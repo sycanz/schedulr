@@ -2,7 +2,7 @@
 // require any user interaction to execute.
 
 import { getToken } from './auth-flow.js';
-import { getCalIds } from './calList-query.js';
+import { getCalIds } from './cal-list-query.js';
 
 // Navigate user to 'schedulr' website's usage part when 
 // the extension is first installed
@@ -13,7 +13,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Listener to know when to query for user's calendar list
-chrome.runtime.onMessage.addListener((message, sendResponse) => {
+chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "queryCalList") {
         console.log("Received message in service-worker.js");
 
@@ -29,8 +29,8 @@ chrome.runtime.onMessage.addListener((message, sendResponse) => {
                 });
             })
             .catch((error) => {
-                console.log("Failed to get token:", error);
-                window.alert("Failed to get token:", error);
+                console.log("Error querying calendars:", error);
+                window.alert("Error querying calendars:", error);
             });
 
         return true;

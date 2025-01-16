@@ -35,6 +35,6 @@ function parseCalIds(calObject) {
         }
     });
 
-    console.log("Calendars parsed, sending calendar JSON back to popup.js");
+    console.log("Calendars parsed, sending calendar JSON back to service-worker");
     return calJson;
 }
