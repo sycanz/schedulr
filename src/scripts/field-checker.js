@@ -36,8 +36,7 @@ function getFormsValue(selectedOptionValue) {
 }
 
 chrome.runtime.onMessage.addListener((message) => {
-    if (message.action === "checkOptVal") {
+    if (message.action === "going to field checker") {
         getFormsValue(message.optVal);
-
     }
 });

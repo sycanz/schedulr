@@ -36,3 +36,13 @@ chrome.runtime.onMessage.addListener((message) => {
         return true;
     }
 });
+
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.action === "back to service") {
+        chrome.runtime.sendMessage({
+            action: "going to field checker",
+            optVal: message.optVal
+        });
+    }
+});
+

@@ -15,8 +15,13 @@ export async function handleFlow(selectedColorValue, selectedCalendar, selectedR
             token = await getAuthToken();
         }
 
+        console.log("is it running?");
+
         // Get the current active tab
         const currTab = await getCurrTab();
+
+        console.log("how about here?");
+        console.log(currTab);
 
         // Execute dataProc in the current tab
         chrome.scripting.executeScript({
@@ -32,6 +37,7 @@ export async function handleFlow(selectedColorValue, selectedCalendar, selectedR
 }
 
 function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
+    console.log("hello brah")
     // =============== Helper functions ===============
     // Function to create a calendar event
     function createCalendarEvent(event) {
@@ -182,6 +188,7 @@ function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedCo
     }
 
     function createCalEvent(summary, classLocation, startDate, formattedStartTime, endDate, formattedEndTime, selectedSemesterValue, selectedColorValue, selectedReminderTime) {
+        console.log("is this working??")
         let event = {
             'summary': `${summary}`,
             'location': `${classLocation}`,
@@ -581,8 +588,7 @@ END:VALARM`;
     }
 
     function studentFlow() {
-        // console.log(openClassSec);
-        let classSec = document.querySelectorAll("[id^='win0divDERIVED_SSR_FL_SSR_SCRTAB_DTLS']");
+        let classSec = document.querySelectorAll("[id*='divSSR_SBJCT_LVL1_row']");
 
         // For each class sections
         classSec.forEach((element, index) => {

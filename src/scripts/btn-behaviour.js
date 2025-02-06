@@ -5,7 +5,7 @@ function finalButtonClickHandler(event) {
     event.preventDefault();
 
     chrome.runtime.sendMessage({
-        action: "checkOptVal",
+        action: "back to service",
         optVal: selectedOptionValue
 
     });
