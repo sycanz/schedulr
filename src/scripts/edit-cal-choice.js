@@ -28,7 +28,7 @@ function setAttributes(form, calData) {
 chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "calData") {
         // Get calData and form's element so can edit them later on
-        console.log("edit-cal-choice.js got the calData!")
+        console.log("Received message in edit-cal-choice.js")
         const calData = message.data;
         const form = document.getElementById("calendarForm");
 

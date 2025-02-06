@@ -15,14 +15,14 @@ chrome.runtime.onInstalled.addListener(() => {
 // Listener to know when to query for user's calendar list
 chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "queryCalList") {
-        console.log("Received message in service-worker.js");
+        console.log("Received message in service worker");
 
         getToken()
             .then((token) => {
                 return getCalIds(token);
             })
             .then((calJson) => {
-                console.log("Calendars queried:", calJson);
+                console.log("Sending message to edit-cal-choice.js");
                 chrome.runtime.sendMessage({
                     action: "calData",
                     data: calJson
@@ -38,7 +38,9 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 chrome.runtime.onMessage.addListener((message) => {
+    console.log("Message received in service worker again");
     if (message.action === "back to service") {
+        console.log("Sending message to field-checker.js");
         chrome.runtime.sendMessage({
             action: "going to field checker",
             optVal: message.optVal

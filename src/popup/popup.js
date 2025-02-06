@@ -1,12 +1,14 @@
 import { getAuthToken, getCurrTab } from '../scripts/helper/prog-flow.js';
 
 // Query for user available calendar then insert into popup.html dynamically
+console.log("Starting schedulr\nSending message to service worker");
 chrome.runtime.sendMessage({
     action: "queryCalList"
 });
 
 // This function handles token and window flow
 export async function handleFlow(selectedColorValue, selectedCalendar, selectedReminderTime, selectedSemesterValue, selectedEventFormat, selectedOptionValue) {
+    console.log("Back in popup handleFlow");
     try {
         let token = null;
         // Only try to get token if the selected options require Google account access
@@ -15,13 +17,8 @@ export async function handleFlow(selectedColorValue, selectedCalendar, selectedR
             token = await getAuthToken();
         }
 
-        console.log("is it running?");
-
         // Get the current active tab
         const currTab = await getCurrTab();
-
-        console.log("how about here?");
-        console.log(currTab);
 
         // Execute dataProc in the current tab
         chrome.scripting.executeScript({
@@ -37,10 +34,11 @@ export async function handleFlow(selectedColorValue, selectedCalendar, selectedR
 }
 
 function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
-    console.log("hello brah")
+    console.log("Execute script dataProc called");
     // =============== Helper functions ===============
     // Function to create a calendar event
     function createCalendarEvent(event) {
+        console.log("Start creating google calendar events")
         fetch(`https://www.googleapis.com/calendar/v3/calendars/${selectedCalendar}/events`, {
             method: 'POST',
             headers: {
@@ -188,7 +186,6 @@ function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedCo
     }
 
     function createCalEvent(summary, classLocation, startDate, formattedStartTime, endDate, formattedEndTime, selectedSemesterValue, selectedColorValue, selectedReminderTime) {
-        console.log("is this working??")
         let event = {
             'summary': `${summary}`,
             'location': `${classLocation}`,
@@ -442,6 +439,7 @@ END:VALARM`;
 
     const lectIndicator = document.querySelector("table.ptalNoPadding.ptalPgltAreaControlsIcon a#ptalPgltAreaHide");
     
+    console.log("Detecting user type");
     if (lectIndicator && iframeElement) {
         // Do the lecturer's process
         console.log("We got a lecturer here!");
@@ -453,6 +451,7 @@ END:VALARM`;
     }
 
     function lectFlow() {
+        console.log("Running lecturer process");
         // Access the iframe's content document
         const iframeDocument = iframeElement.contentWindow.document.body;
 
@@ -588,6 +587,7 @@ END:VALARM`;
     }
 
     function studentFlow() {
+        console.log("Running student process");
         let classSec = document.querySelectorAll("[id*='divSSR_SBJCT_LVL1_row']");
 
         // For each class sections
@@ -659,14 +659,15 @@ END:VALARM`;
     if (selectedOptionValue == 2 || selectedOptionValue == 3) {
         // Create a blob file for users to download
         // console.log(classEvents);
+        console.log("Creating blob");
         icalContent = icalBlob(classEvents, selectedReminderTime);
 
         console.log(icalContent);
 
         const icsContainer = document.querySelector('.ics-container');
-        if (icsContainer) {
-            console.log("Found icsContainer", icsContainer);
-        }
+        // if (icsContainer) {
+        //     console.log("Found icsContainer", icsContainer);
+        // }
 
         // Convert data to Blob
         const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
@@ -678,6 +679,7 @@ END:VALARM`;
         downloadButton.innerText = 'Download .ics';
         downloadButton.classList.add('download-btn');
 
+        console.log("Downloading ics file...");
         downloadButton.click();
     }
 
