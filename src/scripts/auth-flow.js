@@ -1,6 +1,4 @@
 export function getToken() {
-    console.log("Getting token");
-
     return new Promise((resolve, reject) => {
         chrome.identity.getAuthToken({ interactive: true }, function (token) {
             if (chrome.runtime.lastError || !token) {

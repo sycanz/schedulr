@@ -4,8 +4,9 @@ let selectedOptionValue;
 function finalButtonClickHandler(event) {
     event.preventDefault();
 
+    console.log("Sending message back to service worker");
     chrome.runtime.sendMessage({
-        action: "checkOptVal",
+        action: "back to service",
         optVal: selectedOptionValue
 
     });
@@ -15,6 +16,7 @@ function finalButtonClickHandler(event) {
 
 // Listener to get selected option value
 document.getElementById('optionForm').addEventListener('submit', function(event) {
+    console.log("Submit button pressed");
     event.preventDefault();
 
     selectedOptionValue = document.querySelector('input[name="option"]:checked')?.value;
@@ -54,6 +56,7 @@ document.getElementById('optionForm').addEventListener('submit', function(event)
 
 // Event listener for the back button
 document.getElementById('backButton').addEventListener('click', function() {
+    console.log("Back button pressed");
     // Query all forms
     let optionForm = document.getElementsByClassName('optionForm')[0];
     let generalForms = document.getElementsByClassName('generalForms')[0];

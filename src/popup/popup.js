@@ -1,12 +1,15 @@
 import { getAuthToken, getCurrTab } from '../scripts/helper/prog-flow.js';
 
 // Query for user available calendar then insert into popup.html dynamically
+console.log("Starting schedulr");
+console.log("Sending message to service worker from popup.js");
 chrome.runtime.sendMessage({
     action: "queryCalList"
 });
 
 // This function handles token and window flow
 export async function handleFlow(selectedColorValue, selectedCalendar, selectedReminderTime, selectedSemesterValue, selectedEventFormat, selectedOptionValue) {
+    console.log("Back in popup handleFlow");
     try {
         let token = null;
         // Only try to get token if the selected options require Google account access
@@ -32,9 +35,11 @@ export async function handleFlow(selectedColorValue, selectedCalendar, selectedR
 }
 
 function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
+    console.log("Execute script dataProc called");
     // =============== Helper functions ===============
     // Function to create a calendar event
     function createCalendarEvent(event) {
+        console.log("Created google calendar events")
         fetch(`https://www.googleapis.com/calendar/v3/calendars/${selectedCalendar}/events`, {
             method: 'POST',
             headers: {
@@ -429,12 +434,15 @@ END:VALARM`;
 
     // =============== Web scrape workflow ===============
     let classEvents = [];
+    let googleCalendarSuccess = false;
+    let icsDownloadSuccess = false;
 
     // Declare iframe
     const iframeElement = document.querySelector("#ptifrmtgtframe");
 
     const lectIndicator = document.querySelector("table.ptalNoPadding.ptalPgltAreaControlsIcon a#ptalPgltAreaHide");
     
+    console.log("Detecting user type");
     if (lectIndicator && iframeElement) {
         // Do the lecturer's process
         console.log("We got a lecturer here!");
@@ -446,6 +454,7 @@ END:VALARM`;
     }
 
     function lectFlow() {
+        console.log("Running lecturer process");
         // Access the iframe's content document
         const iframeDocument = iframeElement.contentWindow.document.body;
 
@@ -566,6 +575,7 @@ END:VALARM`;
                             if (token) {
                                 // console.log("Extension end");
                                 createCalendarEvent(event);
+                                googleCalendarSuccess = true;
                             }
                         }
                         classEvents.push(event);
@@ -581,8 +591,8 @@ END:VALARM`;
     }
 
     function studentFlow() {
-        // console.log(openClassSec);
-        let classSec = document.querySelectorAll("[id^='win0divDERIVED_SSR_FL_SSR_SCRTAB_DTLS']");
+        console.log("Running student process");
+        let classSec = document.querySelectorAll("[id*='divSSR_SBJCT_LVL1_row']");
 
         // For each class sections
         classSec.forEach((element, index) => {
@@ -643,6 +653,7 @@ END:VALARM`;
                 if (token) {
                     // console.log("Extension end");
                     createCalendarEvent(event);
+                    googleCalendarSuccess = true;
                 }
             }
 
@@ -653,14 +664,15 @@ END:VALARM`;
     if (selectedOptionValue == 2 || selectedOptionValue == 3) {
         // Create a blob file for users to download
         // console.log(classEvents);
+        console.log("Creating blob");
         icalContent = icalBlob(classEvents, selectedReminderTime);
 
         console.log(icalContent);
 
         const icsContainer = document.querySelector('.ics-container');
-        if (icsContainer) {
-            console.log("Found icsContainer", icsContainer);
-        }
+        // if (icsContainer) {
+        //     console.log("Found icsContainer", icsContainer);
+        // }
 
         // Convert data to Blob
         const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
@@ -672,16 +684,24 @@ END:VALARM`;
         downloadButton.innerText = 'Download .ics';
         downloadButton.classList.add('download-btn');
 
-        downloadButton.click();
+        console.log("Downloading ics file...");
+        downloadButton.click()
+        console.log("Download initiated");
+
+        icsDownloadSuccess = true;
     }
 
     // =============== End of web scrape workflow ===============
-
-    if (selectedOptionValue == 1) {
-        window.alert("Timetable transferred to Google Calendar!");
-    } else if (selectedOptionValue == 2){
-        window.alert(".ics file installed!");
+    
+    // Show alert only if an operation was successful
+    if (googleCalendarSuccess && icsDownloadSuccess) {
+        window.alert("Timetable transferred to Google Calendar and .ics file downloaded!");
+    } else if (googleCalendarSuccess) {
+        window.alert("Timetable successfully transferred to Google Calendar!");
+    } else if (icsDownloadSuccess) {
+        window.alert(".ics file downloaded! Now you can import it into a calendar of your choice.");
     } else {
-        window.alert("Timetable transferred to Google Calendar and installed .ics file!");
+        console.warn("Something went wrong");
+        window.error("Something went wrong");
     }
 }
