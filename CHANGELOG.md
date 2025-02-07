@@ -1,4 +1,4 @@
-## [3.0.3]() (8-2-2024)
+## [3.0.3](https://github.com/sycanz/schedulr/commit/afd7bf743148b0f86a15a7710a5bac83597007b1) (8-2-2024)
 ### Bug Fixes
 - Extension wasn't working due to message passing within popup. Fixed the bug by passing message to service worker before going to popup again.
 - onInstalled function kept being invoked so added "reasons" for it to be invoked which is during install.
