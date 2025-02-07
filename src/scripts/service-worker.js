@@ -7,9 +7,11 @@ import { getCalIds } from './cal-list-query.js';
 // Navigate user to 'schedulr' website's usage part when 
 // the extension is first installed
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.tabs.create({
-        url: "https://www.mmuschedulr.com/#usage",
-    });
+    if (reason === "install") {
+        chrome.tabs.create({
+            url: "https://www.mmuschedulr.com/#usage",
+        });
+    }
 });
 
 // Listener to know when to query for user's calendar list
