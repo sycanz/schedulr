@@ -1,4 +1,4 @@
-## [3.0.3](https://github.com/sycanz/schedulr/commit/afd7bf743148b0f86a15a7710a5bac83597007b1) (8-2-2024)
+## [3.0.4](https://github.com/sycanz/schedulr/commit/afd7bf743148b0f86a15a7710a5bac83597007b1) (8-2-2024)
 ### Bug Fixes
 - Extension wasn't working due to message passing within popup. Fixed the bug by passing message to service worker before going to popup again.
 - onInstalled function kept being invoked so added "reasons" for it to be invoked which is during install.
@@ -6,6 +6,14 @@
 ### Documentation
 - Added SECURITY.md for my own sake.
 - Changed username, hence all links that includes my previous username were broken. So I changed them to my new username to prevent link from breaking.
+
+## [3.0.3](https://github.com/sycanz/schedulr/commit/128ae124930145716c9b56b0c4b3f3e275a4bbeb) (19-1-2025)
+### Bug Fixes
+- It kinda addresses issue [#26](https://github.com/sycanz/schedulr/issues/26). Basically user was getting authenticated even though they only chose to download
+.ics file only. So made some checks to make sure user get the proper verification process.
+
+### Refactor
+- Changed up the project structure a little as well to help ease the project's revamp in the future a little easier.
 
 ## [3.0.2](https://github.com/sycanz/schedulr/commit/e177235c99e9e3cd3301786aaef62f543569c122) (1-12-2024)
 ### Program Flow
