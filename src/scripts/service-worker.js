@@ -38,8 +38,8 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 chrome.runtime.onMessage.addListener((message) => {
-    console.log("Message received in service worker again");
     if (message.action === "back to service") {
+        console.log("Message received in service worker again");
         console.log("Sending message to field-checker.js");
         chrome.runtime.sendMessage({
             action: "going to field checker",
