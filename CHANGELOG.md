@@ -1,3 +1,12 @@
+## [3.0.3]() (8-2-2024)
+### Bug Fixes
+- Extension wasn't working due to message passing within popup. Fixed the bug by passing message to service worker before going to popup again.
+- onInstalled function kept being invoked so added "reasons" for it to be invoked which is during install.
+
+### Documentation
+- Added SECURITY.md for my own sake.
+- Changed username, hence all links that includes my previous username were broken. So I changed them to my new username to prevent link from breaking.
+
 ## [3.0.2](https://github.com/sycanz/schedulr/commit/e177235c99e9e3cd3301786aaef62f543569c122) (1-12-2024)
 ### Program Flow
 - Redirects user to schedulr website's **usage** page after first install.
