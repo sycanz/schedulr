@@ -3,9 +3,9 @@ import { getAuthToken, getCurrTab } from '../scripts/helper/prog-flow.js';
 // Query for user available calendar then insert into popup.html dynamically
 console.log("Starting schedulr");
 console.log("Sending message to service worker from popup.js");
-chrome.runtime.sendMessage({
-    action: "queryCalList"
-});
+// chrome.runtime.sendMessage({
+//     action: "queryCalList"
+// });
 
 // This function handles token and window flow
 export async function handleFlow(selectedColorValue, selectedCalendar, selectedReminderTime, selectedSemesterValue, selectedEventFormat, selectedOptionValue) {
@@ -13,7 +13,7 @@ export async function handleFlow(selectedColorValue, selectedCalendar, selectedR
     try {
         let token = null;
         // Only try to get token if the selected options require Google account access
-        if (selectedOptionValue == 1 || selectedOptionValue == 3) {
+        if (selectedOptionValue == 1) {
             // Get Oauth token
             token = await getAuthToken();
         }
@@ -214,7 +214,7 @@ function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedCo
             })
         }
 
-        if (selectedOptionValue != 2) {
+        if (selectedOptionValue != 3) {
             event.colorId = selectedColorValue
         }
 
@@ -571,7 +571,7 @@ END:VALARM`;
                         // console.log(`RRULE:FREQ=WEEKLY;COUNT=${selectedSemesterValue}`);
                         // console.log('Selected semester value:', selectedSemesterValue);
 
-                        if (selectedOptionValue == 1 || selectedOptionValue == 3) {
+                        if (selectedOptionValue == 1) {
                             if (token) {
                                 // console.log("Extension end");
                                 createCalendarEvent(event);
@@ -649,7 +649,7 @@ END:VALARM`;
 
             console.log(event);
 
-            if (selectedOptionValue == 1 || selectedOptionValue == 3) {
+            if (selectedOptionValue == 1) {
                 if (token) {
                     // console.log("Extension end");
                     createCalendarEvent(event);
@@ -661,7 +661,7 @@ END:VALARM`;
         }
     }
 
-    if (selectedOptionValue == 2 || selectedOptionValue == 3) {
+    if (selectedOptionValue == 2) {
         // Create a blob file for users to download
         // console.log(classEvents);
         console.log("Creating blob");

@@ -14,6 +14,15 @@ function finalButtonClickHandler(event) {
     return true;
 }
 
+async function googleAuthentication() {
+    console.log("Running google auth")
+    if (selectedOptionValue == 1) {
+        await chrome.runtime.sendMessage({
+            action: "queryCalList"
+        });
+    }
+}
+
 // Listener to get selected option value
 document.getElementById('optionForm').addEventListener('submit', function(event) {
     console.log("Submit button pressed");
@@ -40,10 +49,14 @@ document.getElementById('optionForm').addEventListener('submit', function(event)
     backButton.style.display = 'flex';
 
     // Display appropriate forms
-    if (selectedOptionValue == 1 || selectedOptionValue == 3) {
+    if (selectedOptionValue == 1) {
+        console.log("Option 1 selected");
+        googleAuthentication();
         calForms.style.display = 'flex';
         finalButton.style.display = 'flex';
     } else if (selectedOptionValue == 2) {
+        finalButton.style.display = 'flex';
+    } else if (selectedOptionValue == 3) {
         finalButton.style.display = 'flex';
     }
 

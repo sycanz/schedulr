@@ -10,7 +10,7 @@ function getFormsValue(selectedOptionValue) {
         const selectedCalendar = document.querySelector('input[name="calendar"]:checked')?.value;
         const selectedEventFormat = document.querySelector('input[name="format"]:checked')?.value;
 
-        if (selectedOptionValue == 1 || selectedOptionValue == 3) {
+        if (selectedOptionValue == 1 || selectedOptionValue == 2) {
             // Check if all values are selected
             if (!(selectedSemesterValue && selectedReminderTime && selectedColorValue && selectedCalendar && selectedEventFormat)) {
                 window.alert('Please select all options.');
@@ -19,7 +19,7 @@ function getFormsValue(selectedOptionValue) {
 
             handleFlow(selectedColorValue, selectedCalendar, selectedReminderTime, selectedSemesterValue, selectedEventFormat, selectedOptionValue);
 
-        } else if (selectedOptionValue == 2) {
+        } else if (selectedOptionValue == 3) {
             // Check if all values are selected
             if (!(selectedSemesterValue && selectedReminderTime && selectedEventFormat)) {
                 window.alert('Please select all options.');
