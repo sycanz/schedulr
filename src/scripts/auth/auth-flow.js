@@ -1,7 +1,7 @@
 export function getToken() {
     return new Promise((resolve, reject) => {
         try {
-            const client_id = "879287591532-uga057u09bnhd4o1kv48kpacbjg2aqlf.apps.googleusercontent.com"
+            const client_id = "CLIENT_ID"
             const state = Math.random().toString(36).substring(7)
             const scope = "https://www.googleapis.com/auth/calendar"
             const callbackUrl = chrome.identity.getRedirectURL("oauth");

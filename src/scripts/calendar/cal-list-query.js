@@ -9,9 +9,8 @@ export function getCalIds(token) {
         .then((response) => {
             if (!response.ok) {
                 console.error("Error getting calendar id:", response.error);
-                windows.alert("Error getting calendar id:", response.error);
             }
-            console.log("Reponse ok, getting JSON");
+            // console.log("Reponse ok, getting JSON");
             return response.json();
         })
         .then((calObject) => {
@@ -20,12 +19,11 @@ export function getCalIds(token) {
         })
         .catch((error) => {
             console.error("Error occured:", error);
-            windows.error("Error occured:", error);
         });
 }
 
 function parseCalIds(calObject) {
-    console.log("Parsing calendars");
+    // console.log("Parsing calendars");
 
     let calJson = {};
     calObject.items.forEach((calendar) => {
@@ -35,6 +33,6 @@ function parseCalIds(calObject) {
         }
     });
 
-    console.log("Calendars parsed, sending calendar JSON back to service-worker");
+    // console.log("Got calendars, returning to service worker");
     return calJson;
 }
