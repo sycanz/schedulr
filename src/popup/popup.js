@@ -1,11 +1,8 @@
-import { getAuthToken, getCurrTab } from '../scripts/helper/prog-flow.js';
+import { getCurrTab } from '../scripts/helper/prog-flow.js';
+import { getToken } from '../scripts/auth/auth-flow.js';
 
 // Query for user available calendar then insert into popup.html dynamically
 console.log("Starting schedulr");
-console.log("Sending message to service worker from popup.js");
-// chrome.runtime.sendMessage({
-//     action: "queryCalList"
-// });
 
 // This function handles token and window flow
 export async function handleFlow(selectedColorValue, selectedCalendar, selectedReminderTime, selectedSemesterValue, selectedEventFormat, selectedOptionValue) {
@@ -15,7 +12,7 @@ export async function handleFlow(selectedColorValue, selectedCalendar, selectedR
         // Only try to get token if the selected options require Google account access
         if (selectedOptionValue == 1) {
             // Get Oauth token
-            token = await getAuthToken();
+            token = await getToken();
         }
 
         // Get the current active tab
@@ -702,6 +699,6 @@ END:VALARM`;
         window.alert(".ics file downloaded! Now you can import it into a calendar of your choice.");
     } else {
         console.warn("Something went wrong");
-        window.error("Something went wrong");
+        window.Error("Something went wrong");
     }
 }

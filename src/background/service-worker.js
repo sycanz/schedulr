@@ -1,8 +1,8 @@
 // service-worker.js is a file that runs background scripts which does not
 // require any user interaction to execute.
 
-import { getToken } from './auth-flow.js';
-import { getCalIds } from './cal-list-query.js';
+import { getToken } from '../scripts/auth/auth-flow.js';
+import { getCalIds } from '../scripts/cal-list-query.js';
 
 // Navigate user to 'schedulr' website's usage part when 
 // the extension is first installed
@@ -15,12 +15,13 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Listener to know when to query for user's calendar list
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "queryCalList") {
         console.log("Received message in service worker");
 
-        getToken()
+        await getToken()
             .then((token) => {
+                console.log("received token, calling calID")
                 return getCalIds(token);
             })
             .then((calJson) => {
@@ -32,7 +33,6 @@ chrome.runtime.onMessage.addListener((message) => {
             })
             .catch((error) => {
                 console.log("Error querying calendars:", error);
-                window.alert("Error querying calendars:", error);
             });
 
         return true;
@@ -49,4 +49,3 @@ chrome.runtime.onMessage.addListener((message) => {
         });
     }
 });
-
