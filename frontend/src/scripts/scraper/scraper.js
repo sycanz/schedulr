@@ -7,9 +7,7 @@ chrome.storage.local.get([
     'selectedSemesterValue',
     'selectedEventFormat',
     'selectedOptionValue',
-    'updateTextTo'
 ], function (items) {
-    // Destructure values
     const {
         accessToken,
         selectedColorValue,
@@ -20,7 +18,6 @@ chrome.storage.local.get([
         selectedOptionValue
     } = items;
 
-    // Now run your main logic with these values
     dataProc(
         accessToken,
         selectedSemesterValue,

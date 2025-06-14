@@ -6,8 +6,8 @@ import { getCalIds } from '../scripts/calendar/cal-list-query.js';
 
 // navigate user to 'schedulr' website's usage part when 
 // the extension is first installed
-chrome.runtime.onInstalled.addListener(() => {
-    if (reason === "install") {
+chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason == "install") {
         chrome.tabs.create({
             url: "https://www.mmuschedulr.com/#usage",
         });
@@ -18,21 +18,20 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "authoriseUser") {
         console.log("Authorizing user for OAuth consent");
-        await getToken()
-            .then((token) => {
-                console.log("Consent given, trying to get calendars...")
-                return getCalIds(token);
-            })
-            .then((calJson) => {
-                console.log("Got calendars, updating popup option elements");
-                chrome.runtime.sendMessage({
-                    action: "updateCalData",
-                    data: calJson
-                });
-            })
-            .catch((error) => {
-                console.log("Error querying calendars:", error);
+        const token = await getToken()
+
+        if (token) {
+            console.log("Consent given, trying to get calendars...")
+            let calJson = await getCalIds(token);
+
+            console.log("Got calendars, updating popup option elements");
+            chrome.runtime.sendMessage({
+                action: "updateCalData",
+                data: calJson
             });
+        } else {
+            console.log("Authorization failed: No token received.");
+        }
 
         return true;
     }
@@ -54,7 +53,7 @@ chrome.runtime.onMessage.addListener((message) =>{
 
             token, currTab = getNecessarryKeys();
 
-            chrome.storage.local.set({
+            await chrome.storage.local.set({
                 accessToken: token,
                 selectedColorValue: message.colorValue,
                 selectedCalendar: message.calendar,
