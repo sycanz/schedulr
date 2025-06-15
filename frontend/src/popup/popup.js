@@ -139,8 +139,8 @@ function setAttributes(calData) {
 }
 
 // checks all neccessary field vary by selected option value
-function getFormsValue(selectedOptionValue) {
-    try{
+async function getFormsValue(selectedOptionValue) {
+    try {
         // get the value of the selected radio button
         const selectedSemesterValue = document.querySelector('input[name="semester"]:checked')?.value;
         const selectedReminderTime = document.querySelector('input[name="reminder"]:checked')?.value;
@@ -155,14 +155,13 @@ function getFormsValue(selectedOptionValue) {
                 return;
             }
 
-            chrome.runtime.sendMessage({
-                action: "startScraper",
-                colorValue: selectedColorValue,
-                calendar: selectedCalendar,
-                reminderTime: selectedReminderTime,
-                semesterValue: selectedSemesterValue,
-                eventFormat: selectedEventFormat,
-                optionValue: selectedOptionValue
+            await chrome.storage.local.set({
+                selectedColorValues: selectedColorValue,
+                selectedCalendars: selectedCalendar,
+                selectedReminderTimes: selectedReminderTime,
+                selectedSemesterValues: selectedSemesterValue,
+                selectedEventFormats: selectedEventFormat,
+                selectedOptionValues: selectedOptionValue,
             });
         } else if (selectedOptionValue == 3) {
             // check if all values are selected
@@ -171,18 +170,20 @@ function getFormsValue(selectedOptionValue) {
                 return;
             }
 
-            chrome.runtime.sendMessage({
-                action: "startScraper",
-                colorValue: null,
-                calendar: null,
-                reminderTime: selectedReminderTime,
-                semesterValue: selectedSemesterValue,
-                eventFormat: selectedEventFormat,
-                optionValue: selectedOptionValue
+            await chrome.storage.local.set({
+                selectedColorValues: null,
+                selectedCalendars: null,
+                selectedReminderTimes: selectedReminderTime,
+                selectedSemesterValues: selectedSemesterValue,
+                selectedEventFormats: selectedEventFormat,
+                selectedOptionValues: selectedOptionValue,
             });
         }
-    }
-    catch(err) {
+
+        chrome.runtime.sendMessage({
+            action: "startScraper",
+        });
+    } catch(err) {
         console.error('An error occured: ', err);
         window.alert(`An error occured: ${err.message}`);
     }

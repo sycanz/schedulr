@@ -1,8 +1,9 @@
 // service-worker.js is a file that runs background scripts which does not
 // require any user interaction to execute.
 
-import { getToken } from '../scripts/auth/auth-flow.js';
+import { onlaunchWebAuthFlow } from '../scripts/auth/auth-flow.js';
 import { getCalIds } from '../scripts/calendar/cal-list-query.js';
+import { getCurrTab } from '../scripts/utils/prog-flow.js';
 
 // navigate user to 'schedulr' website's usage part when 
 // the extension is first installed
@@ -18,7 +19,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "authoriseUser") {
         console.log("Authorizing user for OAuth consent");
-        const token = await getToken()
+        const token = await onlaunchWebAuthFlow()
 
         if (token) {
             console.log("Consent given, trying to get calendars...")
@@ -38,37 +39,48 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 // listener for when all options are selected and can start scraper
-chrome.runtime.onMessage.addListener((message) =>{
+chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "startScraper") {
-        (async function () {
-            let token = null;
-            // Only try to get token if the selected options require Google account access
-            if (message.selectedOptionValue == 1) {
-                // Get Oauth token
-                token = await getToken();
-            }
+        console.log("Messaged received: startScraper");
 
-            // Get the current active tab
-            const currTab = await getCurrTab();
+        const currTab = await getCurrTab();
 
-            token, currTab = getNecessarryKeys();
+        let accessToken;
+        let selectedColorValue;
+        let selectedCalendar;
+        let selectedReminderTime;
+        let selectedSemesterValue
+        let selectedEventFormat;
+        let selectedOptionValue;
 
-            await chrome.storage.local.set({
-                accessToken: token,
-                selectedColorValue: message.colorValue,
-                selectedCalendar: message.calendar,
-                selectedReminderTime: message.reminderTime,
-                selectedSemesterValue: message.semesterValue,
-                selectedEventFormat: message.eventFormat,
-                selectedOptionValue: message.optionValue
-            });
+        await chrome.storage.local.get([
+            'accessTokens', 'selectedColorValues', 'selectedCalendars', 'selectedReminderTimes',
+            'selectedSemesterValues', 'selectedEventFormats', 'selectedOptionValues',
+        ], (items) => {
+            accessToken = items.accessTokens,
+            selectedColorValue = items.selectedColorValues,
+            selectedCalendar = items.selectedCalendars,
+            selectedReminderTime = items.selectedReminderTimes,
+            selectedSemesterValue = items.selectedSemesterValues,
+            selectedEventFormat = items.selectedEventFormats,
+            selectedOptionValue = items.selectedOptionValues
+        });
 
-            // Execute dataProc in the current tab
+        console.log("Executing script...");
+        // Execute dataProc in the current tab
+        chrome.scripting.executeScript({
+            target: { tabId: currTab.id },
+            files: ["frontend/src/scripts/scraper/scraper.js"],
+        }, () => {
             chrome.scripting.executeScript({
                 target: { tabId: currTab.id },
-                file: ["src/scripts/scraper/scraper.js"]
-            });
-        })();
+                args: [accessToken, selectedSemesterValue, selectedReminderTime,
+                    selectedColorValue, selectedCalendar, selectedEventFormat,
+                    selectedOptionValue
+                ],
+                func: (...args) => dataProc(...args),
+            })
+        });
 
         return true;
     }

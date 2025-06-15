@@ -1,33 +1,5 @@
 // initialize all data
-chrome.storage.local.get([
-    'accessToken',
-    'selectedColorValue',
-    'selectedCalendar',
-    'selectedReminderTime',
-    'selectedSemesterValue',
-    'selectedEventFormat',
-    'selectedOptionValue',
-], function (items) {
-    const {
-        accessToken,
-        selectedColorValue,
-        selectedCalendar,
-        selectedReminderTime,
-        selectedSemesterValue,
-        selectedEventFormat,
-        selectedOptionValue
-    } = items;
-
-    dataProc(
-        accessToken,
-        selectedSemesterValue,
-        selectedReminderTime,
-        selectedColorValue,
-        selectedCalendar,
-        selectedEventFormat,
-        selectedOptionValue
-    );
-});
+console.log("Script received message, going to get data from local storage")
 
 function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
     console.log("Execute script dataProc called");

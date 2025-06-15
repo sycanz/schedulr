@@ -1,22 +1,20 @@
-export async function getToken() {
+export async function onlaunchWebAuthFlow() {
     try {
-        const client_id = "CLIENT_ID"
+        const clientId = "CLIENT_ID"
+        // const clientId = "879287591532-uga057u09bnhd4o1kv48kpacbjg2aqlf.apps.googleusercontent.com"
         const state = Math.random().toString(36).substring(7)
         const scope = "https://www.googleapis.com/auth/calendar"
-        const callbackUrl = chrome.identity.getRedirectURL("oauth");
+        const redirectUri = chrome.identity.getRedirectURL("oauth");
 
         const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth")
-        authUrl.searchParams.append("client_id", client_id);
-        authUrl.searchParams.append("redirect_uri", callbackUrl);
+        authUrl.searchParams.append("client_id", clientId);
+        authUrl.searchParams.append("redirect_uri", redirectUri);
         authUrl.searchParams.append("response_type", "code");
-        authUrl.searchParams.append("access_type", "offline");
         authUrl.searchParams.append("scope", scope);
+        authUrl.searchParams.append("access_type", "offline");
         authUrl.searchParams.append("state", state);
         authUrl.searchParams.append("include_granted_scopes", "true");
         authUrl.searchParams.append("prompt", "consent");
-
-        console.log("Redirect URI: ", callbackUrl)
-        console.log("Auth URL", authUrl)
 
         const url = await new Promise((resolve, reject) => {
             chrome.identity.launchWebAuthFlow(
@@ -48,7 +46,8 @@ export async function getToken() {
         }
 
         const response = await fetch(
-            'CLOUDFLARE_WORKERS_ENDPOINT',
+            // 'CLOUDFLARE_WORKER_ENDPOINT,'
+            // 'http://localhost:8787/api/auth/token',
             {
                 method: "POST",
                 headers: {
@@ -67,7 +66,6 @@ export async function getToken() {
         const { accessToken, expiresAt, refreshToken } = await response.json()
 
         if (accessToken) {
-            console.log("got access token: ", accessToken)
             await chrome.storage.local.set({
                 accessTokens: accessToken,
                 refreshTokens: refreshToken,
@@ -79,6 +77,5 @@ export async function getToken() {
         }
     } catch (error) {
         console.error("Error in getToken:", error);
-        alert("There's an error in the authentication flow:", error)
     }
 }

@@ -29,7 +29,7 @@ app.post("/api/auth/token", async (c) => {
         const response = await fetch("https://oauth2.googleapis.com/token", {
             method: "POST",
             headers: {
-                "Content-Type": "appliation/json",
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 code: body.code,
@@ -50,7 +50,7 @@ app.post("/api/auth/token", async (c) => {
             return c.json(
                 {
                     accessToken,
-                    expires: now + expiresIn,
+                    expiresAt: now + expiresIn,
                     refreshToken,
                 },
                 200,
