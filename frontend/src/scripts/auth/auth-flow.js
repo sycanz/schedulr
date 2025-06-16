@@ -25,7 +25,6 @@ async function getExistingOrRefreshedToken() {
         if (accessTokens && expiresAts > nowPlus60) {
             return accessTokens;
         }
-        console.log(refreshTokens)
 
         if (refreshTokens) {
             const response = await fetch('CLOUDFLARE_WORKER_ENDPOINT', {
@@ -66,7 +65,7 @@ export async function onlaunchWebAuthFlow() {
             return currentAccessToken;
         }
 
-        // const clientId = "CLIENT_ID"
+        const clientId = "CLIENT_ID"
         const state = Math.random().toString(36).substring(7)
         const scope = "https://www.googleapis.com/auth/calendar"
         const redirectUri = chrome.identity.getRedirectURL("oauth");

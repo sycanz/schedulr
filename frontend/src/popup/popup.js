@@ -1,3 +1,5 @@
+import { selectRadioButton } from '../scripts/utils/autoSelect.js'
+
 // program starts here
 console.log("Starting schedulr");
 
@@ -21,10 +23,17 @@ document.getElementById('backButton').addEventListener('click', function() {
 });
 
 // 2nd page: listener for when user's calendar is queried
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "updateCalData") {
         const calData = message.data;
         setAttributes(calData);
+
+        const items = await chrome.storage.local.get("selectedOptionValues");
+        const selectedOption = items.selectedOptionValues;
+
+        if (selectedOption === "1") {
+            checkForPreference(selectedOptionValue);
+        }
     } else if (message.action === "showAlert") {
         window.alert(message.error);
     }
@@ -73,6 +82,10 @@ async function updatePopup() {
         return;
     }
 
+    chrome.storage.local.set({
+        selectedOptionValues: selectedOptionValue,
+    })
+
     // hide the "1st page" after user chooses an option
     document.getElementsByClassName('firstPage')[0].style.display = 'none';
 
@@ -96,9 +109,11 @@ async function updatePopup() {
             break;
         case "2":
             finalButton.style.display = 'flex';
+            checkForPreference(selectedOptionValue);
             break;
         case "3":
             finalButton.style.display = 'flex';
+            checkForPreference(selectedOptionValue);
             break;
     }
 
@@ -136,6 +151,41 @@ function setAttributes(calData) {
     // hide the loader after option elements updated
     document.getElementById('loader').style.display = 'none';
     console.log("Calendar options upated")
+}
+
+// if user had previously used schedulr,
+// it'll automatically select their previous option
+function checkForPreference(selectedOptionValue) {
+    chrome.storage.local.get([
+        "selectedCalendars", "selectedColorValues", "selectedEventFormats",
+        "selectedReminderTimes", "selectedSemesterValues"], (items) => {
+        const { selectedCalendars, selectedColorValues, selectedEventFormats,
+            selectedReminderTimes, selectedSemesterValues } = items;
+
+        if (!selectedSemesterValues) {
+            return;
+        }
+
+        switch(selectedOptionValue) {
+            case "1":
+                selectRadioButton("semester", selectedSemesterValues);
+                selectRadioButton("format", selectedEventFormats);
+                selectRadioButton("reminder", selectedReminderTimes);
+                selectRadioButton("calendar", selectedCalendars);
+                selectRadioButton("color", selectedColorValues);
+                break;
+            case "2":
+                selectRadioButton("semester", selectedSemesterValues);
+                selectRadioButton("format", selectedEventFormats);
+                selectRadioButton("reminder", selectedReminderTimes);
+                break;
+            case "3":
+                selectRadioButton("semester", selectedSemesterValues);
+                selectRadioButton("format", selectedEventFormats);
+                selectRadioButton("reminder", selectedReminderTimes);
+                break;
+        }
+    })
 }
 
 // checks all neccessary field vary by selected option value
