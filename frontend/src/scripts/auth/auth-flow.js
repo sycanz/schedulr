@@ -1,7 +1,72 @@
+function getStorageData(keys) {
+    return new Promise((resolve) => {
+        chrome.storage.local.get(keys, (items) => {
+            resolve(items);
+        });
+    });
+}
+
+function setStorageData(items) {
+    return new Promise((resolve) => {
+        chrome.storage.local.set(items, () => {
+            resolve();
+        });
+    });
+}
+
+async function getExistingOrRefreshedToken() {
+    try {
+        const { accessTokens, refreshTokens, expiresAts } =
+            await getStorageData(["accessTokens", "refreshTokens", "expiresAts"]);
+
+        const nowInSeconds = Math.floor(Date.now() / 1000);
+        const nowPlus60 = nowInSeconds + 60;
+
+        if (accessTokens && expiresAts > nowPlus60) {
+            return accessTokens;
+        }
+        console.log(refreshTokens)
+
+        if (refreshTokens) {
+            const response = await fetch('CLOUDFLARE_WORKER_ENDPOINT', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    refreshToken: refreshTokens,
+                }),
+            });
+
+            if (response.ok) {
+                const { accessToken, expiresAt } = await response.json();
+                await setStorageData({
+                    accessTokens: accessToken,
+                    expiresAts: expiresAt
+                });
+                return accessToken;
+            } else {
+                const data = await response.json();
+                console.error("Refresh token request failed: ", data);
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        console.error("Error checking or refreshing token:", error);
+        return null;
+    }
+}
+
 export async function onlaunchWebAuthFlow() {
     try {
-        const clientId = "CLIENT_ID"
-        // const clientId = "879287591532-uga057u09bnhd4o1kv48kpacbjg2aqlf.apps.googleusercontent.com"
+        const currentAccessToken = await getExistingOrRefreshedToken();
+        if (currentAccessToken) {
+            console.log("Got token by refreshing/storage")
+            return currentAccessToken;
+        }
+
+        // const clientId = "CLIENT_ID"
         const state = Math.random().toString(36).substring(7)
         const scope = "https://www.googleapis.com/auth/calendar"
         const redirectUri = chrome.identity.getRedirectURL("oauth");
@@ -46,8 +111,7 @@ export async function onlaunchWebAuthFlow() {
         }
 
         const response = await fetch(
-            // 'CLOUDFLARE_WORKER_ENDPOINT,'
-            // 'http://localhost:8787/api/auth/token',
+            'CLOUDFLARE_WORKER_ENDPOINT',
             {
                 method: "POST",
                 headers: {
@@ -60,13 +124,14 @@ export async function onlaunchWebAuthFlow() {
         );
 
         if (!response.ok) {
-            console.log(response)
+            const errorData = await response.json();
+            console.error("Token exchange failed:", errorData);
         }
 
         const { accessToken, expiresAt, refreshToken } = await response.json()
 
         if (accessToken) {
-            await chrome.storage.local.set({
+            await setStorageData({
                 accessTokens: accessToken,
                 refreshTokens: refreshToken,
                 expiresAts: expiresAt,
@@ -76,6 +141,6 @@ export async function onlaunchWebAuthFlow() {
             throw new Error("Access token not found in the server response.");
         }
     } catch (error) {
-        console.error("Error in getToken:", error);
+        console.error("Error onLaunchWebAuthFlow:", error);
     }
 }
