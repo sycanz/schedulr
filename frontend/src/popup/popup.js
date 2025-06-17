@@ -1,4 +1,5 @@
 import { selectRadioButton } from '../scripts/utils/autoSelect.js'
+import { isNotANewcomer } from '../scripts/utils/firstTimer.js'
 
 // program starts here
 console.log("Starting schedulr");
@@ -22,18 +23,17 @@ document.getElementById('backButton').addEventListener('click', function() {
     showPreviousPage();
 });
 
+// starting from 2nd page: listener for "previous settings" button
+document.getElementById('fillPreviousSettings').addEventListener('click', function() {
+    console.log("Previous Settings button pressed");
+    checkForPreference();
+});
+
 // 2nd page: listener for when user's calendar is queried
 chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "updateCalData") {
         const calData = message.data;
         setAttributes(calData);
-
-        const items = await chrome.storage.local.get("selectedOptionValues");
-        const selectedOption = items.selectedOptionValues;
-
-        if (selectedOption === "1") {
-            checkForPreference(selectedOptionValue);
-        }
     } else if (message.action === "showAlert") {
         window.alert(message.error);
     }
@@ -53,12 +53,14 @@ function finalButtonClickHandler(event) {
 
 function showPreviousPage() {
     // query all forms
+    let previousSettingButton = document.getElementsByClassName('previousSettingsButton')[0];
     let optionForm = document.getElementsByClassName('optionForm')[0];
     let generalForms = document.getElementsByClassName('generalForms')[0];
     let calForms = document.getElementsByClassName('calForms')[0];
     let finalButton = document.getElementsByClassName('finalButton')[0];
 
     // hide the second page forms
+    previousSettingButton.style.display = 'none';
     generalForms.style.display = 'none';
     calForms.style.display = 'none';
     finalButton.style.display = 'none';
@@ -89,7 +91,8 @@ async function updatePopup() {
     // hide the "1st page" after user chooses an option
     document.getElementsByClassName('firstPage')[0].style.display = 'none';
 
-    // Query all possible forms
+    // query all possible forms
+    let previousSettingButton = document.getElementsByClassName('previousSettingsButton')[0];
     let generalForms = document.getElementsByClassName('generalForms')[0];
     let backButton = document.getElementById('backButton');
     let calForms = document.getElementsByClassName('calForms')[0];
@@ -98,22 +101,36 @@ async function updatePopup() {
     generalForms.style.display = 'flex';
     backButton.style.display = 'flex';
 
+    // check if they're a first timer, if so then show previous settings button
+    const returningUser = await isNotANewcomer();
+    console.log("Is he a returning user?", returningUser);
+
     // display appropriate forms according to selected option
     switch(selectedOptionValue) {
         case "1":
             await chrome.runtime.sendMessage({
                 action: "authoriseUser"
             });
+
+            if (returningUser) {
+                previousSettingButton.style.display = 'flex';
+            }
             calForms.style.display = 'flex';
             finalButton.style.display = 'flex';
             break;
         case "2":
+            if (returningUser) {
+                previousSettingButton.style.display = 'flex';
+            }
+            previousSettingButton.style.display = 'flex';
             finalButton.style.display = 'flex';
-            checkForPreference(selectedOptionValue);
             break;
         case "3":
+            if (returningUser) {
+                previousSettingButton.style.display = 'flex';
+            }
+            previousSettingButton.style.display = 'flex';
             finalButton.style.display = 'flex';
-            checkForPreference(selectedOptionValue);
             break;
     }
 
@@ -155,18 +172,18 @@ function setAttributes(calData) {
 
 // if user had previously used schedulr,
 // it'll automatically select their previous option
-function checkForPreference(selectedOptionValue) {
+function checkForPreference() {
     chrome.storage.local.get([
         "selectedCalendars", "selectedColorValues", "selectedEventFormats",
-        "selectedReminderTimes", "selectedSemesterValues"], (items) => {
+        "selectedReminderTimes", "selectedSemesterValues", "selectedOptionValues"], (items) => {
         const { selectedCalendars, selectedColorValues, selectedEventFormats,
-            selectedReminderTimes, selectedSemesterValues } = items;
+            selectedReminderTimes, selectedSemesterValues, selectedOptionValues } = items;
 
         if (!selectedSemesterValues) {
             return;
         }
 
-        switch(selectedOptionValue) {
+        switch(selectedOptionValues) {
             case "1":
                 selectRadioButton("semester", selectedSemesterValues);
                 selectRadioButton("format", selectedEventFormats);
