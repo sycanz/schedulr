@@ -1,2 +1,10 @@
-manifest.json
+# env var
 .env
+
+# frontend build
+frontend/dist/
+
+node_modules
+npm-debug.log
+
+.DS_Store

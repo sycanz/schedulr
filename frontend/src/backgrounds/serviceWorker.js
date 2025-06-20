@@ -1,9 +1,9 @@
 // service-worker.js is a file that runs background scripts which does not
 // require any user interaction to execute.
 
-import { onlaunchWebAuthFlow } from '../scripts/auth/auth-flow.js';
-import { getCalIds } from '../scripts/calendar/cal-list-query.js';
-import { getCurrTab } from '../scripts/utils/prog-flow.js';
+import { onlaunchWebAuthFlow } from '../scripts/auth/authFlow.js';
+import { getCalIds } from '../scripts/calendar/calListQuery.js';
+import { getCurrTab } from '../scripts/utils/progFlow.js';
 
 // navigate user to 'schedulr' website's usage part when 
 // the extension is first installed
@@ -70,15 +70,15 @@ chrome.runtime.onMessage.addListener(async (message) => {
         // Execute dataProc in the current tab
         chrome.scripting.executeScript({
             target: { tabId: currTab.id },
-            files: ["frontend/src/scripts/scraper/scraper.js"],
+            files: ["frontend/dist/scraper.bundle.js"],
         }, () => {
+            console.log("Scraper's bundle updated");
             chrome.scripting.executeScript({
                 target: { tabId: currTab.id },
                 args: [accessToken, selectedSemesterValue, selectedReminderTime,
                     selectedColorValue, selectedCalendar, selectedEventFormat,
-                    selectedOptionValue
-                ],
-                func: (...args) => dataProc(...args),
+                    selectedOptionValue],
+                func: (...args) => dataProcBundle.dataProc(...args),
             })
         });
 

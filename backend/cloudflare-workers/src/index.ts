@@ -108,4 +108,8 @@ app.post("/api/auth/refresh", async (c) => {
     }
 });
 
+app.post("api/calendar/add-events", async(c) => {
+
+});
+
 export default app
