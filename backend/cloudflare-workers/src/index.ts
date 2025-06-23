@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 
 type Env = {
     CLIENT_ID: string;
@@ -16,6 +17,12 @@ type OAuthTokenResponse = {
 }
 
 const app = new Hono<{ Bindings: Env }>()
+
+app.use('*', cors({
+  origin: 'https://clic.mmu.edu.my',
+  allowMethods: ['GET', 'POST'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+}));
 
 app.post("/api/auth/token", async (c) => {
     const clientId = c.env.CLIENT_ID;
@@ -109,7 +116,31 @@ app.post("/api/auth/refresh", async (c) => {
 });
 
 app.post("api/calendar/add-events", async(c) => {
+    const body = await c.req.json();
 
+    try {
+        const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${body.selectedCalendar}/events`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${body.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body.event)
+        })
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Event created:', data);
+            return c.json({ data }, 200);
+        }
+
+        const data = await response.json();
+        console.error("request failed:", data)
+        return c.json({ data }, 400);
+    } catch (error) {
+        console.error("Error with add-events request: ", error);
+        return c.json({ error: "Failed to add events" }, 500);
+    }
 });
 
 export default app
