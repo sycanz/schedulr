@@ -1,15 +1,27 @@
 import { procClassName, procClassDetails, procClassDates, procClassTimes } from '../utils/studProc.js';
+import { icalBlob } from './createIcs.js';
 
 console.log("Script received message, going to get data from local storage")
+
+// object for easy access to common vars
+const config = {}
+
+let classEvents = [];
+let googleCalendarSuccess = false;
+let icsDownloadSuccess = false;
 
 export function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
     console.log("Execute script dataProc called");
 
-    // =============== Web scrape workflow ===============
-    let classEvents = [];
-    let googleCalendarSuccess = false;
-    let icsDownloadSuccess = false;
+    config.token = token;
+    config.selectedSemesterValue = selectedSemesterValue;
+    config.selectedReminderTime = selectedReminderTime;
+    config.selectedColorValue = selectedColorValue;
+    config.selectedCalendar = selectedCalendar;
+    config.selectedEventFormat = selectedEventFormat;
+    config.selectedOptionValue = selectedOptionValue;
 
+    // =============== Web scrape workflow ===============
     // Declare iframe
     const iframeElement = document.querySelector("#ptifrmtgtframe");
 
@@ -71,377 +83,45 @@ export function dataProc(token, selectedSemesterValue, selectedReminderTime, sel
     }
 }
 
-// =============== Helper functions ===============
-// Function to create a calendar event
-function createCalendarEvent(event) {
-    console.log("Created google calendar events")
-    fetch(`https://www.googleapis.com/calendar/v3/calendars/${selectedCalendar}/events`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(event)
-    })
-        .then(response => {
-            if (!response.ok) {
-                console.error(`Error creating event: ${response.statusText}`);
-                window.alert(`Error creating event: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Event created:', data);
-        })
-        .catch(error => {
-            console.error('Error creating event:', error);
-            window.alert(`Failed to create event: ${error.message}`);
-        });
-}
-
-// Remove unnecessary prefix
-function truncLocation(location) {
-    const prefix = "Common Lecture Complex &amp; ";
-    if (location.startsWith(prefix)) {
-        return location.slice(prefix.length).trim();
-    }
-    return location;
-}
-
-// Remove unnecessary spaces for class. Currently looks like 'LM     PU3192 - FCI4'
-function truncClassSpace(className) {
-    const [beforeHyphen, afterHyphen] = className.split('-');
-    const trimBeforeHyphen = beforeHyphen.replace(/\s+/g, '');
-    const fullClassName = `${trimBeforeHyphen} -${afterHyphen}`
-    return fullClassName
-}
-
-// Reformat time. Current looks like '2:00PM - 4:00PM' and '10:00AM - 12:00PM' 
-// Target format '2024-08-12T09:00:00+08:00'
-function formatTime(classTime) {
-    function convertTimeFormat(timeStr) {
-        const [time, period] = timeStr.split(/(AM|PM)/);
-
-        let [hour, minute] = time.split(':');
-
-        if (period === 'AM' && parseInt(hour) < 10) {
-            hour = `0${hour}`;
-        } else if (period === 'AM' && parseInt(hour) > 9) {
-            hour = `${hour}`;
-        } else if (period === 'PM' && parseInt(hour) < 12) {
-            hour = parseInt(hour) + 12;
-        }
-
-        return `${hour}:${minute}:00+08:00`;
-    }
-
-    const [startTime, endTime] = classTime.split('-').map(t => t.trim());
-
-
-    return {
-        formattedStartTime: convertTimeFormat(startTime),
-        formattedEndTime: convertTimeFormat(endTime)
-    }
-}
-
-// Reformat date. Currently looks like '14 Aug'
-// Target format '2024-08-14'
-function formatDate(classDate, yearElement) {
-    // Get the correct date and month
-    const [date, month] = classDate.split(' ')
-    // console.log(`${date},${month}`)
-    const months = {
-        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
-        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
-        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
-    }
-
-    let monthValue = months[month];
-    endDateYear = yearElement.substr(-4, 4);
-    return `${endDateYear}-${monthValue}-${date}`
-}
-
-function createArray(rows, cols, value = 0) {
-    let arr = new Array(rows);
-    for (let i = 0; i < rows; i++) {
-        arr[i] = new Array(cols).fill(value);
-    }
-
-    // console.log(arr);
-    return arr;
-}
-
-function rowSpan(fStartTime, fEndTime) {
-    // Parse formatted time
-    const startTime = fStartTime.split(':');
-    const endTime = fEndTime.split(':');
-
-    // Get hour/min
-    const startHour = parseInt(startTime[0]);
-    const endHour = parseInt(endTime[0]);
-    const endMin = parseInt(endTime[1]);
-
-    hourSpan = endHour - startHour;
-    if (endMin > 0) {
-        let minSpan = 1;
-        totalSpan = hourSpan + minSpan
-    } else {
-        totalSpan = hourSpan;
-    }
-    // console.log(totalSpan);
-
-    return totalSpan;
-}
-
-function handleMultiHourClass(totalSpan, rowIndex, skip, colIndex) {
-    // For every total - 1 span
-    for (i = 1; i < totalSpan; i++) {
-        // If next row is a valid row
-        if (rowIndex + i < skip.length) {
-            // Edit value to 1 in row i
-            skip[rowIndex + i][colIndex] = 1;
-
-            updatePrevCol(colIndex, skip, rowIndex + i)
-            let nextRow = rowIndex + i
-        }
-    }
-}
-
-function updatePrevCol(colIndex, skip, nextRow) {
-    // Checks the col before curr one
-    let itrColIndex = colIndex - 1;
-    while (itrColIndex > 0) {
-        if (skip[nextRow][itrColIndex] > 0) {
-            skip[nextRow][itrColIndex] += 1;
-        }
-        else {
-            break;
-        }
-        itrColIndex -= 1;
-    }
-}
-
-function createCalEvent(summary, classLocation, startDate, formattedStartTime, endDate, formattedEndTime, selectedSemesterValue, selectedColorValue, selectedReminderTime) {
-    let event = {
-        'summary': `${summary}`,
-        'location': `${classLocation}`,
-        'start': {
-            'dateTime': `${startDate}T${formattedStartTime}`,
-            'timeZone': 'Asia/Kuala_Lumpur'
-        },
-        'end': {
-            'dateTime': `${endDate}T${formattedEndTime}`,
-            'timeZone': 'Asia/Kuala_Lumpur'
-        },
-        'recurrence': [
-            `RRULE:FREQ=WEEKLY;COUNT=${selectedSemesterValue}`
-        ],
-        'reminders': {
-            'useDefault': false,
-            'overrides': []
-        },
-    }
-
-    if (selectedReminderTime !== "none") {
-        event.reminders.overrides.push({
-            'method': 'popup',
-            'minutes': parseInt(selectedReminderTime)
-        })
-    }
-
-    if (selectedOptionValue != 3) {
-        event.colorId = selectedColorValue
-    }
-
-    return event;
-}
-
-function procData(classContent, subjTitleVal, classInstructorVal) {
-    const subjCodeAndClassSect = truncClassSpace(classContent[0]);
-    const subjCode = subjCodeAndClassSect.split("-")[0].trim();
-    const classSect = subjCodeAndClassSect.split("-")[1].trim();
-
-    let baseIndex = 1;
-    let subjTitle = null;
-    let classInstructor = null;
-
-    if (subjTitleVal === "Y") {
-        subjTitle = classContent[baseIndex];
-        baseIndex += 1;
-    }
-
-    // Abbreviate the class types
-    let classType = classContent[baseIndex];
-    if (classType === "Lecture") {
-        classType = "Lec";
-    } else if (classType === "Tutorial") {
-        classType = "Tut";
-    } else if (classType === "Laboratory") {
-        classType = "Lab";
-    }
-
-    const classTime = classContent[baseIndex + 1];
-    const { formattedStartTime, formattedEndTime } = formatTime(classTime);
-    const classLocation = truncLocation(classContent[baseIndex + 2]);
-
-    if (classInstructorVal === "Y") {
-        classInstructor = classContent[baseIndex + 4];
-    }
-
-    return {
-        subjCode,
-        classSect,
-        subjTitle,
-        classType,
-        startTime: formattedStartTime,
-        endTime: formattedEndTime,
-        classLocation,
-        classInstructor
-    }
-}
-
-// This function converts json object into ical format and write it into .ics file
-function icalBlob(event, selectedReminderTime) {
-    // Define the header and footer of the iCalendar
-    const icalHeader = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//sycanz/schedulr//EN`;
-    const icalTz = `\nBEGIN:VTIMEZONE\nTZID:Asia/Kuala_Lumpur\nBEGIN:STANDARD\nTZOFFSETFROM:+0800\nTZOFFSETTO:+0800\nTZNAME:GMT+8\nEND:STANDARD\nEND:VTIMEZONE`
-    const icalFooter = `\nEND:VCALENDAR`;
-
-    allClasses = classCalIcs(event);
-
-    const icalContent = icalHeader + icalTz + allClasses + icalFooter;
-
-    return icalContent
-}
-
-function classCalIcs(event) {
-    // Empty string to store all class events
-    let allClasses = ""
-    event.forEach((classes) => {
-        // Convert from 2024-09-30T10:00:00 to 19980118T073000Z
-        let dtStart = classes.start.dateTime.replace(/[-:]/g, "").split("+")[0];
-        let dtEnd = classes.end.dateTime.replace(/[-:]/g, "").split("+")[0];
-
-        let { uid, dtStamp } = uidAndDtstamp();
-
-        // Create empty string to store all events
-        let classEvent = `
-BEGIN:VEVENT
-SUMMARY:${classes.summary}
-LOCATION:${classes.location}
-DTSTART;TZID=${classes.start.timeZone}:${dtStart}
-DTEND;TZID=${classes.end.timeZone}:${dtEnd}
-${classes.recurrence[0]}
-UID:${uid}
-DTSTAMP:${dtStamp}Z`
-
-
-        if (selectedReminderTime !== "none") {
-            classEvent += `
-BEGIN:VALARM
-TRIGGER:-PT${selectedReminderTime}M
-DESCRIPTION:${classes.summary}
-ACTION:DISPLAY
-END:VALARM`;
-        }
-
-        // Close the event
-        classEvent += `\nEND:VEVENT`;
-
-        // Append the class event to allClasses
-        allClasses += classEvent;
-    });
-
-    return allClasses;
-}
-
-function uidAndDtstamp() {
-    // Generate and get all necessary date time
-    let date = new Date();
-    const year = date.getFullYear().toString();
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-
-    // Generate a short random string
-    const randomStr = Math.random().toString(36).substring(2, 8);
-
-    const dtStamp = `${year}${month}${day}T${hours}${minutes}${seconds}`;
-    const uid = `${randomStr}-${dtStamp}@schedulr.com`;
-    // console.log(dtStamp, uid);
-
-    return { uid, dtStamp };
-}
-
-function addZeroToDate(date) {
-    // Split date string to date and month
-    const splitDate = date.split(" ");
-
-    // Get date string
-    const parseDate = parseInt(splitDate[0]);
-    const parseMonth = splitDate[1];
-
-    // Add 0 to date if it's 1 digit
-    let formattedDate;
-    if (parseDate > 0 && parseDate < 10) {
-        formattedDate = `0${parseDate}`;
-    } else {
-        formattedDate = parseDate.toString();
-    }
-
-    // Combine date month
-    const realDate = `${formattedDate} ${parseMonth}`;
-
-    return realDate;
-}
-
-function groupData(className, classDetails, classDates, classTimes, classLoc) {
-    // console.log(className, classType, classDates, classTimes, classLoc);
-
-    let { classCode, classNameOnly } = procClassName(className);
-    let { classType, classSect } = procClassDetails(classDetails);
-    let { startDate, endDate } = procClassDates(classDates);
-    let { startTime, endTime } = procClassTimes(classTimes);
-
-    // console.log(classCode, ",", classNameOnly, ",", classType, ",", classSect, ",", startDate, "-", endDate, ",", startTime, ",", endTime, ",", classLoc);
-
-    /*
-        Let user choose thier own event format:
-        Subject Code - Section (Type)
-        Subject Name - Section (Type)
-        Subject Name - Code - Section (Type)
-    */
-    let summary = `${classCode} - ${classSect} (${classType})`;
-
-    if (selectedEventFormat === "2") {
-        summary = `${classNameOnly} - ${classSect} (${classType})`;
-    } else if (selectedEventFormat === "3") {
-        summary = `${classNameOnly} - ${classCode} - ${classSect} (${classType})`;
-    }
-
-    // console.log("Summary:", summary);
-
-    const event = createCalEvent(summary, classLoc, startDate, startTime
-        , startDate, endTime, selectedSemesterValue, selectedColorValue, selectedReminderTime, selectedOptionValue);
-
-    console.log(event);
-
-    if (selectedOptionValue == 1) {
-        if (token) {
-            // console.log("Extension end");
-            createCalendarEvent(event);
-            googleCalendarSuccess = true;
-        }
-    }
-
-    classEvents.push(event);
-}
-
-// =============== End of helper functions ===============
-
 /* Start of flow types */
+
+function studentFlow() {
+    console.log("Running student process");
+    let classSec = document.querySelectorAll("[id*='divSSR_SBJCT_LVL1_row']");
+
+    // For each class sections
+    classSec.forEach((element, index) => {
+        // Select all class name, type, dates, times, and location
+        let className = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_SCRTAB_DTLS']");
+        let classDetails = element.querySelectorAll("a[id^='DERIVED_SSR_FL_SSR_SBJ_CAT_NBR$355']");
+        let classDates = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_ST_END_DT1']");
+        let classTimes = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DAYSTIMES1']");
+        let classLoc = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DRV_ROOM1']");
+
+        let maxSlots = Math.max(classDetails.length);
+
+        for (let i = 0; i < maxSlots; i++) {
+            // Get the text content of the elements
+            let classNameText = className[0].textContent;
+            let classDetailsText = classDetails[i].textContent.trim();
+            let classDatesText = classDates[i].textContent.trim();
+            let classTimesText = classTimes[i].textContent.trim();
+            let classLocText = classLoc[i].textContent.trim();
+
+            // Call function to ultimately create calendar event
+            groupData(classNameText, classDetailsText, classDatesText, classTimesText, classLocText);
+        }
+    })
+
+    console.log("Grouped events: ", classEvents);
+    classEvents.forEach((element) => {
+        if (config.selectedOptionValue == 1 && config.token) {
+            createCalendarEvent(element);
+        }
+    })
+
+    googleCalendarSuccess = true;
+}
 
 function lectFlow(iframeElement) {
     console.log("Running lecturer process");
@@ -580,33 +260,102 @@ function lectFlow(iframeElement) {
     });
 }
 
-function studentFlow() {
-    console.log("Running student process");
-    let classSec = document.querySelectorAll("[id*='divSSR_SBJCT_LVL1_row']");
+/* End of flow types */
 
-    // For each class sections
-    classSec.forEach((element, index) => {
-        // Select all class name, type, dates, times, and location
-        let className = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_SCRTAB_DTLS']");
-        let classDetails = element.querySelectorAll("a[id^='DERIVED_SSR_FL_SSR_SBJ_CAT_NBR$355']");
-        let classDates = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_ST_END_DT1']");
-        let classTimes = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DAYSTIMES1']");
-        let classLoc = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DRV_ROOM1']");
-
-        let maxSlots = Math.max(classDetails.length);
-
-        for (let i = 0; i < maxSlots; i++) {
-            // Get the text content of the elements
-            let classNameText = className[0].textContent;
-            let classDetailsText = classDetails[i].textContent.trim();
-            let classDatesText = classDates[i].textContent.trim();
-            let classTimesText = classTimes[i].textContent.trim();
-            let classLocText = classLoc[i].textContent.trim();
-
-            // Call function to ultimately create calendar event
-            groupData(classNameText, classDetailsText, classDatesText, classTimesText, classLocText);
-        }
+// =============== Helper functions ===============
+// Function to create a calendar event
+function createCalendarEvent(event) {
+    console.log("Created google calendar events")
+    fetch(`https://www.googleapis.com/calendar/v3/calendars/${config.selectedCalendar}/events`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${config.token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(event)
     })
+        .then(response => {
+            if (!response.ok) {
+                console.error(`Error creating event: ${response.statusText}`);
+                window.alert(`Error creating event: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Event created:', data);
+        })
+        .catch(error => {
+            console.error('Error creating event:', error);
+            window.alert(`Failed to create event: ${error.message}`);
+        });
 }
 
-/* End of flow types */
+function createCalEvent(summary, classLocation, startDate, formattedStartTime, endDate, formattedEndTime, selectedSemesterValue, selectedColorValue, selectedReminderTime) {
+    let event = {
+        'summary': `${summary}`,
+        'location': `${classLocation}`,
+        'start': {
+            'dateTime': `${startDate}T${formattedStartTime}`,
+            'timeZone': 'Asia/Kuala_Lumpur'
+        },
+        'end': {
+            'dateTime': `${endDate}T${formattedEndTime}`,
+            'timeZone': 'Asia/Kuala_Lumpur'
+        },
+        'recurrence': [
+            `RRULE:FREQ=WEEKLY;COUNT=${selectedSemesterValue}`
+        ],
+        'reminders': {
+            'useDefault': false,
+            'overrides': []
+        },
+    }
+
+    if (selectedReminderTime !== "none") {
+        event.reminders.overrides.push({
+            'method': 'popup',
+            'minutes': parseInt(selectedReminderTime)
+        })
+    }
+
+    if (config.selectedOptionValue != 3) {
+        event.colorId = selectedColorValue
+    }
+
+    return event;
+}
+
+
+function groupData(className, classDetails, classDates, classTimes, classLoc) {
+    // console.log(className, classType, classDates, classTimes, classLoc);
+
+    let { classCode, classNameOnly } = procClassName(className);
+    let { classType, classSect } = procClassDetails(classDetails);
+    let { startDate, endDate } = procClassDates(classDates);
+    let { startTime, endTime } = procClassTimes(classTimes);
+
+    // console.log(classCode, ",", classNameOnly, ",", classType, ",", classSect, ",", startDate, "-", endDate, ",", startTime, ",", endTime, ",", classLoc);
+
+    /*
+        Let user choose thier own event format:
+        Subject Code - Section (Type)
+        Subject Name - Section (Type)
+        Subject Name - Code - Section (Type)
+    */
+    let summary = `${classCode} - ${classSect} (${classType})`;
+
+    if (config.selectedEventFormat === "2") {
+        summary = `${classNameOnly} - ${classSect} (${classType})`;
+    } else if (config.selectedEventFormat === "3") {
+        summary = `${classNameOnly} - ${classCode} - ${classSect} (${classType})`;
+    }
+
+    // console.log("Summary:", summary);
+
+    const event = createCalEvent(summary, classLoc, startDate, startTime, startDate, endTime,
+        config.selectedSemesterValue, config.selectedColorValue, config.selectedReminderTime, config.selectedOptionValue);
+
+    classEvents.push(event);
+}
+
+// =============== End of helper functions ===============

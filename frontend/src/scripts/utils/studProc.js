@@ -1,6 +1,6 @@
 export function procClassName(className) {
     // console.log(className.trim());
-    splitClassName = className.trim().split(/\s+/);
+    let splitClassName = className.trim().split(/\s+/);
     // console.log(splitClassName);
 
     let classCode = splitClassName[0] + splitClassName[1];
@@ -16,11 +16,11 @@ export function procClassName(className) {
 }
 
 export function procClassDetails(classDetails) {
-    splitClassDetails = classDetails.split(" - ");
+    let splitClassDetails = classDetails.split(" - ");
     // console.log(splitClassDetails);
 
-    classType = splitClassDetails[0].split(" ")[1];
-    classSect = splitClassDetails[1].split(" ")[2];
+    let classType = splitClassDetails[0].split(" ")[1];
+    let classSect = splitClassDetails[1].split(" ")[2];
     // console.log(splitClassType);
 
     return { classType, classSect };
@@ -59,8 +59,8 @@ export function procClassTimes(classTimes) {
         return `${hour}:${minute}:00+08:00`;
     }
 
-    startTime = convertTimeFormat(splitClassTimes[1]);
-    endTime = convertTimeFormat(splitClassTimes[3]);
+    let startTime = convertTimeFormat(splitClassTimes[1]);
+    let endTime = convertTimeFormat(splitClassTimes[3]);
     // console.log(convertTimeFormat(startTime), ",", convertTimeFormat(endTime));
 
     return { startTime, endTime };
