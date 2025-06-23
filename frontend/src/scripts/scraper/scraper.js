@@ -10,7 +10,7 @@ let classEvents = [];
 let googleCalendarSuccess = false;
 let icsDownloadSuccess = false;
 
-export function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
+export async function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
     console.log("Execute script dataProc called");
 
     config.token = token;
@@ -29,42 +29,17 @@ export function dataProc(token, selectedSemesterValue, selectedReminderTime, sel
     
     console.log("Detecting user type");
     if (lectIndicator && iframeElement) {
-        // Do the lecturer's process
-        console.log("We got a lecturer here!");
         lectFlow(iframeElement);
     } else {
-        // Do the student's process
-        console.log("We got a student here!");
         studentFlow();
     }
 
-    if (selectedOptionValue == 2) {
-        // Create a blob file for users to download
-        // console.log(classEvents);
-        console.log("Creating blob");
-        icalContent = icalBlob(classEvents, selectedReminderTime);
+    if (selectedOptionValue == 1 && token) {
+        syncGoogleCalendar();
 
-        console.log(icalContent);
-
-        const icsContainer = document.querySelector('.ics-container');
-        // if (icsContainer) {
-        //     console.log("Found icsContainer", icsContainer);
-        // }
-
-        // Convert data to Blob
-        const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
-        const blobUrl = URL.createObjectURL(blob);
-
-        const downloadButton = document.createElement('a');
-        downloadButton.href = blobUrl;
-        downloadButton.download = 'schedulr.ics';
-        downloadButton.innerText = 'Download .ics';
-        downloadButton.classList.add('download-btn');
-
-        console.log("Downloading ics file...");
-        downloadButton.click()
-        console.log("Download initiated");
-
+        googleCalendarSuccess = true;
+    } else if (selectedOptionValue == 3) {
+        downloadICS();
         icsDownloadSuccess = true;
     }
 
@@ -112,15 +87,6 @@ function studentFlow() {
             groupData(classNameText, classDetailsText, classDatesText, classTimesText, classLocText);
         }
     })
-
-    console.log("Grouped events: ", classEvents);
-    classEvents.forEach((element) => {
-        if (config.selectedOptionValue == 1 && config.token) {
-            createCalendarEvent(element);
-        }
-    })
-
-    googleCalendarSuccess = true;
 }
 
 function lectFlow(iframeElement) {
@@ -229,7 +195,7 @@ function lectFlow(iframeElement) {
                         handleMultiHourClass(totalSpan, rowIndex, skip, colIndex);
                     }
 
-                    const event = createCalEvent(summary, result.classLocation, startDate, result.startTime
+                    const event = craftCalEvent(summary, result.classLocation, startDate, result.startTime
                         , endDate, result.endTime, selectedSemesterValue, selectedColorValue, selectedReminderTime, selectedOptionValue);
                     // Append to array after defining events
                     // console.log('Event: ', event)
@@ -263,34 +229,7 @@ function lectFlow(iframeElement) {
 /* End of flow types */
 
 // =============== Helper functions ===============
-// Function to create a calendar event
-function createCalendarEvent(event) {
-    console.log("Created google calendar events")
-    fetch(`https://www.googleapis.com/calendar/v3/calendars/${config.selectedCalendar}/events`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${config.token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(event)
-    })
-        .then(response => {
-            if (!response.ok) {
-                console.error(`Error creating event: ${response.statusText}`);
-                window.alert(`Error creating event: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Event created:', data);
-        })
-        .catch(error => {
-            console.error('Error creating event:', error);
-            window.alert(`Failed to create event: ${error.message}`);
-        });
-}
-
-function createCalEvent(summary, classLocation, startDate, formattedStartTime, endDate, formattedEndTime, selectedSemesterValue, selectedColorValue, selectedReminderTime) {
+function craftCalEvent(summary, classLocation, startDate, formattedStartTime, endDate, formattedEndTime) {
     let event = {
         'summary': `${summary}`,
         'location': `${classLocation}`,
@@ -303,7 +242,7 @@ function createCalEvent(summary, classLocation, startDate, formattedStartTime, e
             'timeZone': 'Asia/Kuala_Lumpur'
         },
         'recurrence': [
-            `RRULE:FREQ=WEEKLY;COUNT=${selectedSemesterValue}`
+            `RRULE:FREQ=WEEKLY;COUNT=${config.selectedSemesterValue}`
         ],
         'reminders': {
             'useDefault': false,
@@ -311,10 +250,10 @@ function createCalEvent(summary, classLocation, startDate, formattedStartTime, e
         },
     }
 
-    if (selectedReminderTime !== "none") {
+    if (config.selectedReminderTime !== "none") {
         event.reminders.overrides.push({
             'method': 'popup',
-            'minutes': parseInt(selectedReminderTime)
+            'minutes': parseInt(config.selectedReminderTime)
         })
     }
 
@@ -352,10 +291,53 @@ function groupData(className, classDetails, classDates, classTimes, classLoc) {
 
     // console.log("Summary:", summary);
 
-    const event = createCalEvent(summary, classLoc, startDate, startTime, startDate, endTime,
+    const event = craftCalEvent(summary, classLoc, startDate, startTime, startDate, endTime,
         config.selectedSemesterValue, config.selectedColorValue, config.selectedReminderTime, config.selectedOptionValue);
 
     classEvents.push(event);
+}
+
+function syncGoogleCalendar() {
+    // create calendar events
+    classEvents.forEach(async (newEvent) => {
+        const response = await fetch('http://localhost:8787/api/calendar/add-events', {
+        // const response = await fetch('CLOUDFLARE_WORKER_ENDPOINT', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                event: newEvent,
+                selectedCalendar: config.selectedCalendar,
+                token: config.token,
+            }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Event added successfully:", data);
+        } else {
+            const errorData = await response.json();
+            console.error("Error adding event:", errorData);
+        }
+    });
+}
+
+function downloadICS() {
+    const icalContent = icalBlob(classEvents, config.selectedReminderTime);
+
+    // Convert data to Blob
+    const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    const downloadButton = document.createElement('a');
+    downloadButton.href = blobUrl;
+    downloadButton.download = 'schedulr.ics';
+    downloadButton.innerText = 'Download .ics';
+    downloadButton.classList.add('download-btn');
+
+    console.log("Downloading ics file...");
+    downloadButton.click()
 }
 
 // =============== End of helper functions ===============

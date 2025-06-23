@@ -5,14 +5,14 @@ export function icalBlob(event, selectedReminderTime) {
     const icalTz = `\nBEGIN:VTIMEZONE\nTZID:Asia/Kuala_Lumpur\nBEGIN:STANDARD\nTZOFFSETFROM:+0800\nTZOFFSETTO:+0800\nTZNAME:GMT+8\nEND:STANDARD\nEND:VTIMEZONE`
     const icalFooter = `\nEND:VCALENDAR`;
 
-    allClasses = classCalIcs(event);
+    const allClasses = classCalIcs(event, selectedReminderTime);
 
     const icalContent = icalHeader + icalTz + allClasses + icalFooter;
 
     return icalContent
 }
 
-function classCalIcs(event) {
+function classCalIcs(event, selectedReminderTime) {
     // Empty string to store all class events
     let allClasses = ""
     event.forEach((classes) => {
