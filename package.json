@@ -22,6 +22,8 @@
   },
   "homepage": "https://github.com/sycanz/schedulr#readme",
   "devDependencies": {
+    "@rollup/plugin-replace": "^6.0.2",
+    "dotenv": "^16.5.0",
     "rollup": "^4.44.0"
   }
 }
