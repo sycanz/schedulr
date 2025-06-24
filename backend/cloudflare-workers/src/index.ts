@@ -25,6 +25,7 @@ app.use('*', cors({
 }));
 
 app.post("/api/auth/token", async (c) => {
+    // uncomment the following for production use
     const clientId = c.env.CLIENT_ID;
     const clientSecret = c.env.CLIENT_SECRET;
     const redirectUri = c.env.REDIRECT_URI;

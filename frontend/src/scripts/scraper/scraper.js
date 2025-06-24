@@ -229,6 +229,34 @@ function lectFlow(iframeElement) {
 /* End of flow types */
 
 // =============== Helper functions ===============
+function groupData(className, classDetails, classDates, classTimes, classLoc) {
+    let { classCode, classNameOnly } = procClassName(className);
+    let { classType, classSect } = procClassDetails(classDetails);
+    let { startDate, endDate } = procClassDates(classDates);
+    let { startTime, endTime } = procClassTimes(classTimes);
+
+    // console.log(classCode, ",", classNameOnly, ",", classType, ",", classSect, ",", startDate, "-", endDate, ",", startTime, ",", endTime, ",", classLoc);
+
+    /*
+        Let user choose thier own event format:
+        Subject Code - Section (Type)
+        Subject Name - Section (Type)
+        Subject Name - Code - Section (Type)
+    */
+    let summary = `${classCode} - ${classSect} (${classType})`;
+
+    if (config.selectedEventFormat === "2") {
+        summary = `${classNameOnly} - ${classSect} (${classType})`;
+    } else if (config.selectedEventFormat === "3") {
+        summary = `${classNameOnly} - ${classCode} - ${classSect} (${classType})`;
+    }
+
+    const event = craftCalEvent(summary, classLoc, startDate, startTime, startDate, endTime,
+        config.selectedSemesterValue, config.selectedColorValue, config.selectedReminderTime, config.selectedOptionValue);
+
+    classEvents.push(event);
+}
+
 function craftCalEvent(summary, classLocation, startDate, formattedStartTime, endDate, formattedEndTime) {
     let event = {
         'summary': `${summary}`,
@@ -258,43 +286,10 @@ function craftCalEvent(summary, classLocation, startDate, formattedStartTime, en
     }
 
     if (config.selectedOptionValue != 3) {
-        event.colorId = selectedColorValue
+        event.colorId = config.selectedColorValue
     }
 
     return event;
-}
-
-
-function groupData(className, classDetails, classDates, classTimes, classLoc) {
-    // console.log(className, classType, classDates, classTimes, classLoc);
-
-    let { classCode, classNameOnly } = procClassName(className);
-    let { classType, classSect } = procClassDetails(classDetails);
-    let { startDate, endDate } = procClassDates(classDates);
-    let { startTime, endTime } = procClassTimes(classTimes);
-
-    // console.log(classCode, ",", classNameOnly, ",", classType, ",", classSect, ",", startDate, "-", endDate, ",", startTime, ",", endTime, ",", classLoc);
-
-    /*
-        Let user choose thier own event format:
-        Subject Code - Section (Type)
-        Subject Name - Section (Type)
-        Subject Name - Code - Section (Type)
-    */
-    let summary = `${classCode} - ${classSect} (${classType})`;
-
-    if (config.selectedEventFormat === "2") {
-        summary = `${classNameOnly} - ${classSect} (${classType})`;
-    } else if (config.selectedEventFormat === "3") {
-        summary = `${classNameOnly} - ${classCode} - ${classSect} (${classType})`;
-    }
-
-    // console.log("Summary:", summary);
-
-    const event = craftCalEvent(summary, classLoc, startDate, startTime, startDate, endTime,
-        config.selectedSemesterValue, config.selectedColorValue, config.selectedReminderTime, config.selectedOptionValue);
-
-    classEvents.push(event);
 }
 
 function syncGoogleCalendar() {

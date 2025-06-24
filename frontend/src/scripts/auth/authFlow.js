@@ -27,7 +27,7 @@ async function getExistingOrRefreshedToken() {
         }
 
         if (refreshTokens) {
-            const response = await fetch('CLOUDFLARE_WORKER_ENDPOINT', {
+            const response = await fetch(__CFW_REFRESH_ENDPOINT__, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -65,7 +65,7 @@ export async function onlaunchWebAuthFlow() {
             return currentAccessToken;
         }
 
-        const clientId = "CLIENT_ID"
+        const clientId = __CLIENT_ID__;
         const state = Math.random().toString(36).substring(7)
         const scope = "https://www.googleapis.com/auth/calendar"
         const redirectUri = chrome.identity.getRedirectURL("oauth");
@@ -110,7 +110,7 @@ export async function onlaunchWebAuthFlow() {
         }
 
         const response = await fetch(
-            'CLOUDFLARE_WORKER_ENDPOINT',
+            __CFW_AUTH_ENDPOINT__,
             {
                 method: "POST",
                 headers: {

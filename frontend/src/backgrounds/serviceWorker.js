@@ -1,7 +1,7 @@
 // service-worker.js is a file that runs background scripts which does not
 // require any user interaction to execute.
 
-import { onlaunchWebAuthFlow } from '../scripts/auth/authFlow.js';
+import { onlaunchWebAuthFlow } from '../../dist/authFlow.bundle.js';
 import { getCalIds } from '../scripts/calendar/calListQuery.js';
 import { getCurrTab } from '../scripts/utils/progFlow.js';
 
@@ -42,7 +42,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
 chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "startScraper") {
         console.log("Messaged received: startScraper");
-
         const currTab = await getCurrTab();
 
         let accessToken;
@@ -78,7 +77,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
                 args: [accessToken, selectedSemesterValue, selectedReminderTime,
                     selectedColorValue, selectedCalendar, selectedEventFormat,
                     selectedOptionValue],
-                func: (...args) => dataProcBundle.dataProc(...args),
+                func: (...args) => scraperBundle.dataProc(...args),
             })
         });
 
