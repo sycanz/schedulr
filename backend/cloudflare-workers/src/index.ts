@@ -144,4 +144,31 @@ app.post("api/calendar/add-events", async(c) => {
     }
 });
 
+app.post("api/calendar/get-calendar-list", async(c) => {
+    const body = await c.req.json();
+
+    try {
+        const response = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${body.token}`,
+                "Content-Type": "application/json",
+            },
+        })
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Calendar list retrieved");
+            return c.json({ data }, 200);
+        }
+
+        const data = await response.json();
+        console.error("request failed:", data);
+        return c.json({ data }, 400);
+    } catch (error) {
+        console.error("Error with get-calendar-list request: ", error);
+        return c.json({ error: "Failed to get calendar list" }, 500);
+    }
+});
+
 export default app

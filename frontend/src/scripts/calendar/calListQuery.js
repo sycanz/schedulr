@@ -1,25 +1,16 @@
-export function getCalIds(token) {
-    return fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
+export async function getCalIds(token) {
+    const response = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
         },
     })
-        .then((response) => {
-            if (!response.ok) {
-                console.error("Error getting calendar id:", response.error);
-            }
-            // console.log("Reponse ok, getting JSON");
-            return response.json();
-        })
-        .then((calObject) => {
-            // console.log('Calendar list:', calObject);
-            return parseCalIds(calObject);
-        })
-        .catch((error) => {
-            console.error("Error occured:", error);
-        });
+
+    if (response.ok) {
+        const calObject = await response.json();
+        return parseCalIds(calObject);
+    }
 }
 
 function parseCalIds(calObject) {
