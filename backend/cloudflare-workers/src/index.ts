@@ -25,7 +25,6 @@ app.use('*', cors({
 }));
 
 app.post("/api/auth/token", async (c) => {
-    // uncomment the following for production use
     const clientId = c.env.CLIENT_ID;
     const clientSecret = c.env.CLIENT_SECRET;
     const redirectUri = c.env.REDIRECT_URI;
@@ -48,12 +47,18 @@ app.post("/api/auth/token", async (c) => {
             }),
         });
 
+        const data = await response.json();
+
         if (response.ok) {
             const {
                 access_token: accessToken,
                 expires_in: expiresIn,
                 refresh_token: refreshToken,
-            } = (await response.json()) as OAuthTokenResponse;
+                id_token: idToken,
+            } = data as OAuthTokenResponse;
+
+            const decodedIdToken = decodeJwtPayload(idToken);
+            const sub = decodedIdToken.sub;
 
             return c.json(
                 {
@@ -65,7 +70,6 @@ app.post("/api/auth/token", async (c) => {
             );
         }
 
-        const data = await response.json();
         console.error("request failed: ", data);
         return c.json({ data }, 400);
     } catch (error) {
@@ -170,5 +174,15 @@ app.post("api/calendar/get-calendar-list", async(c) => {
         return c.json({ error: "Failed to get calendar list" }, 500);
     }
 });
+
+function decodeJwtPayload(token: string): any {
+    const payload = token.split('.')[1];
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+
+    const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+
+    const decoded = atob(padded);
+    return JSON.parse(decoded);
+}
 
 export default app
