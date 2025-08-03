@@ -181,11 +181,28 @@ app.post("/api/calendar/add-events", async(c) => {
         c.env.SUPABASE_ANON_KEY,
     )
 
+    const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
+    const userSession = await getUserSessionDetails(supabase, userId);
+    if (!userSession) {
+        return c.json({ error: "No session details found for this user!" }, 400);
+    }
+    let { expires_at: sessionTokenExpiresAt } = userSession;
+
+    if (sessionTokenExpiresAt < new Date().toISOString()) {
+        return c.json({ error: "Session expired, please reauthenticate!" }, 400);
+    }
+
+    const userOAuth = await getUserOAuthDetails(supabase, userId);
+    if (!userOAuth) {
+        return c.json({ error: "No OAuth details found!" }, 400);
+    }
+    let { access_token: accessToken } = userOAuth;
+
     try {
         const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${body.selectedCalendar}/events`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${body.token}`,
+                'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body.event)

@@ -44,7 +44,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
         console.log("Messaged received: startScraper");
         const currTab = await getCurrTab();
 
-        let accessToken, selectedColorValue, selectedCalendar, selectedReminderTime,
+        let sessionToken, selectedColorValue, selectedCalendar, selectedReminderTime,
             selectedSemesterValue, selectedEventFormat, selectedOptionValue;
 
         await chrome.storage.local.get([

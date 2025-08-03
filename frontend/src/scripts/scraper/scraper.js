@@ -4,8 +4,7 @@ import { icalBlob } from './createIcs.js';
 console.log("Script received message, going to get data from local storage")
 
 // object for easy access to common vars
-const config = {}
-
+let config = {}
 let classEvents = [];
 let googleCalendarSuccess = false;
 let icsDownloadSuccess = false;
@@ -24,10 +23,10 @@ export async function dataProc(sessionToken, selectedSemesterValue, selectedRemi
     // =============== Web scrape workflow ===============
     // Declare iframe
     const iframeElement = document.querySelector("#ptifrmtgtframe");
-
     const lectIndicator = document.querySelector("table.ptalNoPadding.ptalPgltAreaControlsIcon a#ptalPgltAreaHide");
     
     console.log("Detecting user type");
+    // lecturers and students have different UI, need to execute appropriate flow
     if (lectIndicator && iframeElement) {
         lectFlow(iframeElement);
     } else {
@@ -36,7 +35,6 @@ export async function dataProc(sessionToken, selectedSemesterValue, selectedRemi
 
     if (selectedOptionValue == 1 && sessionToken) {
         syncGoogleCalendar();
-
         googleCalendarSuccess = true;
     } else if (selectedOptionValue == 3) {
         downloadICS();
@@ -301,7 +299,7 @@ function syncGoogleCalendar() {
             body: JSON.stringify({
                 event: newEvent,
                 selectedCalendar: config.selectedCalendar,
-                token: config.sessionToken,
+                sessionToken: config.sessionToken,
             }),
         });
 
