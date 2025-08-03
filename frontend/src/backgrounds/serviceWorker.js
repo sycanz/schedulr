@@ -1,8 +1,8 @@
 // service-worker.js is a file that runs background scripts which does not
 // require any user interaction to execute.
 
-import { onlaunchWebAuthFlow } from '../../dist/authFlow.bundle.js';
-import { getCalIds } from '../scripts/calendar/calListQuery.js';
+import { onLaunchWebAuthFlow } from '../../dist/authFlow.bundle.js';
+import { getCalIds } from '../../dist/calListQuery.bundle.js';
 import { getCurrTab } from '../scripts/utils/progFlow.js';
 
 // navigate user to 'schedulr' website's usage part when 
@@ -19,11 +19,11 @@ chrome.runtime.onInstalled.addListener((details) => {
 chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "authoriseUser") {
         console.log("Authorizing user for OAuth consent");
-        const token = await onlaunchWebAuthFlow()
+        const sessionToken = await onLaunchWebAuthFlow()
 
-        if (token) {
+        if (sessionToken) {
             console.log("Consent given, trying to get calendars...")
-            let calJson = await getCalIds(token);
+            let calJson = await getCalIds(sessionToken);
 
             console.log("Got calendars, updating popup option elements");
             chrome.runtime.sendMessage({
@@ -44,19 +44,14 @@ chrome.runtime.onMessage.addListener(async (message) => {
         console.log("Messaged received: startScraper");
         const currTab = await getCurrTab();
 
-        let accessToken;
-        let selectedColorValue;
-        let selectedCalendar;
-        let selectedReminderTime;
-        let selectedSemesterValue
-        let selectedEventFormat;
-        let selectedOptionValue;
+        let accessToken, selectedColorValue, selectedCalendar, selectedReminderTime,
+            selectedSemesterValue, selectedEventFormat, selectedOptionValue;
 
         await chrome.storage.local.get([
-            'accessTokens', 'selectedColorValues', 'selectedCalendars', 'selectedReminderTimes',
+            'session_token', 'selectedColorValues', 'selectedCalendars', 'selectedReminderTimes',
             'selectedSemesterValues', 'selectedEventFormats', 'selectedOptionValues',
         ], (items) => {
-            accessToken = items.accessTokens,
+            sessionToken = items.session_token,
             selectedColorValue = items.selectedColorValues,
             selectedCalendar = items.selectedCalendars,
             selectedReminderTime = items.selectedReminderTimes,
@@ -74,7 +69,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
             console.log("Scraper's bundle updated");
             chrome.scripting.executeScript({
                 target: { tabId: currTab.id },
-                args: [accessToken, selectedSemesterValue, selectedReminderTime,
+                args: [sessionToken, selectedSemesterValue, selectedReminderTime,
                     selectedColorValue, selectedCalendar, selectedEventFormat,
                     selectedOptionValue],
                 func: (...args) => scraperBundle.dataProc(...args),

@@ -10,10 +10,10 @@ let classEvents = [];
 let googleCalendarSuccess = false;
 let icsDownloadSuccess = false;
 
-export async function dataProc(token, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
+export async function dataProc(sessionToken, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
     console.log("Execute script dataProc called");
 
-    config.token = token;
+    config.sessionToken = sessionToken;
     config.selectedSemesterValue = selectedSemesterValue;
     config.selectedReminderTime = selectedReminderTime;
     config.selectedColorValue = selectedColorValue;
@@ -34,7 +34,7 @@ export async function dataProc(token, selectedSemesterValue, selectedReminderTim
         studentFlow();
     }
 
-    if (selectedOptionValue == 1 && token) {
+    if (selectedOptionValue == 1 && sessionToken) {
         syncGoogleCalendar();
 
         googleCalendarSuccess = true;
@@ -208,11 +208,9 @@ function lectFlow(iframeElement) {
                     // console.log('Selected semester value:', selectedSemesterValue);
 
                     if (selectedOptionValue == 1) {
-                        if (token) {
-                            // console.log("Extension end");
-                            createCalendarEvent(event);
-                            googleCalendarSuccess = true;
-                        }
+                        // console.log("Extension end");
+                        createCalendarEvent(event);
+                        googleCalendarSuccess = true;
                     }
                     classEvents.push(event);
 
@@ -295,8 +293,7 @@ function craftCalEvent(summary, classLocation, startDate, formattedStartTime, en
 function syncGoogleCalendar() {
     // create calendar events
     classEvents.forEach(async (newEvent) => {
-        const response = await fetch('http://localhost:8787/api/calendar/add-events', {
-        // const response = await fetch('CLOUDFLARE_WORKER_ENDPOINT', {
+        const response = await fetch(__CFW_ADD_NEW_EVENT_ENDPOINT_DEV__, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -304,7 +301,7 @@ function syncGoogleCalendar() {
             body: JSON.stringify({
                 event: newEvent,
                 selectedCalendar: config.selectedCalendar,
-                token: config.token,
+                token: config.sessionToken,
             }),
         });
 

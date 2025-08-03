@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "cloudflare-workers",
-  "main": "src/index.ts",
+  "main": "dist/worker.js",
   "compatibility_date": "2025-06-13",
   "observability": {
     "logs": {

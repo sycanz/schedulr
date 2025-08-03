@@ -103,7 +103,6 @@ async function updatePopup() {
 
     // check if they're a first timer, if so then show previous settings button
     const returningUser = await isNotANewcomer();
-    console.log("Is he a returning user?", returningUser);
 
     // display appropriate forms according to selected option
     switch(selectedOptionValue) {
