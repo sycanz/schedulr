@@ -1,5 +1,6 @@
 import { procClassName, procClassDetails, procClassDates, procClassTimes } from '../utils/studProc.js';
 import { icalBlob } from './createIcs.js';
+import { showErrorNotification, showSuccessNotification } from '../utils/errorNotifier.js';
 
 console.log("Script received message, going to get data from local storage")
 
@@ -34,25 +35,22 @@ export async function dataProc(sessionToken, selectedSemesterValue, selectedRemi
     }
 
     if (selectedOptionValue == 1 && sessionToken) {
-        syncGoogleCalendar();
-        googleCalendarSuccess = true;
-    } else if (selectedOptionValue == 3) {
+        await syncGoogleCalendar();
+    } else if (selectedOptionValue == 2) {
         downloadICS();
-        icsDownloadSuccess = true;
     }
 
     // =============== End of web scrape workflow ===============
     
     // Show alert only if an operation was successful
     if (googleCalendarSuccess && icsDownloadSuccess) {
-        window.alert("Timetable transferred to Google Calendar and .ics file downloaded!");
+        showSuccessNotification("Timetable transferred to Google Calendar and .ics file downloaded!");
     } else if (googleCalendarSuccess) {
-        window.alert("Timetable successfully transferred to Google Calendar!");
+        showSuccessNotification("Timetable successfully transferred to Google Calendar!");
     } else if (icsDownloadSuccess) {
-        window.alert(".ics file downloaded! Now you can import it into a calendar of your choice.");
+        showSuccessNotification(".ics file downloaded! Now you can import it into a calendar of your choice.");
     } else {
-        console.warn("Something went wrong");
-        window.Error("Something went wrong");
+        showErrorNotification("No data was processed. Please make sure you're on the correct page and try again.");
     }
 }
 
@@ -61,6 +59,11 @@ export async function dataProc(sessionToken, selectedSemesterValue, selectedRemi
 function studentFlow() {
     console.log("Running student process");
     let classSec = document.querySelectorAll("[id*='divSSR_SBJCT_LVL1_row']");
+
+    if (classSec.length === 0) {
+        showErrorNotification("No class data found. Please make sure you're on the student timetable page and the page has loaded completely.");
+        return;
+    }
 
     // For each class sections
     classSec.forEach((element, index) => {
@@ -84,7 +87,7 @@ function studentFlow() {
             // Call function to ultimately create calendar event
             groupData(classNameText, classDetailsText, classDatesText, classTimesText, classLocText);
         }
-    })
+    });
 }
 
 function lectFlow(iframeElement) {
@@ -101,13 +104,13 @@ function lectFlow(iframeElement) {
 
     if (!dayHeader || dayHeader.length === 0) {
         console.error("No day elements found");
-        window.alert("No day elements found");
+        showErrorNotification("No day elements found. Please make sure you're on the lecturer timetable page.");
         return;
     }
 
-    if (subjTitleVal === "N" && (selectedEventFormat === "2" || selectedEventFormat === "3")) {
+    if (subjTitleVal === "N" && (config.selectedEventFormat === "2" || config.selectedEventFormat === "3")) {
         console.error('Please check "Show Class Title" box below the calendar under Display Options!');
-        window.alert('Please check "Show Class Title" box below the calendar under Display Options!');
+        showErrorNotification('Please check "Show Class Title" box below the calendar under Display Options!');
         return;
     }
 
@@ -177,9 +180,9 @@ function lectFlow(iframeElement) {
                 */
                     let summary = `${result.subjCode} - ${result.classSect} (${result.classType})`;
 
-                    if (selectedEventFormat === "2") {
+                    if (config.selectedEventFormat === "2") {
                         summary = `${result.subjTitle} - ${result.classSect} (${result.classType})`;
-                    } else if (selectedEventFormat === "3") {
+                    } else if (config.selectedEventFormat === "3") {
                         summary = `${result.subjTitle} - ${result.subjCode} - ${result.classSect} (${result.classType})`;
                     }
 
@@ -207,14 +210,14 @@ function lectFlow(iframeElement) {
 
                     if (selectedOptionValue == 1) {
                         // console.log("Extension end");
-                        createCalendarEvent(event);
-                        googleCalendarSuccess = true;
+                        // createCalendarEvent(event); // This function doesn't exist and syncGoogleCalendar handles all events
+                        // googleCalendarSuccess = true; // This should be set after syncGoogleCalendar completes
                     }
                     classEvents.push(event);
 
                 } catch (error) {
                     console.error('Error processing class data:', error);
-                    window.alert('Failed to process class data:', error);
+                    showErrorNotification('Failed to process class data: ' + error.message);
                     return;
                 }
             }
@@ -281,16 +284,24 @@ function craftCalEvent(summary, classLocation, startDate, formattedStartTime, en
         })
     }
 
-    if (config.selectedOptionValue != 3) {
+    if (config.selectedOptionValue != 2) {
         event.colorId = config.selectedColorValue
     }
 
     return event;
 }
 
-function syncGoogleCalendar() {
+async function syncGoogleCalendar() {
+    if (classEvents.length === 0) {
+        showErrorNotification("No events to sync. Please make sure timetable data was loaded correctly.");
+        return;
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+
     // create calendar events
-    classEvents.forEach(async (newEvent) => {
+    for (const newEvent of classEvents) {
         const response = await fetch(__CFW_ADD_NEW_EVENT_ENDPOINT_DEV__, {
             method: "POST",
             headers: {
@@ -306,20 +317,34 @@ function syncGoogleCalendar() {
         if (response.ok) {
             const data = await response.json();
             console.log("Event added successfully:", data);
+            successCount++;
         } else {
             const errorData = await response.json();
             console.error("Error adding event:", errorData);
+            errorCount++;
         }
-    });
+    }
+
+    if (errorCount > 0) {
+        showErrorNotification(`${errorCount} out of ${classEvents.length} events failed to sync. Please check your internet connection and try again.`);
+    } else if (successCount > 0) {
+        googleCalendarSuccess = true;
+    }
 }
 
 function downloadICS() {
+    if (classEvents.length === 0) {
+        showErrorNotification("No events to download. Please make sure timetable data was loaded correctly.");
+        return;
+    }
+
     const icalContent = icalBlob(classEvents, config.selectedReminderTime);
 
     // Convert data to Blob
     const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
     const blobUrl = URL.createObjectURL(blob);
 
+    // Create download link and trigger download
     const downloadButton = document.createElement('a');
     downloadButton.href = blobUrl;
     downloadButton.download = 'schedulr.ics';
@@ -327,7 +352,10 @@ function downloadICS() {
     downloadButton.classList.add('download-btn');
 
     console.log("Downloading ics file...");
-    downloadButton.click()
+    downloadButton.click();
+    
+    // Set success flag since download was initiated
+    icsDownloadSuccess = true;
 }
 
 // =============== End of helper functions ===============

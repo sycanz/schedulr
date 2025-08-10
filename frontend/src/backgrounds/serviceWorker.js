@@ -4,6 +4,7 @@
 import { onLaunchWebAuthFlow } from '../../dist/authFlow.bundle.js';
 import { getCalIds } from '../../dist/calListQuery.bundle.js';
 import { getCurrTab } from '../scripts/utils/progFlow.js';
+import { showErrorNotification } from '../scripts/utils/errorNotifier.js';
 
 // navigate user to 'schedulr' website's usage part when 
 // the extension is first installed
@@ -21,18 +22,24 @@ chrome.runtime.onMessage.addListener(async (message) => {
         console.log("Authorizing user for OAuth consent");
         const sessionToken = await onLaunchWebAuthFlow()
 
-        if (sessionToken) {
-            console.log("Consent given, trying to get calendars...")
-            let calJson = await getCalIds(sessionToken);
-
-            console.log("Got calendars, updating popup option elements");
-            chrome.runtime.sendMessage({
-                action: "updateCalData",
-                data: calJson
-            });
-        } else {
-            console.log("Authorization failed: No token received.");
+        if (!sessionToken) {
+            showErrorNotification("Authorization failed. Please try again.", "Authentication Error");
+            return true;
         }
+
+        console.log("Consent given, trying to get calendars...")
+        let calJson = await getCalIds(sessionToken);
+
+        if (!calJson || Object.keys(calJson).length === 0) {
+            showErrorNotification("No calendars found. Please make sure you have at least one calendar in your Google account.", "Calendar Error");
+            return true;
+        }
+
+        console.log("Got calendars, updating popup option elements");
+        chrome.runtime.sendMessage({
+            action: "updateCalData",
+            data: calJson
+        });
 
         return true;
     }
@@ -43,6 +50,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "startScraper") {
         console.log("Messaged received: startScraper");
         const currTab = await getCurrTab();
+
+        if (!currTab) {
+            showErrorNotification("No active tab found. Please make sure you're on the correct page.", "Tab Error");
+            return true;
+        }
 
         let sessionToken, selectedColorValue, selectedCalendar, selectedReminderTime,
             selectedSemesterValue, selectedEventFormat, selectedOptionValue;
@@ -66,6 +78,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
             target: { tabId: currTab.id },
             files: ["frontend/dist/scraper.bundle.js"],
         }, () => {
+            if (chrome.runtime.lastError) {
+                showErrorNotification(chrome.runtime.lastError.message, "Script Execution Error");
+                return;
+            }
+            
             console.log("Scraper's bundle updated");
             chrome.scripting.executeScript({
                 target: { tabId: currTab.id },
@@ -73,7 +90,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
                     selectedColorValue, selectedCalendar, selectedEventFormat,
                     selectedOptionValue],
                 func: (...args) => scraperBundle.dataProc(...args),
-            })
+            }, () => {
+                if (chrome.runtime.lastError) {
+                    showErrorNotification(chrome.runtime.lastError.message, "Script Execution Error");
+                }
+            });
         });
 
         return true;

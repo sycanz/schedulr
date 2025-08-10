@@ -31,7 +31,8 @@
         "activeTab",
         "scripting",
         "identity",
-        "storage"
+        "storage",
+        "notifications"
     ],
     "host_permissions": [
         "https://*.workers.dev/*",

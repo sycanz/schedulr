@@ -1,5 +1,6 @@
 import { selectRadioButton } from '../scripts/utils/autoSelect.js'
 import { isNotANewcomer } from '../scripts/utils/firstTimer.js'
+import { showErrorNotification } from '../scripts/utils/errorNotifier.js'
 
 // program starts here
 console.log("Starting schedulr");
@@ -80,7 +81,7 @@ async function updatePopup() {
     // console.log(`Received option value: ${selectedOptionValue}`);
 
     if (!(selectedOptionValue)) {
-        window.alert('Please select an option.');
+        showErrorNotification('Please select an option.', 'Selection Required', true);
         return;
     }
 
@@ -118,13 +119,6 @@ async function updatePopup() {
             finalButton.style.display = 'flex';
             break;
         case "2":
-            if (returningUser) {
-                previousSettingButton.style.display = 'flex';
-            }
-            previousSettingButton.style.display = 'flex';
-            finalButton.style.display = 'flex';
-            break;
-        case "3":
             if (returningUser) {
                 previousSettingButton.style.display = 'flex';
             }
@@ -195,11 +189,6 @@ function checkForPreference() {
                 selectRadioButton("format", selectedEventFormats);
                 selectRadioButton("reminder", selectedReminderTimes);
                 break;
-            case "3":
-                selectRadioButton("semester", selectedSemesterValues);
-                selectRadioButton("format", selectedEventFormats);
-                selectRadioButton("reminder", selectedReminderTimes);
-                break;
         }
     })
 }
@@ -214,10 +203,10 @@ async function getFormsValue(selectedOptionValue) {
         const selectedCalendar = document.querySelector('input[name="calendar"]:checked')?.value;
         const selectedEventFormat = document.querySelector('input[name="format"]:checked')?.value;
 
-        if (selectedOptionValue == 1 || selectedOptionValue == 2) {
+        if (selectedOptionValue == 1) {
             // check if all values are selected
             if (!(selectedSemesterValue && selectedReminderTime && selectedColorValue && selectedCalendar && selectedEventFormat)) {
-                window.alert('Please select all options.');
+                showErrorNotification('Please select all options.', 'Selection Required', true);
                 return;
             }
 
@@ -229,10 +218,10 @@ async function getFormsValue(selectedOptionValue) {
                 selectedEventFormats: selectedEventFormat,
                 selectedOptionValues: selectedOptionValue,
             });
-        } else if (selectedOptionValue == 3) {
+        } else if (selectedOptionValue == 2) {
             // check if all values are selected
             if (!(selectedSemesterValue && selectedReminderTime && selectedEventFormat)) {
-                window.alert('Please select all options.');
+                showErrorNotification('Please select all options.', 'Selection Required', true);
                 return;
             }
 
@@ -251,7 +240,7 @@ async function getFormsValue(selectedOptionValue) {
         });
     } catch(err) {
         console.error('An error occured: ', err);
-        window.alert(`An error occured: ${err.message}`);
+        showErrorNotification(err.message || 'An unexpected error occurred', 'Form Submission Error', true);
     }
 }
 
