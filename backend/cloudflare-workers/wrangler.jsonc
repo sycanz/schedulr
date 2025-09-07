@@ -2,10 +2,20 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "cloudflare-workers",
   "main": "dist/worker.js",
-  "compatibility_date": "2025-06-13",
+  "compatibility_date": "2025-08-10",
   "observability": {
     "logs": {
       "enabled": true
+    }
+  },
+  "env": {
+    "dev": {
+      "name": "cloudflare-workers",
+      "compatibility_date": "2025-08-10"
+    },
+    "prd": {
+      "name": "cloudflare-workers",
+      "compatibility_date": "2025-08-10"
     }
   }
 }

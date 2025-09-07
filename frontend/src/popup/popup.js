@@ -1,6 +1,7 @@
 import { selectRadioButton } from '../scripts/utils/autoSelect.js'
 import { isNotANewcomer } from '../scripts/utils/firstTimer.js'
 import { showErrorNotification } from '../scripts/utils/errorNotifier.js'
+import { setStorageData } from '../scripts/auth/authFlow.js'
 
 // program starts here
 console.log("Starting schedulr");
@@ -85,9 +86,9 @@ async function updatePopup() {
         return;
     }
 
-    chrome.storage.local.set({
+    await setStorageData({
         selectedOptionValues: selectedOptionValue,
-    })
+    });
 
     // hide the "1st page" after user chooses an option
     document.getElementsByClassName('firstPage')[0].style.display = 'none';
@@ -168,9 +169,11 @@ function setAttributes(calData) {
 function checkForPreference() {
     chrome.storage.local.get([
         "selectedCalendars", "selectedColorValues", "selectedEventFormats",
-        "selectedReminderTimes", "selectedSemesterValues", "selectedOptionValues"], (items) => {
+        "selectedReminderTimes", "selectedSemesterValues", "selectedOptionValues",
+        "selectedDefects"], (items) => {
         const { selectedCalendars, selectedColorValues, selectedEventFormats,
-            selectedReminderTimes, selectedSemesterValues, selectedOptionValues } = items;
+            selectedReminderTimes, selectedSemesterValues, selectedOptionValues,
+            selectedDefects } = items;
 
         if (!selectedSemesterValues) {
             return;
@@ -183,11 +186,13 @@ function checkForPreference() {
                 selectRadioButton("reminder", selectedReminderTimes);
                 selectRadioButton("calendar", selectedCalendars);
                 selectRadioButton("color", selectedColorValues);
+                selectRadioButton("defected", selectedDefects);
                 break;
             case "2":
                 selectRadioButton("semester", selectedSemesterValues);
                 selectRadioButton("format", selectedEventFormats);
                 selectRadioButton("reminder", selectedReminderTimes);
+                selectRadioButton("defected", selectedDefects);
                 break;
         }
     })
@@ -198,39 +203,50 @@ async function getFormsValue(selectedOptionValue) {
     try {
         // get the value of the selected radio button
         const selectedSemesterValue = document.querySelector('input[name="semester"]:checked')?.value;
-        const selectedReminderTime = document.querySelector('input[name="reminder"]:checked')?.value;
-        const selectedColorValue = document.querySelector('input[name="color"]:checked')?.value;
-        const selectedCalendar = document.querySelector('input[name="calendar"]:checked')?.value;
         const selectedEventFormat = document.querySelector('input[name="format"]:checked')?.value;
+        const selectedReminderTime = document.querySelector('input[name="reminder"]:checked')?.value;
+        const selectedCalendar = document.querySelector('input[name="calendar"]:checked')?.value;
+        const selectedDefect = document.querySelector('input[name="defected"]:checked')?.value;
+        const selectedColorValue = document.querySelector('input[name="color"]:checked')?.value;
 
         if (selectedOptionValue == 1) {
             // check if all values are selected
-            if (!(selectedSemesterValue && selectedReminderTime && selectedColorValue && selectedCalendar && selectedEventFormat)) {
+            if (!(selectedSemesterValue &&
+                selectedEventFormat &&
+                selectedReminderTime &&
+                selectedCalendar &&
+                selectedDefect &&
+                selectedColorValue)) {
                 showErrorNotification('Please select all options.', 'Selection Required', true);
                 return;
             }
 
-            await chrome.storage.local.set({
-                selectedColorValues: selectedColorValue,
-                selectedCalendars: selectedCalendar,
-                selectedReminderTimes: selectedReminderTime,
+            await setStorageData({
                 selectedSemesterValues: selectedSemesterValue,
                 selectedEventFormats: selectedEventFormat,
+                selectedReminderTimes: selectedReminderTime,
+                selectedCalendars: selectedCalendar,
+                selectedDefects: selectedDefect,
+                selectedColorValues: selectedColorValue,
                 selectedOptionValues: selectedOptionValue,
             });
         } else if (selectedOptionValue == 2) {
             // check if all values are selected
-            if (!(selectedSemesterValue && selectedReminderTime && selectedEventFormat)) {
+            if (!(selectedSemesterValue &&
+                selectedEventFormat &&
+                selectedReminderTime &&
+                selectedDefect)) {
                 showErrorNotification('Please select all options.', 'Selection Required', true);
                 return;
             }
 
-            await chrome.storage.local.set({
-                selectedColorValues: null,
-                selectedCalendars: null,
-                selectedReminderTimes: selectedReminderTime,
+            await setStorageData({
                 selectedSemesterValues: selectedSemesterValue,
                 selectedEventFormats: selectedEventFormat,
+                selectedReminderTimes: selectedReminderTime,
+                selectedCalendars: null,
+                selectedDefects: selectedDefect,
+                selectedColorValues: null,
                 selectedOptionValues: selectedOptionValue,
             });
         }

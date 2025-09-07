@@ -65,3 +65,8 @@ export function procClassTimes(classTimes) {
 
     return { startTime, endTime };
 }
+
+export function procClassDay(classDay) {
+    let classDayText = classDay.split(":")[1].trim();
+    return { classDayText };
+}

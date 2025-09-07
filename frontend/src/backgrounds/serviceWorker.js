@@ -57,11 +57,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
         }
 
         let sessionToken, selectedColorValue, selectedCalendar, selectedReminderTime,
-            selectedSemesterValue, selectedEventFormat, selectedOptionValue;
+            selectedSemesterValue, selectedEventFormat, selectedDefect, selectedOptionValue;
 
         await chrome.storage.local.get([
             'session_token', 'selectedColorValues', 'selectedCalendars', 'selectedReminderTimes',
-            'selectedSemesterValues', 'selectedEventFormats', 'selectedOptionValues',
+            'selectedSemesterValues', 'selectedEventFormats', 'selectedDefects', 'selectedOptionValues',
         ], (items) => {
             sessionToken = items.session_token,
             selectedColorValue = items.selectedColorValues,
@@ -69,6 +69,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
             selectedReminderTime = items.selectedReminderTimes,
             selectedSemesterValue = items.selectedSemesterValues,
             selectedEventFormat = items.selectedEventFormats,
+            selectedDefect = items.selectedDefects,
             selectedOptionValue = items.selectedOptionValues
         });
 
@@ -88,7 +89,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
                 target: { tabId: currTab.id },
                 args: [sessionToken, selectedSemesterValue, selectedReminderTime,
                     selectedColorValue, selectedCalendar, selectedEventFormat,
-                    selectedOptionValue],
+                    selectedDefect, selectedOptionValue],
                 func: (...args) => scraperBundle.dataProc(...args),
             }, () => {
                 if (chrome.runtime.lastError) {

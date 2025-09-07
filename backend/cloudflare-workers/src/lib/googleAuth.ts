@@ -33,7 +33,6 @@ export function decodeJwtPayload(token: string): any {
 
 export async function getNewValidAuthToken(refreshToken: string, authRefreshEndpointDev: string) {
     // refresh oauth token then store it in db
-    console.log("Refresh endpoint:", authRefreshEndpointDev);
     const response = await fetch(
         authRefreshEndpointDev,
         {

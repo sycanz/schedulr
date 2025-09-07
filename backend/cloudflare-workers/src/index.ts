@@ -39,11 +39,12 @@ app.use('*', cors({
 }));
 
 app.post("/api/auth/return-user", async (c) => {
-    const { AUTH_REFRESH_ENDPOINT_DEV: authRefreshEndpointDev } = c.env;
-    const supabase = getSupabaseClient (
-        c.env.SUPABASE_URL,
-        c.env.SUPABASE_ANON_KEY,
-    )
+    const {
+        AUTH_REFRESH_ENDPOINT_DEV: authRefreshEndpointDev,
+        SUPABASE_URL: supabaseUrl,
+        SUPABASE_ANON_KEY: supabaseAnonKey
+    } = c.env;
+    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey);
     const body = await c.req.json();
 
     const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
@@ -84,11 +85,14 @@ app.post("/api/auth/return-user", async (c) => {
 });
 
 app.post("/api/auth/token", async (c) => {
-    const { CLIENT_ID: clientId, CLIENT_SECRET: clientSecret, REDIRECT_URI: redirectUri } = c.env;
-    const supabase = getSupabaseClient (
-        c.env.SUPABASE_URL,
-        c.env.SUPABASE_ANON_KEY,
-    )
+    const {
+        CLIENT_ID: clientId,
+        CLIENT_SECRET: clientSecret,
+        REDIRECT_URI: redirectUri,
+        SUPABASE_URL: supabaseUrl,
+        SUPABASE_ANON_KEY: supabaseAnonKey
+    } = c.env;
+    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey)
     const body = await c.req.json();
 
     try {
@@ -128,12 +132,13 @@ app.post("/api/auth/token", async (c) => {
 });
 
 app.post("/api/auth/refresh", async (c) => {
-    const clientId = c.env.CLIENT_ID;
-    const clientSecret = c.env.CLIENT_SECRET;
-    const supabase = getSupabaseClient (
-        c.env.SUPABASE_URL,
-        c.env.SUPABASE_ANON_KEY,
-    )
+    const {
+        CLIENT_ID: clientId,
+        CLIENT_SECRET: clientSecret,
+        SUPABASE_URL: supabaseUrl,
+        SUPABASE_ANON_KEY: supabaseAnonKey
+    } = c.env;
+    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey)
 
     const body = await c.req.json();
     const now = Math.floor(Date.now() / 1000);
@@ -175,11 +180,12 @@ app.post("/api/auth/refresh", async (c) => {
 });
 
 app.post("/api/calendar/add-events", async(c) => {
+    const {
+        SUPABASE_URL: supabaseUrl,
+        SUPABASE_ANON_KEY: supabaseAnonKey
+    } = c.env;
     const body = await c.req.json();
-    const supabase = getSupabaseClient (
-        c.env.SUPABASE_URL,
-        c.env.SUPABASE_ANON_KEY,
-    )
+    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey);
 
     const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
     const userSession = await getUserSessionDetails(supabase, userId);
@@ -224,11 +230,12 @@ app.post("/api/calendar/add-events", async(c) => {
 });
 
 app.post("/api/calendar/get-calendar-list", async(c) => {
+    const {
+        SUPABASE_URL: supabaseUrl,
+        SUPABASE_ANON_KEY: supabaseAnonKey
+    } = c.env;
     const body = await c.req.json();
-    const supabase = getSupabaseClient (
-        c.env.SUPABASE_URL,
-        c.env.SUPABASE_ANON_KEY,
-    )
+    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey);
 
     const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
     const userOAuth = await getUserOAuthDetails(supabase, userId);

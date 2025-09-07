@@ -1,8 +1,8 @@
-import { procClassName, procClassDetails, procClassDates, procClassTimes } from '../utils/studProc.js';
+import { procClassName, procClassDetails, procClassDates, procClassTimes, procClassDay } from '../utils/studProc.js';
 import { icalBlob } from './createIcs.js';
 import { showErrorNotification, showSuccessNotification } from '../utils/errorNotifier.js';
-
-console.log("Script received message, going to get data from local storage")
+import { getStorageData } from '../auth/authFlow.js';
+import { watch } from 'rollup';
 
 // object for easy access to common vars
 let config = {}
@@ -10,7 +10,10 @@ let classEvents = [];
 let googleCalendarSuccess = false;
 let icsDownloadSuccess = false;
 
-export async function dataProc(sessionToken, selectedSemesterValue, selectedReminderTime, selectedColorValue, selectedCalendar, selectedEventFormat, selectedOptionValue) {
+export async function dataProc(sessionToken, selectedSemesterValue,
+    selectedReminderTime, selectedColorValue,
+    selectedCalendar, selectedEventFormat,
+    selectedDefect, selectedOptionValue) {
     console.log("Execute script dataProc called");
 
     config.sessionToken = sessionToken;
@@ -19,6 +22,7 @@ export async function dataProc(sessionToken, selectedSemesterValue, selectedRemi
     config.selectedColorValue = selectedColorValue;
     config.selectedCalendar = selectedCalendar;
     config.selectedEventFormat = selectedEventFormat;
+    config.selectedDefect = selectedDefect;
     config.selectedOptionValue = selectedOptionValue;
 
     // =============== Web scrape workflow ===============
@@ -29,9 +33,9 @@ export async function dataProc(sessionToken, selectedSemesterValue, selectedRemi
     console.log("Detecting user type");
     // lecturers and students have different UI, need to execute appropriate flow
     if (lectIndicator && iframeElement) {
-        lectFlow(iframeElement);
+        await lectFlow(iframeElement);
     } else {
-        studentFlow();
+        await studentFlow();
     }
 
     if (selectedOptionValue == 1 && sessionToken) {
@@ -56,7 +60,7 @@ export async function dataProc(sessionToken, selectedSemesterValue, selectedRemi
 
 /* Start of flow types */
 
-function studentFlow() {
+async function studentFlow() {
     console.log("Running student process");
     let classSec = document.querySelectorAll("[id*='divSSR_SBJCT_LVL1_row']");
 
@@ -65,28 +69,30 @@ function studentFlow() {
         return;
     }
 
-    // For each class sections
     classSec.forEach((element, index) => {
-        // Select all class name, type, dates, times, and location
-        let className = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_SCRTAB_DTLS']");
-        let classDetails = element.querySelectorAll("a[id^='DERIVED_SSR_FL_SSR_SBJ_CAT_NBR$355']");
-        let classDates = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_ST_END_DT1']");
-        let classTimes = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DAYSTIMES1']");
-        let classLoc = element.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DRV_ROOM1']");
-
-        let maxSlots = Math.max(classDetails.length);
-
-        for (let i = 0; i < maxSlots; i++) {
-            // Get the text content of the elements
-            let classNameText = className[0].textContent;
-            let classDetailsText = classDetails[i].textContent.trim();
-            let classDatesText = classDates[i].textContent.trim();
-            let classTimesText = classTimes[i].textContent.trim();
-            let classLocText = classLoc[i].textContent.trim();
-
-            // Call function to ultimately create calendar event
-            groupData(classNameText, classDetailsText, classDatesText, classTimesText, classLocText);
-        }
+        // Get all the rows within this class section
+        let classRows = element.querySelectorAll("tr[id*='STDNT_ENRL_SSVW$'][id*='_row_']");
+        
+        classRows.forEach((row) => {
+            // For each row, get the class details (this will be consistent per row)
+            let classDetails = row.querySelectorAll("a[id^='DERIVED_SSR_FL_SSR_SBJ_CAT_NBR$355']");
+            let classDates = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_ST_END_DT']");
+            let classDays = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DAYS']");
+            let classTimes = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DAYSTIMES']");
+            let classLoc = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DRV_ROOM']");
+            
+            // Now loop through the time slots for this specific class type
+            for (let i = 0; i < Math.max(classDates.length); i++) {
+                let classNameText = element.querySelector("[id^='DERIVED_SSR_FL_SSR_SCRTAB_DTLS']").textContent;
+                let classDetailsText = classDetails[0].textContent.trim(); // Use the first (and likely only) class detail for this row
+                let classDatesText = classDates[i].textContent.trim();
+                let classDaysText = classDays[i].textContent.trim();
+                let classTimesText = classTimes[i].textContent.trim();
+                let classLocText = classLoc[i].textContent.trim();
+                
+                await groupData(classNameText, classDetailsText, classDatesText, classDaysText, classTimesText, classLocText);
+            }
+        });
     });
 }
 
@@ -228,11 +234,39 @@ function lectFlow(iframeElement) {
 /* End of flow types */
 
 // =============== Helper functions ===============
-function groupData(className, classDetails, classDates, classTimes, classLoc) {
+async function groupData(className, classDetails, classDates, classDay, classTimes, classLoc) {
     let { classCode, classNameOnly } = procClassName(className);
     let { classType, classSect } = procClassDetails(classDetails);
     let { startDate, endDate } = procClassDates(classDates);
     let { startTime, endTime } = procClassTimes(classTimes);
+    let { classDayText } = procClassDay(classDay);
+
+    const { selectedDefects: selectedDefect } = await getStorageData([ 'selectedDefects' ]);
+    let parsedStartDate = startDate.split("-");
+    if (selectedDefect == "yes") {
+        let updatedDate;
+        switch (classDayText) {
+            case "Monday":
+                updatedDate = parsedStartDate[2];
+                break;
+            case "Tuesday":
+                updatedDate = (parseInt(parsedStartDate[2]) + 1).toString();
+                break;
+            case "Wednesday":
+                updatedDate = (parseInt(parsedStartDate[2]) + 2).toString();
+                break;
+            case "Thursday":
+                updatedDate = (parseInt(parsedStartDate[2]) + 3).toString();
+                break;
+            case "Friday":
+                updatedDate = (parseInt(parsedStartDate[2]) + 4).toString();
+                break;
+            default:
+                updatedDate = parsedStartDate[2];
+        }
+
+        startDate = `${parsedStartDate[0]}-${parsedStartDate[1]}-${updatedDate}`
+    }
 
     // console.log(classCode, ",", classNameOnly, ",", classType, ",", classSect, ",", startDate, "-", endDate, ",", startTime, ",", endTime, ",", classLoc);
 

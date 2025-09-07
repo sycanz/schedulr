@@ -1,6 +1,6 @@
 import { showErrorNotification } from '../utils/errorNotifier.js';
 
-function getStorageData(keys) {
+export function getStorageData(keys) {
     return new Promise((resolve) => {
         chrome.storage.local.get(keys, (items) => {
             resolve(items);
@@ -8,7 +8,7 @@ function getStorageData(keys) {
     });
 }
 
-function setStorageData(items) {
+export function setStorageData(items) {
     return new Promise((resolve) => {
         chrome.storage.local.set(items, () => {
             resolve();
