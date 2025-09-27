@@ -94,18 +94,18 @@ jobs:
           cd backend/cloudflare-workers
           npm run build:scraper
 
-      - name: Deploy to Cloudflare Workers (Production)
+      - name: Create production environment file
         run: |
           cd backend/cloudflare-workers
-          # Set production environment variables
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID_PROD }}" > .env.prod
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET_PROD }}" >> .env.prod
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI_PROD }}" >> .env.prod
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env.prod
-          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env.prod
-          
-          # Deploy to production environment
-          npx wrangler deploy --env prd --minify
+          # Create .dev.vars.prd file with production secrets
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" > .dev.vars.prd
+          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .dev.vars.prd
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .dev.vars.prd
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .dev.vars.prd
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .dev.vars.prd
+
+      - name: Deploy to Cloudflare Workers using Makefile
+        run: make deploy-prd-wrangler
 
   deploy-extension:
     needs: [build-project, deploy-backend]
