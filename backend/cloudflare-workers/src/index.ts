@@ -10,7 +10,7 @@ type Env = {
     CLIENT_ID: string;
     CLIENT_SECRET: string;
     REDIRECT_URI: string;
-    AUTH_REFRESH_ENDPOINT_DEV: string;
+    CFW_REFRESH_ENDPOINT: string;
     SUPABASE_URL: string;
     SUPABASE_ANON_KEY: string;
 };
@@ -40,7 +40,7 @@ app.use('*', cors({
 
 app.post("/api/auth/return-user", async (c) => {
     const {
-        AUTH_REFRESH_ENDPOINT_DEV: authRefreshEndpointDev,
+        CFW_REFRESH_ENDPOINT: authRefreshEndpointDev,
         SUPABASE_URL: supabaseUrl,
         SUPABASE_ANON_KEY: supabaseAnonKey
     } = c.env;
