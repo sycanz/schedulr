@@ -115,24 +115,11 @@ jobs:
         run: zip -r extension.zip . -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
 
       - name: Upload to Chrome Web Store
-        run: |
-          ACCESS_TOKEN=$(curl -s \
-            -d client_id=${{ secrets.CLIENT_ID }} \
-            -d client_secret=${{ secrets.CLIENT_SECRET }} \
-            -d refresh_token=${{ secrets.REFRESH_TOKEN }} \
-            -d grant_type=refresh_token \
-            https://accounts.google.com/o/oauth2/token \
-            | jq -r '.access_token')
-
-          curl -s -X PUT \
-            -H "Authorization: Bearer $ACCESS_TOKEN" \
-            -H "x-goog-api-version: 2" \
-            -T extension.zip \
-            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ secrets.EXTENSION_ID }}"
-
-          curl -s -X POST \
-            -H "Authorization: Bearer $ACCESS_TOKEN" \
-            -H "x-goog-api-version: 2" \
-            -H "Content-Type: application/json" \
-            -d '{"target":"default"}' \
-            "https://www.googleapis.com/chromewebstore/v1.1/items/${{ secrets.EXTENSION_ID }}/publish?publishTarget=draft"
+        uses: mobilefirstllc/cws-publish@latest
+        with:
+          action: 'upload' # 'publish' for auto-publish
+          client_id: ${{ secrets.CLIENT_ID }}
+          client_secret: ${{ secrets.CLIENT_SECRET }}
+          refresh_token: ${{ secrets.REFRESH_TOKEN }}
+          extension_id: ${{ secrets.EXTENSION_ID }}
+          zip_file: 'extension.zip'
