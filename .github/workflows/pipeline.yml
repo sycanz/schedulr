@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - stg
 
 jobs:
   secret-detection:
@@ -91,6 +92,8 @@ jobs:
 
       - name: Deploy to Cloudflare Workers using Makefile
         run: make deploy-prd-wrangler
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
   deploy-extension:
     needs: [build-project, deploy-backend]
