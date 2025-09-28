@@ -71,7 +71,7 @@ async function studentFlow() {
         // Get all the rows within this class section
         let classRows = element.querySelectorAll("tr[id*='STDNT_ENRL_SSVW$'][id*='_row_']");
         
-        classRows.forEach((row) => {
+        classRows.forEach(async (row) => {
             // For each row, get the class details (this will be consistent per row)
             let classDetails = row.querySelectorAll("a[id^='DERIVED_SSR_FL_SSR_SBJ_CAT_NBR$355']");
             let classDates = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_ST_END_DT']");

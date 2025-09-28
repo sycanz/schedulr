@@ -38,11 +38,7 @@ jobs:
       - name: Install backend dependencies
         run: cd backend/cloudflare-workers && npm install
 
-      - name: Build backend
-        run: |
-          npm run build:scraper
-
-      - name: Build frontend with production environment
+      - name: Build frontend and backend with production environment
         run: |
           # Set production environment variables from GitHub secrets
           export CFW_AUTH_ENDPOINT_DEV="${{ secrets.CFW_AUTH_ENDPOINT_PROD }}"
@@ -54,6 +50,9 @@ jobs:
           
           # Build the frontend extension
           npm run build:scraper
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Create production manifest
         run: |
@@ -67,11 +66,9 @@ jobs:
           name: extension-build
           path: |
             frontend/dist/
-            manifest.json
+            frontend/src/
             images/
-            frontend/src/popup/
-            frontend/src/backgrounds/
-            frontend/src/scripts/
+            manifest.json
           retention-days: 1
 
   deploy-backend:
@@ -80,20 +77,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install backend dependencies
-        run: cd backend/cloudflare-workers && npm install
-
-      - name: Build backend
-        run: |
-          cd backend/cloudflare-workers
-          npm run build:scraper
 
       - name: Create production environment file
         run: |
@@ -104,6 +87,7 @@ jobs:
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .dev.vars.prd
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .dev.vars.prd
           echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .dev.vars.prd
+          echo "CFW_REFRESH_ENDPOINT=${{ secrets.CFW_REFRESH_ENDPOINT_PROD }}" >> .dev.vars.prd
 
       - name: Deploy to Cloudflare Workers using Makefile
         run: make deploy-prd-wrangler

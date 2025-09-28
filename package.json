@@ -7,8 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "build:scraper": "rollup -c",
-    "watch:scraper": "rollup -c -w"
+    "build:scraper": "rollup -c --bundleConfigAsCjs",
+    "watch:scraper": "rollup -c --bundleConfigAsCjs -w"
   },
   "repository": {
     "type": "git",
