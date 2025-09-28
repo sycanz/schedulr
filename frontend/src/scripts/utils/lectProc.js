@@ -56,7 +56,7 @@ export function formatDate(classDate, yearElement) {
     }
 
     let monthValue = months[month];
-    endDateYear = yearElement.substr(-4, 4);
+    const endDateYear = yearElement.substr(-4, 4);
     return `${endDateYear}-${monthValue}-${date}`
 }
 
