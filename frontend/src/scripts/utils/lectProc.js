@@ -95,14 +95,13 @@ export function rowSpan(fStartTime, fEndTime) {
 
 export function handleMultiHourClass(totalSpan, rowIndex, skip, colIndex) {
     // For every total - 1 span
-    for (i = 1; i < totalSpan; i++) {
+    for (let i = 1; i < totalSpan; i++) {
         // If next row is a valid row
         if (rowIndex + i < skip.length) {
             // Edit value to 1 in row i
             skip[rowIndex + i][colIndex] = 1;
 
             updatePrevCol(colIndex, skip, rowIndex + i)
-            let nextRow = rowIndex + i
         }
     }
 }
