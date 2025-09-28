@@ -1,0 +1,151 @@
+name: Secret Detection + Build + Deploy Backend + Deploy Extension
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  secret-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-project:
+    needs: secret-detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Install backend dependencies
+        run: cd backend/cloudflare-workers && npm install
+
+      - name: Build backend
+        run: |
+          cd backend/cloudflare-workers
+          npm run build:scraper
+
+      - name: Build frontend with production environment
+        run: |
+          # Set production environment variables from GitHub secrets
+          export CFW_AUTH_ENDPOINT_DEV="${{ secrets.CFW_AUTH_ENDPOINT_PROD }}"
+          export CFW_REFRESH_ENDPOINT_DEV="${{ secrets.CFW_REFRESH_ENDPOINT_PROD }}"
+          export CFW_CHECK_RETURN_USER_ENDPOINT_DEV="${{ secrets.CFW_CHECK_RETURN_USER_ENDPOINT_PROD }}"
+          export CFW_GET_CALENDAR_ENDPOINT_DEV="${{ secrets.CFW_GET_CALENDAR_ENDPOINT_PROD }}"
+          export CFW_ADD_NEW_EVENT_ENDPOINT_DEV="${{ secrets.CFW_ADD_NEW_EVENT_ENDPOINT_PROD }}"
+          export CLIENT_ID="${{ secrets.CLIENT_ID_PROD }}"
+          
+          # Build the frontend extension
+          npm run build:scraper
+
+      - name: Create production manifest
+        run: |
+          # Create production manifest with key field
+          jq '.host_permissions |= map(select(. != "http://localhost:8787/*")) | .key = "${{ secrets.EXTENSION_PUBLIC_KEY }}"' manifest.json > manifest.prod.json
+          mv manifest.prod.json manifest.json
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-build
+          path: |
+            frontend/dist/
+            manifest.json
+            images/
+            frontend/src/popup/
+            frontend/src/backgrounds/
+            frontend/src/scripts/
+          retention-days: 1
+
+  deploy-backend:
+    needs: build-project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install backend dependencies
+        run: cd backend/cloudflare-workers && npm install
+
+      - name: Build backend
+        run: |
+          cd backend/cloudflare-workers
+          npm run build:scraper
+
+      - name: Create production environment file
+        run: |
+          cd backend/cloudflare-workers
+          # Create .dev.vars.prd file with production secrets
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" > .dev.vars.prd
+          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .dev.vars.prd
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .dev.vars.prd
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .dev.vars.prd
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .dev.vars.prd
+
+      - name: Deploy to Cloudflare Workers using Makefile
+        run: make deploy-prd-wrangler
+
+  deploy-extension:
+    needs: [build-project, deploy-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-build
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Zip extension
+        run: zip -r extension.zip . -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
+
+      - name: Upload to Chrome Web Store
+        run: |
+          ACCESS_TOKEN=$(curl -s \
+            -d client_id=${{ secrets.CLIENT_ID }} \
+            -d client_secret=${{ secrets.CLIENT_SECRET }} \
+            -d refresh_token=${{ secrets.REFRESH_TOKEN }} \
+            -d grant_type=refresh_token \
+            https://accounts.google.com/o/oauth2/token \
+            | jq -r '.access_token')
+
+          curl -s -X PUT \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -T extension.zip \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ secrets.EXTENSION_ID }}"
+
+          curl -s -X POST \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -H "Content-Type: application/json" \
+            -d '{"target":"default"}' \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/${{ secrets.EXTENSION_ID }}/publish?publishTarget=draft"

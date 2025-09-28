@@ -1,7 +1,7 @@
 import { showErrorNotification } from '../utils/errorNotifier.js';
 
 export async function getCalIds(sessionToken) {
-    const response = await fetch(__CFW_GET_CALENDAR_ENDPOINT_DEV__, {
+    const response = await fetch(__CFW_GET_CALENDAR_ENDPOINT__, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

@@ -12,8 +12,8 @@ const replacePlugin = replace({
     __CFW_AUTH_ENDPOINT__: JSON.stringify(process.env.CFW_AUTH_ENDPOINT_DEV),
     __CFW_REFRESH_ENDPOINT__: JSON.stringify(process.env.CFW_REFRESH_ENDPOINT_DEV),
     __CFW_CHECK_RETURN_USER_ENDPOINT__: JSON.stringify(process.env.CFW_CHECK_RETURN_USER_ENDPOINT_DEV),
-    __CFW_GET_CALENDAR_ENDPOINT_DEV__: JSON.stringify(process.env.CFW_GET_CALENDAR_ENDPOINT_DEV),
-    __CFW_ADD_NEW_EVENT_ENDPOINT_DEV__:JSON.stringify(process.env.CFW_ADD_NEW_EVENT_ENDPOINT_DEV),
+    __CFW_GET_CALENDAR_ENDPOINT__: JSON.stringify(process.env.CFW_GET_CALENDAR_ENDPOINT_DEV),
+    __CFW_ADD_NEW_EVENT_ENDPOINT__:JSON.stringify(process.env.CFW_ADD_NEW_EVENT_ENDPOINT_DEV),
 });
 
 const resolvePlugins = [

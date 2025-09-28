@@ -336,7 +336,7 @@ async function syncGoogleCalendar() {
 
     // create calendar events
     for (const newEvent of classEvents) {
-        const response = await fetch(__CFW_ADD_NEW_EVENT_ENDPOINT_DEV__, {
+        const response = await fetch(__CFW_ADD_NEW_EVENT_ENDPOINT__, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
