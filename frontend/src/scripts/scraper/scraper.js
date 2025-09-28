@@ -2,8 +2,6 @@ import { procClassName, procClassDetails, procClassDates, procClassTimes, procCl
 import { icalBlob } from './createIcs.js';
 import { showErrorNotification, showSuccessNotification } from '../utils/errorNotifier.js';
 import { getStorageData } from '../auth/authFlow.js';
-import { watch } from 'rollup';
-
 // object for easy access to common vars
 let config = {}
 let classEvents = [];
