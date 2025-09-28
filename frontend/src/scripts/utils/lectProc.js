@@ -80,10 +80,11 @@ export function rowSpan(fStartTime, fEndTime) {
     const endHour = parseInt(endTime[0]);
     const endMin = parseInt(endTime[1]);
 
-    hourSpan = endHour - startHour;
+    let hourSpan = endHour - startHour;
+    let totalSpan;
     if (endMin > 0) {
         let minSpan = 1;
-        totalSpan = hourSpan + minSpan
+        totalSpan = hourSpan + minSpan;
     } else {
         totalSpan = hourSpan;
     }
