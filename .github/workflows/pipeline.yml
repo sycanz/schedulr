@@ -94,6 +94,7 @@ jobs:
         run: make deploy-prd-wrangler
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-extension:
     needs: [build-project, deploy-backend]
