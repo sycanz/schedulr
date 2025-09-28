@@ -40,7 +40,6 @@ jobs:
 
       - name: Build backend
         run: |
-          cd backend/cloudflare-workers
           npm run build:scraper
 
       - name: Build frontend with production environment
