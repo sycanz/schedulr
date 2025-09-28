@@ -167,6 +167,33 @@ input[type="radio"]:checked + .color-circle {
     animation: spin 2s linear infinite;
 }
 
+/* Previous setting stuffs */
+.previousSettingsButton {
+    display: none;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.previousSettingsButton button {
+    background-color: #585b70;
+    color: white;
+    padding: 10px 20px;
+    border: 1px solid #89b4fa;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    width: 80%;
+    max-width: 250px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.previousSettingsButton button:hover {
+    background-color: #a6adc8;
+}
+
+/* End of previous Settings stuffs */
+
 /* Safari */
 @-webkit-keyframes spin {
     0% { -webkit-transform: rotate(0deg); }

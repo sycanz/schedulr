@@ -59,7 +59,7 @@ jobs:
       - name: Create production manifest
         run: |
           # Create production manifest with key field
-          jq '. + {"key": "${{ secrets.EXTENSION_PUBLIC_KEY }}"}' manifest.json > manifest.prod.json
+          jq '.host_permissions |= map(select(. != "http://localhost:8787/*")) | .key = "${{ secrets.EXTENSION_PUBLIC_KEY }}"' manifest.json > manifest.prod.json
           mv manifest.prod.json manifest.json
 
       - name: Upload build artifacts

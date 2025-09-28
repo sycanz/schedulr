@@ -15,24 +15,26 @@
             </button>
         </div>
         <div class="middle">
-            <img src="../../images/magnify128.png" width=30px height=auto></img>
+            <img src="../../../images/magnify128.png" width=30px height=auto></img>
             <h1>Schedulr</h1>
         </div>
         <a href="https://hackerspacemmu.rocks/" target="_blank">
-            <img src="../../images/hackerspace.png" width=40px height=auto></img>
+            <img src="../../../images/hackerspace.png" width=40px height=auto></img>
         </a>
     </div>
 
     <div class="line"></div>
+
+    <div class="previousSettingsButton">
+        <button id="fillPreviousSettings" type="button">Apply previous settings</button>
+    </div>
 
     <div class="firstPage">
         <form id="optionForm">
             <p>What do you want to perform?</p>
             <input type="radio" id="cal" name="option" value="1">
             <label for="cal">Transfer to Google Calendar</label><br>
-            <input type="radio" id="outlook" name="option" value="2">
-            <label for="outlook">Transfer to Outlook Calendar</label><br>
-            <input type="radio" id="ics" name="option" value="3">
+            <input type="radio" id="ics" name="option" value="2">
             <label for="ics">Download .ics file</label><br>
             
             <div class="firstButton">
@@ -69,6 +71,14 @@
             <label for="minutes">30 minutes before</label><br>
             <input type="radio" id="hour" name="reminder" value="60">
             <label for="hour">1 hour before</label><br>
+        </form>
+
+        <form id="defectForm">
+            <p>Defected CLiC?:</p>
+            <input type="radio" id="yes" name="defected" value="yes">
+            <label for="minutes">Yes</label><br>
+            <input type="radio" id="no" name="defected" value="no">
+            <label for="minutes">No</label><br>
         </form>
     </div>
 
