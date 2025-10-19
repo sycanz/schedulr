@@ -96,30 +96,65 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+#   deploy-extension:
+#     needs: [build-project, deploy-backend]
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+# 
+#       - name: Download build artifacts
+#         uses: actions/download-artifact@v4
+#         with:
+#           name: extension-build
+# 
+#       - name: Install zip
+#         run: sudo apt-get install zip
+# 
+#       - name: Zip extension
+#         run: zip -r extension.zip . -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
+# 
+#       - name: Upload to Chrome Web Store
+#         uses: mobilefirstllc/cws-publish@latest
+#         with:
+#           action: 'upload' # 'publish' for auto-publish
+#           client_id: ${{ secrets.CLIENT_ID }}
+#           client_secret: ${{ secrets.CLIENT_SECRET }}
+#           refresh_token: ${{ secrets.REFRESH_TOKEN }}
+#           extension_id: ${{ secrets.EXTENSION_ID }}
+#           zip_file: 'extension.zip'
+
   deploy-extension:
     needs: [build-project, deploy-backend]
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: extension-build
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
 
-      - name: Install zip
-        run: sudo apt-get install zip
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: extension-build
 
-      - name: Zip extension
-        run: zip -r extension.zip . -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
+    - name: Install zip
+      run: sudo apt-get install zip
 
-      - name: Upload to Chrome Web Store
-        uses: mobilefirstllc/cws-publish@latest
-        with:
-          action: 'upload' # 'publish' for auto-publish
-          client_id: ${{ secrets.CLIENT_ID }}
-          client_secret: ${{ secrets.CLIENT_SECRET }}
-          refresh_token: ${{ secrets.REFRESH_TOKEN }}
-          extension_id: ${{ secrets.EXTENSION_ID }}
-          zip_file: 'extension.zip'
+    - name: Zip extension
+      run: zip -r extension.zip . -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
+
+    - name: Upload & release
+      uses: mnao305/chrome-extension-upload@v5.0.0
+      with:
+        file-path: extension.zip
+        extension-id: ${{secrets.EXTENSION_ID}}
+        client-id: ${{secrets.CLIENT_ID}}
+        client-secret: ${{secrets.CLIENT_SECRET}}
+        refresh-token: ${{secrets.REFRESH_TOKEN}}
+        publish: false
