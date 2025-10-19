@@ -112,7 +112,6 @@ jobs:
         run: sudo apt-get install zip
 
       - name: Zip extension
-        run: zip -r extension.zip . -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
         run: zip -r extension.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
 
       - name: Upload to Chrome Web Store
