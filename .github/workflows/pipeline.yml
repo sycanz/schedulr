@@ -147,7 +147,7 @@ jobs:
       run: sudo apt-get install zip
 
     - name: Zip extension
-      run: zip -r extension.zip ../../frontend/ ../../images/ ../../manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
+      run: zip -r extension.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
 
     - name: Upload & release
       uses: mnao305/chrome-extension-upload@v5.0.0
