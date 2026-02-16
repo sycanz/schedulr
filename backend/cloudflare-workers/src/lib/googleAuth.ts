@@ -1,4 +1,9 @@
-export async function exchangeCodeForToken(code: string, clientId: string, clientSecret: string, redirectUri: string) {
+export async function exchangeCodeForToken(
+    code: string,
+    clientId: string,
+    clientSecret: string,
+    redirectUri: string
+) {
     const response = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: {
@@ -22,29 +27,32 @@ export async function exchangeCodeForToken(code: string, clientId: string, clien
 }
 
 export function decodeJwtPayload(token: string): any {
-    const payload = token.split('.')[1];
-    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = token.split(".")[1];
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
 
-    const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+    const padded = base64.padEnd(
+        base64.length + ((4 - (base64.length % 4)) % 4),
+        "="
+    );
 
     const decoded = atob(padded);
     return JSON.parse(decoded);
 }
 
-export async function getNewValidAuthToken(refreshToken: string, authRefreshEndpointDev: string) {
+export async function getNewValidAuthToken(
+    refreshToken: string,
+    authRefreshEndpointDev: string
+) {
     // refresh oauth token then store it in db
-    const response = await fetch(
-        authRefreshEndpointDev,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                refreshToken,
-            }),
+    const response = await fetch(authRefreshEndpointDev, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
         },
-    );
+        body: JSON.stringify({
+            refreshToken,
+        }),
+    });
 
     if (!response.ok) {
         const errorData = await response.json();
@@ -52,7 +60,7 @@ export async function getNewValidAuthToken(refreshToken: string, authRefreshEndp
         throw new Error("Failed to refresh token");
     }
 
-    const { accessToken, expires } = await response.json()
-    const authExpiresAtISO = new Date((expires) * 1000).toISOString();
+    const { accessToken, expires } = await response.json();
+    const authExpiresAtISO = new Date(expires * 1000).toISOString();
     return { accessToken, authExpiresAtISO };
 }
