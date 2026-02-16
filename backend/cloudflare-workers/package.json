@@ -1,5 +1,5 @@
 {
-    "name": "cloudflare-workers",
+    "name": "schedulr",
     "scripts": {
         "dev": "wrangler dev",
         "deploy": "wrangler deploy --minify",

@@ -198,6 +198,26 @@ The build process is handled by GitHub Actions:
     - Test the extension by importing your timetable into Google Calendar.
     - Make changes and submit a pull request. Please follow the pull request template [here](https://github.com/sycanz/schedulr/blob/main/.github/pull_request_template.md).
 
+### Development Tips
+
+#### Backend development (Cloudflare Workers)
+
+1. Create `.dev.vars` file in `backend/cloudflare-workers` directory
+2. Add the following variables to `.dev.vars` file:
+
+    ```bash
+    CLIENT_ID="your-client-id"
+    CLIENT_SECRET="your-client-secret"
+    REDIRECT_URI="your-redirect-uri"
+    REDIRECT_URI_BRAVE="your-redirect-uri-brave"
+    AUTH_REFRESH_ENDPOINT_DEV="your-auth-refresh-endpoint-dev"
+    SUPABASE_URL="your-supabase-url"
+    SUPABASE_KEY="your-supabase-key"
+    ```
+
+3. Open terminal 1 in project root dir, run `npm run watch:scraper` (helps read new changes to cfw files)
+4. Open terminal 2 in `backend/cloudflare-workers/`, run `npm run dev` (runs cfw locally)
+
 ## Tech Stack 🚀
 
 1. Javascript

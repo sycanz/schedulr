@@ -29,8 +29,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Install frontend dependencies
         run: npm install
@@ -47,7 +47,7 @@ jobs:
           export CFW_GET_CALENDAR_ENDPOINT_DEV="${{ secrets.CFW_GET_CALENDAR_ENDPOINT_PROD }}"
           export CFW_ADD_NEW_EVENT_ENDPOINT_DEV="${{ secrets.CFW_ADD_NEW_EVENT_ENDPOINT_PROD }}"
           export CLIENT_ID="${{ secrets.CLIENT_ID_PROD }}"
-          
+
           # Build the frontend extension
           npm run build:scraper
 
@@ -86,7 +86,7 @@ jobs:
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .dev.vars.prd
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .dev.vars.prd
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .dev.vars.prd
-          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .dev.vars.prd
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .dev.vars.prd
           echo "CFW_REFRESH_ENDPOINT=${{ secrets.CFW_REFRESH_ENDPOINT_PROD }}" >> .dev.vars.prd
 
       - name: Deploy to Cloudflare Workers using Makefile
@@ -116,38 +116,38 @@ jobs:
       - name: Upload to Chrome Web Store
         uses: mobilefirstllc/cws-publish@latest
         with:
-          action: 'upload' # 'publish' for auto-publish
+          action: "upload" # 'publish' for auto-publish
           client_id: ${{ secrets.CLIENT_ID }}
           client_secret: ${{ secrets.CLIENT_SECRET }}
           refresh_token: ${{ secrets.REFRESH_TOKEN }}
           extension_id: ${{ secrets.EXTENSION_ID }}
-          zip_file: 'extension.zip'
+          zip_file: "extension.zip"
 
 #   deploy-extension:
 #     needs: [build-project, deploy-backend]
 #     runs-on: ubuntu-latest
-# 
+#
 #     steps:
 #     - name: Checkout
 #       uses: actions/checkout@v4
-# 
+#
 #     - name: Setup Node.js
 #       uses: actions/setup-node@v4
 #       with:
 #         node-version: '18'
 #         cache: 'npm'
-# 
+#
 #     - name: Download build artifacts
 #       uses: actions/download-artifact@v4
 #       with:
 #         name: extension-build
-# 
+#
 #     - name: Install zip
 #       run: sudo apt-get install zip
-# 
+#
 #     - name: Zip extension
 #       run: zip -r extension.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
-# 
+#
 #     - name: Upload & release
 #       uses: mnao305/chrome-extension-upload@v5.0.0
 #       with:

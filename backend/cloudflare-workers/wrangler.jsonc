@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cloudflare-workers",
+  "name": "schedulr",
   "main": "dist/worker.js",
-  "compatibility_date": "2025-08-10",
+  "compatibility_date": "2026-02-16",
   "observability": {
     "logs": {
       "enabled": true
@@ -10,12 +10,12 @@
   },
   "env": {
     "dev": {
-      "name": "cloudflare-workers",
-      "compatibility_date": "2025-08-10"
+      "name": "schedulr-dev",
+      "compatibility_date": "2026-02-16"
     },
     "prd": {
-      "name": "cloudflare-workers",
-      "compatibility_date": "2025-08-10"
+      "name": "schedulr-prd",
+      "compatibility_date": "2026-02-16"
     }
   }
 }
