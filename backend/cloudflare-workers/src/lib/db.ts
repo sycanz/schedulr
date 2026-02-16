@@ -46,7 +46,9 @@ export async function getUserOAuthDetails(
         return null;
     }
 
-    return data[0];
+    let accessToken, refreshToken;
+    return ({ access_token: accessToken, refresh_token: refreshToken } =
+        data[0]);
 }
 
 export async function getUserSessionDetails(
