@@ -10,7 +10,7 @@
   },
   "env": {
     "dev": {
-      "name": "schedulr-dev",
+      "name": "schedulr-stg",
       "compatibility_date": "2026-02-16"
     },
     "prd": {

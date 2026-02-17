@@ -6,8 +6,9 @@ import { setStorageData } from "../scripts/auth/authFlow.js";
 // program starts here
 console.log("Starting schedulr");
 
-// initializing common variable
+// common variables
 let selectedOptionValue;
+let isCalendarFetched = false;
 
 //////////// start of listeners //////////////
 
@@ -118,9 +119,11 @@ async function updatePopup() {
     // display appropriate forms according to selected option
     switch (selectedOptionValue) {
         case "1":
-            await chrome.runtime.sendMessage({
-                action: "authoriseUser",
-            });
+            if (!isCalendarFetched) {
+                await chrome.runtime.sendMessage({
+                    action: "authoriseUser",
+                });
+            }
 
             if (returningUser) {
                 previousSettingButton.style.display = "flex";
@@ -144,7 +147,10 @@ async function updatePopup() {
 
 // update option element after queried user's calendars
 function setAttributes(calData) {
-    const form = document.getElementById("calendarForm");
+    const calendarList = document.getElementById("calendarList");
+
+    // clear previous entries to prevent duplication
+    calendarList.innerHTML = "";
 
     for (let cals in calData) {
         // create input and label tag for every index
@@ -163,14 +169,15 @@ function setAttributes(calData) {
         label.setAttribute("for", `${cals}`);
 
         // append input and label tag, then a line break after
-        form.appendChild(input);
-        form.appendChild(label);
-        form.appendChild(br);
+        calendarList.appendChild(input);
+        calendarList.appendChild(label);
+        calendarList.appendChild(br);
     }
 
     // hide the loader after option elements updated
     document.getElementById("loader").style.display = "none";
-    console.log("Calendar options upated");
+    isCalendarFetched = true;
+    console.log("Calendar options updated");
 }
 
 // if user had previously used schedulr,
