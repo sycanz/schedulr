@@ -128,6 +128,8 @@ You should be familiar with or have a basic understanding of these:
 │   │   │   ├── index.ts        # main file to handle cfw endpoints
 │   │   │   └── lib/            # stores reusable functions
 │   │   ├── tsconfig.json
+│   │   ├── .dev.vars           # environment variables for cfw (development)
+│   │   ├── .dev.vars.prd       # environment variables for cfw (production)
 │   │   └── wrangler.jsonc      # wrangler config
 │   └── db/                     # database code
 ├── docs/                       # product website code
@@ -143,6 +145,7 @@ You should be familiar with or have a basic understanding of these:
 │           └── utils/          # misc reusable functions
 ├── images/                     # images used for schedulr
 ├── Makefile                    # shortcut commands for building extension
+├── .env                        # environment variables for frontend
 └── manifest.json               # extension manifest file
 ```
 
@@ -151,6 +154,10 @@ You should be familiar with or have a basic understanding of these:
 The sequence diagram below illustrates both the authentication and import to calendar process in Schedulr:
 
 ![Schedulr Program Flow](/images/prog-flow.png)
+
+#### Entity Relationship Diagram
+
+ERD image to be added here
 
 #### Secret Management
 
@@ -184,39 +191,82 @@ The build process is handled by GitHub Actions:
     - Click on `Load unpacked` and select the cloned repository
     - The extension should now be loaded in your browser
 
+    **IMPORTANT**: Take note of the Client ID (Item ID) of the extension, you'll need it for setting up the Google Calendar API.
+
 #### Setting up Google Calendar API
 
-1. Set Up Google Cloud Project:
-    - Create a new project in the Google Cloud Console.
-    - Enable the Google Calendar API.
-    - Generate an OAuth 2.0 credentials (OAuth Client ID) with the application type **Chrome extension**, Item ID (can be retrieved from `chrome://extensions`).
+1. Create a new project in the Google Cloud Console.
+2. Enable the Google Calendar API.
+3. Generate an OAuth 2.0 credentials (OAuth Client ID) with the application type **Web application**, add the following authorised redirect URIs:
+    - `https://<YOUR-APP-ID>.chromiumapp.org/oauth`
+    - `https://<YOUR-APP-ID>.chromiumapp.org/oauth` (for brave browser)
+4. Retrieve the **Client ID** and **Client Secret**.
 
-2. Environment Configuration:
-    - Add the "oauth2" fields to the `manifest.json` file and fill in the `client_id` (the one you generated) and `scopes` (remain as usual) fields.
+#### Setup development environment
 
-3. Test and Contribute:
-    - Test the extension by importing your timetable into Google Calendar.
-    - Make changes and submit a pull request. Please follow the pull request template [here](https://github.com/sycanz/schedulr/blob/main/.github/pull_request_template.md).
+1. Run `npm install` in the root directory
+2. Create `.env` file (frontend secrets) in the **root** directory and add the following variables:
+
+    ```bash
+    CLIENT_ID="<your-client-id>"
+    CLIENT_SECRET="<your-client-secret>"
+    CFW_AUTH_ENDPOINT_DEV="https://localhost:8787/api/auth/token"
+    CFW_AUTH_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/auth/token"
+    CFW_REFRESH_ENDPOINT_DEV="https://localhost:8787/api/auth/refresh"
+    CFW_REFRESH_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/auth/refresh"
+    CFW_CHECK_RETURN_USER_ENDPOINT_DEV="https://localhost:8787/api/auth/return-user"
+    CFW_CHECK_RETURN_USER_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/auth/return-user"
+    CFW_GET_CALENDAR_ENDPOINT_DEV="https://localhost:8787/api/calendar/get-calendar-list"
+    CFW_GET_CALENDAR_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/calendar/get-calendar-list"
+    CFW_ADD_NEW_EVENT_ENDPOINT_DEV="https://localhost:8787/api/calendar/add-events"
+    CFW_ADD_NEW_EVENT_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/calendar/add-events"
+    ```
+
+3. Run `npm install` in the **backend/cloudflare-workers/** directory
+4. Create `.dev.vars` file (backend secrets) in **backend/cloudflare-workers/** directory
+5. Add the following variables to `.dev.vars` file:
+
+    ```bash
+    CLIENT_ID="<your-client-id>"
+    CLIENT_SECRET="<your-client-secret>"
+    REDIRECT_URI="https://<YOUR-APP-ID>.chromiumapp.org/oauth"
+    REDIRECT_URI_BRAVE="https://<YOUR-APP-ID>.chromiumapp.org/oauth"     # add this if you're testing for brave browser
+    AUTH_REFRESH_ENDPOINT_DEV="https://localhost:8787/api/auth/refresh"
+    SUPABASE_URL="https://<your-project-ref>.supabase.co"
+    SUPABASE_KEY="<your-supabase-key>"                                   # publishable or secret key, NOT anon key
+    ```
 
 ### Development Tips
 
 #### Backend development (Cloudflare Workers)
 
-1. Create `.dev.vars` file in `backend/cloudflare-workers` directory
-2. Add the following variables to `.dev.vars` file:
+There's 2 ways to develop and test cloudflare worker:
 
-    ```bash
-    CLIENT_ID="your-client-id"
-    CLIENT_SECRET="your-client-secret"
-    REDIRECT_URI="your-redirect-uri"
-    REDIRECT_URI_BRAVE="your-redirect-uri-brave"
-    AUTH_REFRESH_ENDPOINT_DEV="your-auth-refresh-endpoint-dev"
-    SUPABASE_URL="your-supabase-url"
-    SUPABASE_KEY="your-supabase-key"
-    ```
+1. Local development (recommended for development)
+    - Open terminal 1 in project root dir, run `npm run watch:scraper` (helps read new changes to cfw files)
+    - Open terminal 2 in `backend/cloudflare-workers/`, run `npm run dev` (runs cfw locally)
 
-3. Open terminal 1 in project root dir, run `npm run watch:scraper` (helps read new changes to cfw files)
-4. Open terminal 2 in `backend/cloudflare-workers/`, run `npm run dev` (runs cfw locally)
+    **NOTE**: This method requires you to edit the cfw endpoint to `http://localhost:8787` instead of the url provided in template above.
+
+2. Push to dev/prd environment (recommended for stg/prd)
+    - Run `npx wrangler login` to authenticate local dev environment with cloudflare account
+    - Use makefile command `make deploy-dev` or `make deploy-prd`
+
+    **NOTE**: This method requires you to run the `make deploy-dev` command after each changes to update your worker
+
+### Git Hooks (pre-commit)
+
+During commit, Husky is setup to automatically:
+
+1. Prettify code with prettier
+2. Run linter with eslint
+
+#### Manual Execution
+
+- `npm run lint` to run the linter.
+- `npm run lint:fix` to run the linter and fix issues.
+- `npm run prettier` to run prettier.
+- `npm run prettier:fix` to run prettier and fix issues.
 
 ## Tech Stack 🚀
 
