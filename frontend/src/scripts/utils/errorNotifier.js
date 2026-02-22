@@ -4,9 +4,13 @@
  * @param {string} title - Optional title for the notification (defaults to "Schedulr Error")
  * @param {boolean} isPopup - Whether this is called from popup context (defaults to false)
  */
-export function showErrorNotification(message, title = "Schedulr Error", isPopup = false) {
+export function showErrorNotification(
+    message,
+    title = "Schedulr Error",
+    isPopup = false
+) {
     console.error(`[${title}] ${message}`);
-    
+
     if (isPopup) {
         // For popup context, use window.alert
         window.alert(`${title}: ${message}`);
@@ -16,16 +20,16 @@ export function showErrorNotification(message, title = "Schedulr Error", isPopup
             // Try to send message to popup first
             chrome.runtime.sendMessage({
                 action: "showAlert",
-                error: `${title}: ${message}`
+                error: `${title}: ${message}`,
             });
-        } catch (error) {
+        } catch {
             // Fallback to browser notification if popup is not available
             if (chrome.notifications) {
                 chrome.notifications.create({
-                    type: 'basic',
-                    iconUrl: '/images/magnify128.png',
+                    type: "basic",
+                    iconUrl: "/images/magnify128.png",
                     title: title,
-                    message: message
+                    message: message,
                 });
             } else {
                 // Last resort: use alert
@@ -41,9 +45,13 @@ export function showErrorNotification(message, title = "Schedulr Error", isPopup
  * @param {string} title - Optional title for the notification (defaults to "Schedulr Success")
  * @param {boolean} isPopup - Whether this is called from popup context (defaults to false)
  */
-export function showSuccessNotification(message, title = "Schedulr Success", isPopup = false) {
+export function showSuccessNotification(
+    message,
+    title = "Schedulr Success",
+    isPopup = false
+) {
     console.log(`[${title}] ${message}`);
-    
+
     if (isPopup) {
         // For popup context, use window.alert
         window.alert(`${title}: ${message}`);
@@ -52,16 +60,16 @@ export function showSuccessNotification(message, title = "Schedulr Success", isP
         try {
             chrome.runtime.sendMessage({
                 action: "showAlert",
-                error: `${title}: ${message}`
+                error: `${title}: ${message}`,
             });
-        } catch (error) {
+        } catch {
             // Fallback to browser notification
             if (chrome.notifications) {
                 chrome.notifications.create({
-                    type: 'basic',
-                    iconUrl: '/images/magnify128.png',
+                    type: "basic",
+                    iconUrl: "/images/magnify128.png",
                     title: title,
-                    message: message
+                    message: message,
                 });
             }
         }
@@ -80,9 +88,10 @@ export function withErrorHandling(asyncFn, errorContext, isPopup = false) {
         try {
             return await asyncFn(...args);
         } catch (error) {
-            const errorMessage = error.message || 'An unexpected error occurred';
+            const errorMessage =
+                error.message || "An unexpected error occurred";
             showErrorNotification(errorMessage, errorContext, isPopup);
             throw error;
         }
     };
-} 
+}
