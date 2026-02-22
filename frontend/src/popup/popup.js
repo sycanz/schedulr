@@ -50,6 +50,28 @@ function finalButtonClickHandler(event) {
     getFormsValue(selectedOptionValue);
 }
 
+// 2nd page: listener for resync button
+document.getElementById("resyncButton").addEventListener("click", () => {
+    console.log("Resync button pressed");
+    document.getElementById("loader").style.display = "block";
+    document.getElementById("calendarList").innerHTML = "";
+    document.getElementById("accountControls").style.display = "none";
+    chrome.runtime.sendMessage({
+        action: "authoriseUser",
+    });
+});
+
+// 2nd page: listener for logout button
+document.getElementById("logoutButton").addEventListener("click", async () => {
+    console.log("Logout button pressed");
+    if (confirm("Are you sure you want to logout?")) {
+        await chrome.storage.local.clear();
+        isCalendarFetched = false;
+        showPreviousPage();
+        location.reload(); // Refresh to clear state
+    }
+});
+
 //////////// end of listeners //////////////
 
 //////////// start of functions //////////////
@@ -174,9 +196,12 @@ function setAttributes(calData) {
         calendarList.appendChild(br);
     }
 
-    // hide the loader after option elements updated
-    document.getElementById("loader").style.display = "none";
     isCalendarFetched = true;
+
+    // update elements
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("accountControls").style.display = "flex";
+
     console.log("Calendar options updated");
 }
 

@@ -1,10 +1,11 @@
 body {
     font-family: Arial, sans-serif;
-    border: 2px solid #89b4fa;
     width: 315px;
+    /* width: 100%; */
     margin: 0;
     box-sizing: border-box;
     background-color: #1e1e2e;
+    overflow-x: hidden;
     overflow-y: auto;
 }
 
@@ -92,7 +93,8 @@ form {
     margin-top: 15px;
 }
 
-p, label {
+p,
+label {
     margin: 0 0 10px;
     font-size: 14px;
     color: #fff;
@@ -145,13 +147,14 @@ input[type="submit"]:hover {
     border: 2px solid transparent;
 }
 
-input[type="radio"]:checked + .color-circle {
+input[type="radio"]:checked+.color-circle {
     border: 3px solid #FFFFFF;
 }
+
 /* End of colour picker stuffs */
 
 /* Loader stuffs */
-.loader-container{
+.loader-container {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -194,14 +197,88 @@ input[type="radio"]:checked + .color-circle {
 
 /* End of previous Settings stuffs */
 
+/* Account Management Buttons */
+.small-btn {
+    background-color: #313244;
+    color: white;
+    padding: 5px 10px;
+    border: 1px solid #89b4fa;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+}
+
+.small-btn:hover {
+    background-color: #45475a;
+}
+
+#accountControls {
+    display: none;
+    margin-top: 10px;
+}
+
+/* End of Account Management Buttons */
+
+/* Default Color Option Styling */
+.color-options-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.default-color-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.default-color-label {
+    background-color: #313244;
+    color: #89b4fa;
+    padding: 6px 20px;
+    border: 1px solid #89b4fa;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-align: center;
+    min-width: 80px;
+}
+
+input[name="color"]:checked+.default-color-label {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+
+.default-color-label:hover {
+    background-color: #45475a;
+}
+
+/* End of Default Color Option Styling */
+
 /* Safari */
 @-webkit-keyframes spin {
-    0% { -webkit-transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); }
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
+
 /* End of loader stuffs */

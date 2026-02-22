@@ -1,7 +1,10 @@
 // service-worker.js is a file that runs background scripts which does not
 // require any user interaction to execute.
 
-import { onLaunchWebAuthFlow } from "../../dist/authFlow.bundle.js";
+import {
+    checkSessionTokenValidity,
+    onLaunchWebAuthFlow,
+} from "../../dist/authFlow.bundle.js";
 import { getCalIds } from "../../dist/calListQuery.bundle.js";
 import { getCurrTab } from "../scripts/utils/progFlow.js";
 import { showErrorNotification } from "../scripts/utils/errorNotifier.js";
@@ -19,8 +22,16 @@ chrome.runtime.onInstalled.addListener((details) => {
 // listener to know when to query for user's calendar list
 chrome.runtime.onMessage.addListener(async (message) => {
     if (message.action === "authoriseUser") {
-        console.log("Authorizing user for OAuth consent");
-        const sessionToken = await onLaunchWebAuthFlow();
+        console.log("Checking session token validity");
+        const validSessionToken = await checkSessionTokenValidity();
+        let sessionToken = validSessionToken;
+        let isNewSession = false;
+
+        if (!validSessionToken) {
+            console.log("Authorizing user for OAuth consent");
+            sessionToken = await onLaunchWebAuthFlow();
+            isNewSession = true;
+        }
 
         if (!sessionToken) {
             showErrorNotification(
@@ -42,10 +53,37 @@ chrome.runtime.onMessage.addListener(async (message) => {
         }
 
         console.log("Got calendars, updating popup option elements");
-        chrome.runtime.sendMessage({
-            action: "updateCalData",
-            data: calJson,
-        });
+
+        chrome.runtime.sendMessage(
+            {
+                action: "updateCalData",
+                data: calJson,
+            },
+            () => {
+                // check for error which happens if the popup is closed
+                if (chrome.runtime.lastError) {
+                    console.log(
+                        "Popup is closed, calendar data saved to storage."
+                    );
+
+                    if (isNewSession) {
+                        console.log(
+                            "Showing authentication complete notification."
+                        );
+                        chrome.notifications.create({
+                            type: "basic",
+                            iconUrl: "/images/magnify128.png",
+                            title: "Authentication Complete",
+                            message:
+                                "Please re-open the extension to import to calendar",
+                            priority: 2,
+                        });
+                    }
+                } else {
+                    console.log("Popup is open, data updated directly.");
+                }
+            }
+        );
 
         return true;
     }
@@ -65,37 +103,27 @@ chrome.runtime.onMessage.addListener(async (message) => {
             return true;
         }
 
-        let sessionToken,
-            selectedColorValue,
-            selectedCalendar,
-            selectedReminderTime,
-            selectedSemesterValue,
-            selectedEventFormat,
-            selectedDefect,
-            selectedOptionValue;
+        const items = await chrome.storage.local.get([
+            "session_token",
+            "selectedColorValues",
+            "selectedCalendars",
+            "selectedReminderTimes",
+            "selectedSemesterValues",
+            "selectedEventFormats",
+            "selectedDefects",
+            "selectedOptionValues",
+        ]);
 
-        await chrome.storage.local.get(
-            [
-                "session_token",
-                "selectedColorValues",
-                "selectedCalendars",
-                "selectedReminderTimes",
-                "selectedSemesterValues",
-                "selectedEventFormats",
-                "selectedDefects",
-                "selectedOptionValues",
-            ],
-            (items) => {
-                ((sessionToken = items.session_token),
-                    (selectedColorValue = items.selectedColorValues),
-                    (selectedCalendar = items.selectedCalendars),
-                    (selectedReminderTime = items.selectedReminderTimes),
-                    (selectedSemesterValue = items.selectedSemesterValues),
-                    (selectedEventFormat = items.selectedEventFormats),
-                    (selectedDefect = items.selectedDefects),
-                    (selectedOptionValue = items.selectedOptionValues));
-            }
-        );
+        const {
+            session_token: sessionToken,
+            selectedColorValues: selectedColorValue,
+            selectedCalendars: selectedCalendar,
+            selectedReminderTimes: selectedReminderTime,
+            selectedSemesterValues: selectedSemesterValue,
+            selectedEventFormats: selectedEventFormat,
+            selectedDefects: selectedDefect,
+            selectedOptionValues: selectedOptionValue,
+        } = items;
 
         console.log("Executing script...");
         // Execute dataProc in the current tab

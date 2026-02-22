@@ -20,7 +20,7 @@
                 "mac": "Command+Shift+S",
                 "windows": "Alt+Shift+S"
             },
-            "description" : "Open schedulr's popup.html"
+            "description": "Open schedulr's popup.html"
         }
     },
     "background": {
@@ -34,8 +34,5 @@
         "storage",
         "notifications"
     ],
-    "host_permissions": [
-        "https://*.workers.dev/*",
-        "http://localhost:8787/*"
-    ]
+    "host_permissions": ["https://*.workers.dev/*", "http://localhost:8787/*"]
 }

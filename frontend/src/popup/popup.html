@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <!-- Meta -->
     <meta charset="UTF-8">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="popup.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <div class="header-container">
         <div class="backButton">
@@ -36,11 +38,12 @@
             <label for="cal">Transfer to Google Calendar</label><br>
             <input type="radio" id="ics" name="option" value="2">
             <label for="ics">Download .ics file</label><br>
-            
+
             <div class="firstButton">
                 <input type="submit" value="Confirm">
             </div>
-            <p class="tip"><em><strong>Tip</strong>: An .ics file lets you import events into other calendar apps like Outlook.</em></p>
+            <p class="tip"><em><strong>Tip</strong>: An .ics file lets you import events into other calendar apps like
+                    Outlook.</em></p>
         </form>
     </div>
 
@@ -92,41 +95,53 @@
             <div class="loader-container">
                 <div class="loader" id="loader"></div>
             </div>
+
+            <!-- Account Management -->
+            <div id="accountControls" style="display: none; margin-top: 10px; gap: 10px; justify-content: center;">
+                <button id="resyncButton" type="button" class="small-btn">Resync</button>
+                <button id="logoutButton" type="button" class="small-btn">Logout</button>
+            </div>
         </form>
 
         <form id="colorForm">
             <p>Color for events: </p>
-            <div class="color-picker">
-                <input type="radio" id="Lavender" name="color" value="1">
-                <label for="Lavender" class="color-circle" style="background-color: #a4bdfc;"></label>
+            <div class="color-options-container">
+                <div class="default-color-container">
+                    <input type="radio" id="Default" name="color" value="default" checked>
+                    <label for="Default" class="default-color-label">Default</label>
+                </div>
 
-                <input type="radio" id="Sage" name="color" value="2">
-                <label for="Sage" class="color-circle" style="background-color: #7ae7bf;"></label>
+                <div class="color-picker">
+                    <input type="radio" id="Lavender" name="color" value="1">
+                    <label for="Lavender" class="color-circle" style="background-color: #a4bdfc;"></label>
 
-                <input type="radio" id="Grape" name="color" value="3">
-                <label for="Grape" class="color-circle" style="background-color: #dbadff;"></label>
+                    <input type="radio" id="Sage" name="color" value="2">
+                    <label for="Sage" class="color-circle" style="background-color: #7ae7bf;"></label>
 
-                <input type="radio" id="Flamingo" name="color" value="4">
-                <label for="Flamingo" class="color-circle" style="background-color: #ff887c;"></label>
+                    <input type="radio" id="Grape" name="color" value="3">
+                    <label for="Grape" class="color-circle" style="background-color: #dbadff;"></label>
 
-                <input type="radio" id="Banana" name="color" value="5">
-                <label for="Banana" class="color-circle" style="background-color: #fbd75b;"></label>
+                    <input type="radio" id="Flamingo" name="color" value="4">
+                    <label for="Flamingo" class="color-circle" style="background-color: #ff887c;"></label>
 
-                <input type="radio" id="Tangerine" name="color" value="6">
-                <label for="Tangerine" class="color-circle" style="background-color: #ffb878;"></label>
+                    <input type="radio" id="Banana" name="color" value="5">
+                    <label for="Banana" class="color-circle" style="background-color: #fbd75b;"></label>
 
-                <input type="radio" id="Peacock" name="color" value="7">
-                <label for="Peacock" class="color-circle" style="background-color: #46d6db;"></label>
+                    <input type="radio" id="Tangerine" name="color" value="6">
+                    <label for="Tangerine" class="color-circle" style="background-color: #ffb878;"></label>
 
-                <input type="radio" id="Blueberry" name="color" value="9">
-                <label for="Blueberry" class="color-circle" style="background-color: #5484ed;"></label>
+                    <input type="radio" id="Peacock" name="color" value="7">
+                    <label for="Peacock" class="color-circle" style="background-color: #46d6db;"></label>
 
-                <input type="radio" id="Basil" name="color" value="10">
-                <label for="Basil" class="color-circle" style="background-color: #51b749;"></label>
+                    <input type="radio" id="Blueberry" name="color" value="9">
+                    <label for="Blueberry" class="color-circle" style="background-color: #5484ed;"></label>
 
-                <input type="radio" id="Tomato" name="color" value="11">
-                <label for="Tomato" class="color-circle" style="background-color: #dc2127;"></label>
-            </div>
+                    <input type="radio" id="Basil" name="color" value="10">
+                    <label for="Basil" class="color-circle" style="background-color: #51b749;"></label>
+
+                    <input type="radio" id="Tomato" name="color" value="11">
+                    <label for="Tomato" class="color-circle" style="background-color: #dc2127;"></label>
+                </div>
         </form>
     </div>
 
@@ -138,4 +153,5 @@
     <script type="module" src="../scripts/btn-behaviour.js"></script>
     <script type="module" src="../scripts/field-checker.js"></script>
 </body>
+
 </html>
