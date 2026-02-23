@@ -87,6 +87,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: worker-build
+          path: backend/cloudflare-workers/dist/
 
       - name: Create production environment file
         run: |
@@ -116,6 +117,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: extension-build
+          path: .
 
       - name: Install zip
         run: sudo apt-get install zip
