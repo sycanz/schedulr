@@ -1,3 +1,39 @@
+## 4.0.2 (23-2-2026)
+
+### ✨ UI/UX Refurbishment
+
+- Completely overhauled the extension popup with a card-based UI.
+- Added support for Google Fonts (Inter, Roboto, and Outfit).
+- Custom-styled radio buttons and hover animations for enhanced feedback.
+- Implemented auto-centering for the popup window and automatic closure after successful submission.
+
+### 🛠️ Developer Experience & DevOps
+
+- Added a root `setup` script for one-click dependency installation.
+- Implemented a `Makefile` to streamline Cloudflare Workers deployment and secret management.
+- Integrated **Husky** for pre-commit hooks.
+- Enforced code quality with **ESLint** and **Prettier** across both frontend and backend.
+- Added `.env.example` and `.dev.vars.example` to simplify initial setup for new contributors.
+
+### 📝 Documentation & Database
+
+- Added new high-resolution diagrams for System Architecture, Program Flow, and Build Process.
+- Provided a dedicated [schema.sql](https://github.com/sycanz/schedulr/blob/main/backend/db/schema.sql) for Supabase table setup.
+- Rewritten the development guide and ERD relationship descriptions for better accuracy.
+
+### 🚀 Backend & Build Pipeline
+
+- Refactored `rollup.config.js` to dynamically inject production secrets based on environment flags.
+- Secured the GitHub Actions pipeline by modernizing secret passing and deployment steps.
+- Renamed several modules for better readability (e.g., `msgNotifier.js`).
+- Standardized naming for Cloudflare Workers environments (`schedulr-stg`, `schedulr-prd`).
+
+### 🐛 Bug Fixes & Maintenance
+
+- Fixed issues with session persistence by clearing targeted `StorageArea` items on logout.
+- Performed `npm audit fix` and patched several dependency-related security vulnerabilities.
+- Fixed multiple minor logic errors discovered during the UI migration.
+
 ## [3.0.4](https://github.com/sycanz/schedulr/commit/afd7bf743148b0f86a15a7710a5bac83597007b1) (8-2-2024)
 
 ### Bug Fixes
