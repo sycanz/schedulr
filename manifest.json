@@ -27,12 +27,6 @@
         "service_worker": "frontend/src/backgrounds/serviceWorker.js",
         "type": "module"
     },
-    "permissions": [
-        "activeTab",
-        "scripting",
-        "identity",
-        "storage",
-        "notifications"
-    ],
+    "permissions": ["activeTab", "scripting", "identity", "storage", "notifications"],
     "host_permissions": ["https://*.workers.dev/*", "http://localhost:8787/*"]
 }

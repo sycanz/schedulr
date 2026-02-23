@@ -7,15 +7,11 @@ export function selectRadioButton(name, value) {
         return;
     }
 
-    const radio = document.querySelector(
-        `input[name="${name}"][value="${value}"]`
-    );
+    const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
     if (radio) {
         radio.checked = true;
     } else {
-        console.warn(
-            `No radio button found for "${name}" with value: ${value}`
-        );
+        console.warn(`No radio button found for "${name}" with value: ${value}`);
         showErrorNotification(
             `Previous setting "${name}" with value "${value}" not found. Please select manually.`,
             "Setting Not Found",

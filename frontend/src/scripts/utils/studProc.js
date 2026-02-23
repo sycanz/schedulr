@@ -31,16 +31,8 @@ export function procClassDates(classDates) {
     let splitClassDates = classDates.trim().split(" - ");
     // console.log(splitClassDates[0], splitClassDates[1]);
 
-    let startDate = splitClassDates[0]
-        .replace(/\//g, "-")
-        .split("-")
-        .reverse()
-        .join("-");
-    let endDate = splitClassDates[1]
-        .replace(/\//g, "-")
-        .split("-")
-        .reverse()
-        .join("-");
+    let startDate = splitClassDates[0].replace(/\//g, "-").split("-").reverse().join("-");
+    let endDate = splitClassDates[1].replace(/\//g, "-").split("-").reverse().join("-");
 
     // console.log(startDate, ",", endDate);
     return { startDate, endDate };

@@ -1,9 +1,4 @@
-export async function exchangeCodeForToken(
-    code: string,
-    clientId: string,
-    clientSecret: string,
-    redirectUri: string
-) {
+export async function exchangeCodeForToken(code: string, clientId: string, clientSecret: string, redirectUri: string) {
     const response = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: {
@@ -30,19 +25,13 @@ export function decodeJwtPayload(token: string): any {
     const payload = token.split(".")[1];
     const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
 
-    const padded = base64.padEnd(
-        base64.length + ((4 - (base64.length % 4)) % 4),
-        "="
-    );
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
 
     const decoded = atob(padded);
     return JSON.parse(decoded);
 }
 
-export async function getNewValidAuthToken(
-    refreshToken: string,
-    authRefreshEndpointDev: string
-) {
+export async function getNewValidAuthToken(refreshToken: string, authRefreshEndpointDev: string) {
     // refresh oauth token then store it in db
     const response = await fetch(authRefreshEndpointDev, {
         method: "POST",

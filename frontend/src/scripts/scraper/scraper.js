@@ -1,24 +1,8 @@
-import {
-    procClassName,
-    procClassDetails,
-    procClassDates,
-    procClassTimes,
-    procClassDay,
-} from "../utils/studProc.js";
+import { procClassName, procClassDetails, procClassDates, procClassTimes, procClassDay } from "../utils/studProc.js";
 import { icalBlob } from "./createIcs.js";
-import {
-    showErrorNotification,
-    showSuccessNotification,
-} from "../utils/msgNotifier.js";
+import { showErrorNotification, showSuccessNotification } from "../utils/msgNotifier.js";
 import { getStorageData } from "../auth/authFlow.js";
-import {
-    addZeroToDate,
-    createArray,
-    procData,
-    formatDate,
-    rowSpan,
-    handleMultiHourClass,
-} from "../utils/lectProc.js";
+import { addZeroToDate, createArray, procData, formatDate, rowSpan, handleMultiHourClass } from "../utils/lectProc.js";
 
 // object for easy access to common vars
 let config = {};
@@ -50,9 +34,7 @@ export async function dataProc(
     // =============== Web scrape workflow ===============
     // Declare iframe
     const iframeElement = document.querySelector("#ptifrmtgtframe");
-    const lectIndicator = document.querySelector(
-        "table.ptalNoPadding.ptalPgltAreaControlsIcon a#ptalPgltAreaHide"
-    );
+    const lectIndicator = document.querySelector("table.ptalNoPadding.ptalPgltAreaControlsIcon a#ptalPgltAreaHide");
 
     console.log("Detecting user type");
     // lecturers and students have different UI, need to execute appropriate flow
@@ -93,9 +75,7 @@ export async function dataProc(
             true
         );
     } else {
-        showErrorNotification(
-            "No data was processed. Please make sure you're on the correct page and try again."
-        );
+        showErrorNotification("No data was processed. Please make sure you're on the correct page and try again.");
     }
 
     // Notify popup that processing is complete
@@ -121,33 +101,19 @@ async function studentFlow() {
 
     for (const element of classSec) {
         // Get all the rows within this class section
-        let classRows = element.querySelectorAll(
-            "tr[id*='STDNT_ENRL_SSVW$'][id*='_row_']"
-        );
+        let classRows = element.querySelectorAll("tr[id*='STDNT_ENRL_SSVW$'][id*='_row_']");
 
         for (const row of classRows) {
             // For each row, get the class details (this will be consistent per row)
-            let classDetails = row.querySelectorAll(
-                "a[id^='DERIVED_SSR_FL_SSR_SBJ_CAT_NBR$355']"
-            );
-            let classDates = row.querySelectorAll(
-                "[id^='DERIVED_SSR_FL_SSR_ST_END_DT']"
-            );
-            let classDays = row.querySelectorAll(
-                "[id^='DERIVED_SSR_FL_SSR_DAYS']"
-            );
-            let classTimes = row.querySelectorAll(
-                "[id^='DERIVED_SSR_FL_SSR_DAYSTIMES']"
-            );
-            let classLoc = row.querySelectorAll(
-                "[id^='DERIVED_SSR_FL_SSR_DRV_ROOM']"
-            );
+            let classDetails = row.querySelectorAll("a[id^='DERIVED_SSR_FL_SSR_SBJ_CAT_NBR$355']");
+            let classDates = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_ST_END_DT']");
+            let classDays = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DAYS']");
+            let classTimes = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DAYSTIMES']");
+            let classLoc = row.querySelectorAll("[id^='DERIVED_SSR_FL_SSR_DRV_ROOM']");
 
             // Now loop through the time slots for this specific class type
             for (let i = 0; i < classDates.length; i++) {
-                let classNameText = element.querySelector(
-                    "[id^='DERIVED_SSR_FL_SSR_SCRTAB_DTLS']"
-                ).textContent;
+                let classNameText = element.querySelector("[id^='DERIVED_SSR_FL_SSR_SCRTAB_DTLS']").textContent;
                 let classDetailsText = classDetails[0].textContent.trim(); // Use the first (and likely only) class detail for this row
                 let classDatesText = classDates[i].textContent.trim();
                 let classDaysText = classDays[i].textContent.trim();
@@ -174,9 +140,7 @@ function lectFlow(iframeElement) {
 
     // Select elements in iframe
     const dayHeader = iframeDocument.querySelectorAll("th.PSLEVEL3GRIDODDROW");
-    const rows = iframeDocument.querySelectorAll(
-        "table.PSLEVEL3GRIDODDROW  tr"
-    );
+    const rows = iframeDocument.querySelectorAll("table.PSLEVEL3GRIDODDROW  tr");
     const year = iframeDocument.querySelector(
         "div#win0divDERIVED_CLASS_S_DESCR100_2 td.PSGROUPBOXLABEL.PSLEFTCORNER"
     ).textContent;
@@ -189,23 +153,13 @@ function lectFlow(iframeElement) {
 
     if (!dayHeader || dayHeader.length === 0) {
         console.error("No day elements found");
-        showErrorNotification(
-            "No day elements found. Please make sure you're on the lecturer timetable page."
-        );
+        showErrorNotification("No day elements found. Please make sure you're on the lecturer timetable page.");
         return;
     }
 
-    if (
-        subjTitleVal === "N" &&
-        (config.selectedEventFormat === "2" ||
-            config.selectedEventFormat === "3")
-    ) {
-        console.error(
-            'Please check "Show Class Title" box below the calendar under Display Options!'
-        );
-        showErrorNotification(
-            'Please check "Show Class Title" box below the calendar under Display Options!'
-        );
+    if (subjTitleVal === "N" && (config.selectedEventFormat === "2" || config.selectedEventFormat === "3")) {
+        console.error('Please check "Show Class Title" box below the calendar under Display Options!');
+        showErrorNotification('Please check "Show Class Title" box below the calendar under Display Options!');
         return;
     }
 
@@ -261,11 +215,7 @@ function lectFlow(iframeElement) {
 
                     // Get innerHTML and process data
                     const classContent = spanElement.innerHTML.split("<br>");
-                    let result = procData(
-                        classContent,
-                        subjTitleVal,
-                        classInstructorVal
-                    );
+                    let result = procData(classContent, subjTitleVal, classInstructorVal);
                     // console.log(result);
 
                     const day = days[colIndex - 1];
@@ -295,12 +245,7 @@ function lectFlow(iframeElement) {
 
                     // If the class's total span is more than an hour
                     if (totalSpan > 1) {
-                        handleMultiHourClass(
-                            totalSpan,
-                            rowIndex,
-                            skip,
-                            colIndex
-                        );
+                        handleMultiHourClass(totalSpan, rowIndex, skip, colIndex);
                     }
 
                     const event = craftCalEvent(
@@ -329,9 +274,7 @@ function lectFlow(iframeElement) {
                     classEvents.push(event);
                 } catch (error) {
                     console.error("Error processing class data:", error);
-                    showErrorNotification(
-                        "Failed to process class data: " + error.message
-                    );
+                    showErrorNotification("Failed to process class data: " + error.message);
                     return;
                 }
             }
@@ -342,23 +285,14 @@ function lectFlow(iframeElement) {
 /* End of flow types */
 
 // =============== Helper functions ===============
-async function groupData(
-    className,
-    classDetails,
-    classDates,
-    classDay,
-    classTimes,
-    classLoc
-) {
+async function groupData(className, classDetails, classDates, classDay, classTimes, classLoc) {
     let { classCode, classNameOnly } = procClassName(className);
     let { classType, classSect } = procClassDetails(classDetails);
     let { startDate } = procClassDates(classDates);
     let { startTime, endTime } = procClassTimes(classTimes);
     let { classDayText } = procClassDay(classDay);
 
-    const { selectedDefects: selectedDefect } = await getStorageData([
-        "selectedDefects",
-    ]);
+    const { selectedDefects: selectedDefect } = await getStorageData(["selectedDefects"]);
     let parsedStartDate = startDate.split("-");
     if (selectedDefect == "yes") {
         let updatedDate;
@@ -401,26 +335,12 @@ async function groupData(
         summary = `${classNameOnly} - ${classCode} - ${classSect} (${classType})`;
     }
 
-    const event = craftCalEvent(
-        summary,
-        classLoc,
-        startDate,
-        startTime,
-        startDate,
-        endTime
-    );
+    const event = craftCalEvent(summary, classLoc, startDate, startTime, startDate, endTime);
 
     classEvents.push(event);
 }
 
-function craftCalEvent(
-    summary,
-    classLocation,
-    startDate,
-    formattedStartTime,
-    endDate,
-    formattedEndTime
-) {
+function craftCalEvent(summary, classLocation, startDate, formattedStartTime, endDate, formattedEndTime) {
     let event = {
         summary: `${summary}`,
         location: `${classLocation}`,
@@ -446,10 +366,7 @@ function craftCalEvent(
         });
     }
 
-    if (
-        config.selectedOptionValue != 2 &&
-        config.selectedColorValue !== "default"
-    ) {
+    if (config.selectedOptionValue != 2 && config.selectedColorValue !== "default") {
         event.colorId = config.selectedColorValue;
     }
 
@@ -458,9 +375,7 @@ function craftCalEvent(
 
 async function syncGoogleCalendar() {
     if (classEvents.length === 0) {
-        showErrorNotification(
-            "No events to sync. Please make sure timetable data was loaded correctly."
-        );
+        showErrorNotification("No events to sync. Please make sure timetable data was loaded correctly.");
         return;
     }
 
@@ -503,9 +418,7 @@ async function syncGoogleCalendar() {
 
 function downloadICS() {
     if (classEvents.length === 0) {
-        showErrorNotification(
-            "No events to download. Please make sure timetable data was loaded correctly."
-        );
+        showErrorNotification("No events to download. Please make sure timetable data was loaded correctly.");
         return;
     }
 

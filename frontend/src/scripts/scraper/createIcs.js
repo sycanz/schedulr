@@ -1,8 +1,7 @@
 // This function converts json object into ical format and write it into .ics file
 export function icalBlob(event, selectedReminderTime) {
     // Define the header and footer of the iCalendar
-    const icalHeader =
-        "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//sycanz/schedulr//EN";
+    const icalHeader = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//sycanz/schedulr//EN";
     const icalTz =
         "\nBEGIN:VTIMEZONE\nTZID:Asia/Kuala_Lumpur\nBEGIN:STANDARD\nTZOFFSETFROM:+0800\nTZOFFSETTO:+0800\nTZNAME:GMT+8\nEND:STANDARD\nEND:VTIMEZONE";
     const icalFooter = "\nEND:VCALENDAR";

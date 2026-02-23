@@ -1,11 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { v4 as uuidv4 } from "uuid";
-import {
-    exchangeCodeForToken,
-    decodeJwtPayload,
-    getNewValidAuthToken,
-} from "../dist/googleAuth.bundle.js";
+import { exchangeCodeForToken, decodeJwtPayload, getNewValidAuthToken } from "../dist/googleAuth.bundle.js";
 import {
     getUserId,
     getUserIdWithSessionToken,
@@ -66,10 +62,7 @@ app.post("/api/auth/return-user", async (c) => {
     const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
     const userSession = await getUserSessionDetails(supabase, userId);
     if (!userSession) {
-        return c.json(
-            { error: "No session details found for this user!" },
-            400
-        );
+        return c.json({ error: "No session details found for this user!" }, 400);
     }
 
     const { expires_at: sessionTokenExpiresAt } = userSession;
@@ -86,37 +79,17 @@ app.post("/api/auth/return-user", async (c) => {
         }
 
         const { refresh_token: refreshToken } = userOAuth;
-        const refreshed = await getNewValidAuthToken(
-            refreshToken,
-            authRefreshEndpointDev
-        );
-        await updateExpiredOAuthDetails(
-            supabase,
-            userId,
-            refreshed.accessToken,
-            refreshed.authExpiresAtISO
-        );
+        const refreshed = await getNewValidAuthToken(refreshToken, authRefreshEndpointDev);
+        await updateExpiredOAuthDetails(supabase, userId, refreshed.accessToken, refreshed.authExpiresAtISO);
 
         // update session table
         const sessionToken = uuidv4();
-        const sessionExpiresAtISO = new Date(
-            Date.now() + 30 * 60 * 1000
-        ).toISOString();
+        const sessionExpiresAtISO = new Date(Date.now() + 30 * 60 * 1000).toISOString();
         const userIpAddr = c.req.header("CF-Connecting-IP") || "";
         const userAgent = c.req.header("User-Agent") || "";
-        await insertSessionDetails(
-            supabase,
-            userId,
-            sessionToken,
-            sessionExpiresAtISO,
-            userIpAddr,
-            userAgent
-        );
+        await insertSessionDetails(supabase, userId, sessionToken, sessionExpiresAtISO, userIpAddr, userAgent);
 
-        return c.json(
-            { tokenExpired, sessionToken, sessionExpiresAtISO, email },
-            200
-        );
+        return c.json({ tokenExpired, sessionToken, sessionExpiresAtISO, email }, 200);
     } else if (timeNow < sessionTokenExpiresAt) {
         tokenExpired = false;
         return c.json({ tokenExpired, email }, 200);
@@ -135,12 +108,7 @@ app.post("/api/auth/token", async (c) => {
     const body = await c.req.json();
 
     try {
-        const data = await exchangeCodeForToken(
-            body.code,
-            clientId,
-            clientSecret,
-            redirectUri
-        );
+        const data = await exchangeCodeForToken(body.code, clientId, clientSecret, redirectUri);
 
         const {
             access_token: accessToken,
@@ -157,31 +125,16 @@ app.post("/api/auth/token", async (c) => {
         }
 
         const now = Math.floor(Date.now() / 1000);
-        const authExpiresAtISO = new Date(
-            (now + expiresIn) * 1000
-        ).toISOString();
+        const authExpiresAtISO = new Date((now + expiresIn) * 1000).toISOString();
 
         userId = await getUserId(supabase, sub);
-        await insertOAuthDetails(
-            supabase,
-            userId,
-            accessToken,
-            refreshToken || "",
-            authExpiresAtISO
-        );
+        await insertOAuthDetails(supabase, userId, accessToken, refreshToken || "", authExpiresAtISO);
 
         const sessionToken = uuidv4();
         const sessionExpiresAtISO = new Date((now + 1800) * 1000).toISOString();
         const userIpAddr = c.req.header("CF-Connecting-IP") || "";
         const userAgent = c.req.header("User-Agent") || "";
-        await insertSessionDetails(
-            supabase,
-            userId,
-            sessionToken,
-            sessionExpiresAtISO,
-            userIpAddr,
-            userAgent
-        );
+        await insertSessionDetails(supabase, userId, sessionToken, sessionExpiresAtISO, userIpAddr, userAgent);
 
         return c.json({ sessionToken, sessionExpiresAtISO, email }, 200);
     } catch (error) {
@@ -217,8 +170,7 @@ app.post("/api/auth/refresh", async (c) => {
         });
 
         if (response.ok) {
-            const { access_token: accessToken, expires_in: expiresIn } =
-                (await response.json()) as OAuthTokenResponse;
+            const { access_token: accessToken, expires_in: expiresIn } = (await response.json()) as OAuthTokenResponse;
 
             return c.json(
                 {
@@ -246,18 +198,12 @@ app.post("/api/calendar/add-events", async (c) => {
     const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
     const userSession = await getUserSessionDetails(supabase, userId);
     if (!userSession) {
-        return c.json(
-            { error: "No session details found for this user!" },
-            400
-        );
+        return c.json({ error: "No session details found for this user!" }, 400);
     }
     const { expires_at: sessionTokenExpiresAt } = userSession;
 
     if (sessionTokenExpiresAt < new Date().toISOString()) {
-        return c.json(
-            { error: "Session expired, please reauthenticate!" },
-            400
-        );
+        return c.json({ error: "Session expired, please reauthenticate!" }, 400);
     }
 
     const userOAuth = await getUserOAuthDetails(supabase, userId);
@@ -307,16 +253,13 @@ app.post("/api/calendar/get-calendar-list", async (c) => {
     const { access_token: accessToken } = userOAuth;
 
     try {
-        const response = await fetch(
-            "https://www.googleapis.com/calendar/v3/users/me/calendarList",
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        const response = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
+        });
 
         if (response.ok) {
             const data = await response.json();

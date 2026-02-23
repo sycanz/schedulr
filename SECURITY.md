@@ -4,14 +4,13 @@
 
 Currently, there are no official releases of this project. Security updates and support will begin once the first stable version is released.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| [v2.3.2](https://github.com/sycanz/schedulr/releases/tag/v2.3.2) | :x:                |
-| [v3.0.0](https://github.com/sycanz/schedulr/releases/tag/v3.0.0) | :x:                |
-| [v3.0.1](https://github.com/sycanz/schedulr/releases/tag/v3.0.1) | :x:                |
-| [v3.0.2](https://github.com/sycanz/schedulr/releases/tag/v3.0.2) | :x:                |
-| [v3.0.3](https://github.com/sycanz/schedulr/releases/tag/v3.0.3) | ✅                |
-
+| Version                                                          | Supported |
+| ---------------------------------------------------------------- | --------- |
+| [v2.3.2](https://github.com/sycanz/schedulr/releases/tag/v2.3.2) | :x:       |
+| [v3.0.0](https://github.com/sycanz/schedulr/releases/tag/v3.0.0) | :x:       |
+| [v3.0.1](https://github.com/sycanz/schedulr/releases/tag/v3.0.1) | :x:       |
+| [v3.0.2](https://github.com/sycanz/schedulr/releases/tag/v3.0.2) | :x:       |
+| [v3.0.3](https://github.com/sycanz/schedulr/releases/tag/v3.0.3) | ✅        |
 
 ## Reporting a Vulnerability
 

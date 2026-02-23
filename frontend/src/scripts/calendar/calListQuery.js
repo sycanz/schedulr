@@ -24,10 +24,7 @@ export async function getCalIds(sessionToken) {
     const calObject = await response.json();
     if (!calObject || !calObject.data || !Array.isArray(calObject.data.items)) {
         console.error("Unexpected calendar response:", calObject);
-        showErrorNotification(
-            "Invalid calendar data received. Please try again.",
-            "Calendar Error"
-        );
+        showErrorNotification("Invalid calendar data received. Please try again.", "Calendar Error");
         return {};
     }
 
@@ -37,10 +34,7 @@ export async function getCalIds(sessionToken) {
 function parseCalIds(items) {
     let calJson = {};
     items.forEach((calendar) => {
-        if (
-            !calendar.summary.includes("Holidays") &&
-            !calendar.summary.includes("Birthdays")
-        ) {
+        if (!calendar.summary.includes("Holidays") && !calendar.summary.includes("Birthdays")) {
             calJson[calendar.summary] = calendar.id;
         }
     });

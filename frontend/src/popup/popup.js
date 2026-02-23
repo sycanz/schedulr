@@ -26,12 +26,10 @@ document.getElementById("backButton").addEventListener("click", function () {
 });
 
 // starting from 2nd page: listener for "previous settings" button
-document
-    .getElementById("fillPreviousSettings")
-    .addEventListener("click", function () {
-        console.log("Previous Settings button pressed");
-        checkForPreference();
-    });
+document.getElementById("fillPreviousSettings").addEventListener("click", function () {
+    console.log("Previous Settings button pressed");
+    checkForPreference();
+});
 
 // 2nd page: listener for when user's calendar is queried
 chrome.runtime.onMessage.addListener(async (message) => {
@@ -73,11 +71,7 @@ document.getElementById("resyncButton").addEventListener("click", () => {
 document.getElementById("logoutButton").addEventListener("click", async () => {
     console.log("Logout button pressed");
     if (confirm("Are you sure you want to logout?")) {
-        await chrome.storage.local.remove([
-            "session_token",
-            "session_expires_at_iso",
-            "selectedCalendars",
-        ]);
+        await chrome.storage.local.remove(["session_token", "session_expires_at_iso", "selectedCalendars"]);
         isCalendarFetched = false;
         showPreviousPage();
         location.reload();
@@ -90,9 +84,7 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
 
 function showPreviousPage() {
     // query all forms
-    let previousSettingButton = document.getElementsByClassName(
-        "previousSettingsButton"
-    )[0];
+    let previousSettingButton = document.getElementsByClassName("previousSettingsButton")[0];
     let generalForms = document.getElementsByClassName("generalForms")[0];
     let calForms = document.getElementsByClassName("calForms")[0];
     let finalButton = document.getElementsByClassName("finalButton")[0];
@@ -114,17 +106,11 @@ function showPreviousPage() {
 }
 
 async function updatePopup() {
-    selectedOptionValue = document.querySelector(
-        'input[name="option"]:checked'
-    )?.value;
+    selectedOptionValue = document.querySelector('input[name="option"]:checked')?.value;
     // console.log(`Received option value: ${selectedOptionValue}`);
 
     if (!selectedOptionValue) {
-        showErrorNotification(
-            "Please select an option.",
-            "Selection Required",
-            true
-        );
+        showErrorNotification("Please select an option.", "Selection Required", true);
         return;
     }
 
@@ -136,9 +122,7 @@ async function updatePopup() {
     document.getElementsByClassName("firstPage")[0].style.display = "none";
 
     // query all possible forms
-    let previousSettingButton = document.getElementsByClassName(
-        "previousSettingsButton"
-    )[0];
+    let previousSettingButton = document.getElementsByClassName("previousSettingsButton")[0];
     let generalForms = document.getElementsByClassName("generalForms")[0];
     let backButton = document.getElementById("backButton");
     let calForms = document.getElementsByClassName("calForms")[0];
@@ -279,24 +263,12 @@ function checkForPreference() {
 async function getFormsValue(selectedOptionValue) {
     try {
         // get the value of the selected radio button
-        const selectedSemesterValue = document.querySelector(
-            'input[name="semester"]:checked'
-        )?.value;
-        const selectedEventFormat = document.querySelector(
-            'input[name="format"]:checked'
-        )?.value;
-        const selectedReminderTime = document.querySelector(
-            'input[name="reminder"]:checked'
-        )?.value;
-        const selectedCalendar = document.querySelector(
-            'input[name="calendar"]:checked'
-        )?.value;
-        const selectedDefect = document.querySelector(
-            'input[name="defected"]:checked'
-        )?.value;
-        const selectedColorValue = document.querySelector(
-            'input[name="color"]:checked'
-        )?.value;
+        const selectedSemesterValue = document.querySelector('input[name="semester"]:checked')?.value;
+        const selectedEventFormat = document.querySelector('input[name="format"]:checked')?.value;
+        const selectedReminderTime = document.querySelector('input[name="reminder"]:checked')?.value;
+        const selectedCalendar = document.querySelector('input[name="calendar"]:checked')?.value;
+        const selectedDefect = document.querySelector('input[name="defected"]:checked')?.value;
+        const selectedColorValue = document.querySelector('input[name="color"]:checked')?.value;
 
         if (selectedOptionValue == 1) {
             // check if all values are selected
@@ -310,11 +282,7 @@ async function getFormsValue(selectedOptionValue) {
                     selectedColorValue
                 )
             ) {
-                showErrorNotification(
-                    "Please select all options.",
-                    "Selection Required",
-                    true
-                );
+                showErrorNotification("Please select all options.", "Selection Required", true);
                 return;
             }
 
@@ -329,19 +297,8 @@ async function getFormsValue(selectedOptionValue) {
             });
         } else if (selectedOptionValue == 2) {
             // check if all values are selected
-            if (
-                !(
-                    selectedSemesterValue &&
-                    selectedEventFormat &&
-                    selectedReminderTime &&
-                    selectedDefect
-                )
-            ) {
-                showErrorNotification(
-                    "Please select all options.",
-                    "Selection Required",
-                    true
-                );
+            if (!(selectedSemesterValue && selectedEventFormat && selectedReminderTime && selectedDefect)) {
+                showErrorNotification("Please select all options.", "Selection Required", true);
                 return;
             }
 
@@ -367,11 +324,7 @@ async function getFormsValue(selectedOptionValue) {
         }
     } catch (err) {
         console.error("An error occured: ", err);
-        showErrorNotification(
-            err.message || "An unexpected error occurred",
-            "Form Submission Error",
-            true
-        );
+        showErrorNotification(err.message || "An unexpected error occurred", "Form Submission Error", true);
     }
 }
 

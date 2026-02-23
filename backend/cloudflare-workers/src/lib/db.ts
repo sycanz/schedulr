@@ -1,11 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export async function getUserId(supabase: SupabaseClient, sub: string) {
-    const { data, error: getUserIdError } = await supabase
-        .from("users")
-        .select("id")
-        .eq("sub", sub)
-        .limit(1);
+    const { data, error: getUserIdError } = await supabase.from("users").select("id").eq("sub", sub).limit(1);
 
     if (getUserIdError || !data || data.length == 0) {
         return null;
@@ -14,10 +10,7 @@ export async function getUserId(supabase: SupabaseClient, sub: string) {
     }
 }
 
-export async function getUserIdWithSessionToken(
-    supabase: SupabaseClient,
-    sessionToken: string
-) {
+export async function getUserIdWithSessionToken(supabase: SupabaseClient, sessionToken: string) {
     // check whether session token exists in any row
     const { data, error: getUserIdError } = await supabase
         .from("sessions")
@@ -32,10 +25,7 @@ export async function getUserIdWithSessionToken(
     }
 }
 
-export async function getUserOAuthDetails(
-    supabase: SupabaseClient,
-    userId: string
-) {
+export async function getUserOAuthDetails(supabase: SupabaseClient, userId: string) {
     const { data, error: getUserOAuthError } = await supabase
         .from("oauth_tokens")
         .select("access_token, refresh_token")
@@ -47,16 +37,11 @@ export async function getUserOAuthDetails(
     }
 
     let accessToken, refreshToken;
-    return ({ access_token: accessToken, refresh_token: refreshToken } =
-        data[0]);
+    return ({ access_token: accessToken, refresh_token: refreshToken } = data[0]);
 }
 
 export async function getUserEmail(supabase: SupabaseClient, userId: string) {
-    const { data, error: getUserOAuthError } = await supabase
-        .from("users")
-        .select("email")
-        .eq("id", userId)
-        .single();
+    const { data, error: getUserOAuthError } = await supabase.from("users").select("email").eq("id", userId).single();
 
     if (getUserOAuthError || !data) {
         return null;
@@ -65,10 +50,7 @@ export async function getUserEmail(supabase: SupabaseClient, userId: string) {
     return data.email;
 }
 
-export async function getUserSessionDetails(
-    supabase: SupabaseClient,
-    userId: string
-) {
+export async function getUserSessionDetails(supabase: SupabaseClient, userId: string) {
     const { data, error: getUserSessionError } = await supabase
         .from("sessions")
         .select("expires_at")
@@ -83,12 +65,7 @@ export async function getUserSessionDetails(
     return { expires_at };
 }
 
-export async function insertUserDetails(
-    supabase: SupabaseClient,
-    email: string,
-    sub: string,
-    name: string
-) {
+export async function insertUserDetails(supabase: SupabaseClient, email: string, sub: string, name: string) {
     const { error: userInsertError } = await supabase.from("users").upsert(
         {
             email: email,
@@ -113,21 +90,19 @@ export async function insertOAuthDetails(
     refreshToken: string,
     expiresAtISO: string
 ) {
-    const { error: tokenInsertError } = await supabase
-        .from("oauth_tokens")
-        .upsert(
-            {
-                user_id: userId,
-                access_token: accessToken,
-                refresh_token: refreshToken,
-                access_token_expires_at: expiresAtISO,
-                scope: "openid profile email calendar",
-            },
-            {
-                onConflict: "user_id",
-                ignoreDuplicates: false,
-            }
-        );
+    const { error: tokenInsertError } = await supabase.from("oauth_tokens").upsert(
+        {
+            user_id: userId,
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            access_token_expires_at: expiresAtISO,
+            scope: "openid profile email calendar",
+        },
+        {
+            onConflict: "user_id",
+            ignoreDuplicates: false,
+        }
+    );
 
     if (tokenInsertError) {
         throw new Error(JSON.stringify(tokenInsertError));
@@ -144,22 +119,20 @@ export async function insertSessionDetails(
 ) {
     const now = new Date().toISOString();
 
-    const { error: sessionInsertError } = await supabase
-        .from("sessions")
-        .upsert(
-            {
-                user_id: userId,
-                session_token: sessionToken,
-                expires_at: sessionExpiresAtISO,
-                last_accessed_at: now,
-                ip_address: userIpAddr,
-                user_agent: userAgent,
-            },
-            {
-                onConflict: "user_id",
-                ignoreDuplicates: false,
-            }
-        );
+    const { error: sessionInsertError } = await supabase.from("sessions").upsert(
+        {
+            user_id: userId,
+            session_token: sessionToken,
+            expires_at: sessionExpiresAtISO,
+            last_accessed_at: now,
+            ip_address: userIpAddr,
+            user_agent: userAgent,
+        },
+        {
+            onConflict: "user_id",
+            ignoreDuplicates: false,
+        }
+    );
 
     if (sessionInsertError) {
         throw new Error(JSON.stringify(sessionInsertError));

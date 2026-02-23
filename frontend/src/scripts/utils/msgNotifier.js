@@ -5,12 +5,7 @@
  * @param {boolean} isPopup - Whether this is called from popup context (defaults to false)
  * @param {boolean} shouldClosePopup - Whether to close the popup after showing notification (defaults to false)
  */
-export function showErrorNotification(
-    message,
-    title = "Schedulr Error",
-    isPopup = false,
-    shouldClosePopup = false
-) {
+export function showErrorNotification(message, title = "Schedulr Error", isPopup = false, shouldClosePopup = false) {
     console.error(`[${title}] ${message}`);
 
     if (isPopup) {
@@ -102,8 +97,7 @@ export function withErrorHandling(asyncFn, errorContext, isPopup = false) {
         try {
             return await asyncFn(...args);
         } catch (error) {
-            const errorMessage =
-                error.message || "An unexpected error occurred";
+            const errorMessage = error.message || "An unexpected error occurred";
             showErrorNotification(errorMessage, errorContext, isPopup);
             throw error;
         }

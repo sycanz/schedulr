@@ -1,10 +1,7 @@
 // service-worker.js is a file that runs background scripts which does not
 // require any user interaction to execute.
 
-import {
-    checkSessionTokenValidity,
-    onLaunchWebAuthFlow,
-} from "../../dist/authFlow.bundle.js";
+import { checkSessionTokenValidity, onLaunchWebAuthFlow } from "../../dist/authFlow.bundle.js";
 import { getCalIds } from "../../dist/calListQuery.bundle.js";
 import { getCurrTab } from "../scripts/utils/progFlow.js";
 import { showErrorNotification } from "../scripts/utils/msgNotifier.js";
@@ -34,10 +31,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
         }
 
         if (!sessionToken) {
-            showErrorNotification(
-                "Authorization failed. Please try again.",
-                "Authentication Error"
-            );
+            showErrorNotification("Authorization failed. Please try again.", "Authentication Error");
             return true;
         }
 
@@ -62,20 +56,15 @@ chrome.runtime.onMessage.addListener(async (message) => {
             () => {
                 // check for error which happens if the popup is closed
                 if (chrome.runtime.lastError) {
-                    console.log(
-                        "Popup is closed, calendar data saved to storage."
-                    );
+                    console.log("Popup is closed, calendar data saved to storage.");
 
                     if (isNewSession) {
-                        console.log(
-                            "Showing authentication complete notification."
-                        );
+                        console.log("Showing authentication complete notification.");
                         chrome.notifications.create({
                             type: "basic",
                             iconUrl: "/images/magnify128.png",
                             title: "Authentication Complete",
-                            message:
-                                "Please re-open the extension to import to calendar",
+                            message: "Please re-open the extension to import to calendar",
                             priority: 2,
                         });
                     }
@@ -96,10 +85,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
         const currTab = await getCurrTab();
 
         if (!currTab) {
-            showErrorNotification(
-                "No active tab found. Please make sure you're on the correct page.",
-                "Tab Error"
-            );
+            showErrorNotification("No active tab found. Please make sure you're on the correct page.", "Tab Error");
             return true;
         }
 
@@ -134,10 +120,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
             },
             () => {
                 if (chrome.runtime.lastError) {
-                    showErrorNotification(
-                        chrome.runtime.lastError.message,
-                        "Script Execution Error"
-                    );
+                    showErrorNotification(chrome.runtime.lastError.message, "Script Execution Error");
                     return;
                 }
 
@@ -159,10 +142,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
                     },
                     () => {
                         if (chrome.runtime.lastError) {
-                            showErrorNotification(
-                                chrome.runtime.lastError.message,
-                                "Script Execution Error"
-                            );
+                            showErrorNotification(chrome.runtime.lastError.message, "Script Execution Error");
                         }
                     }
                 );

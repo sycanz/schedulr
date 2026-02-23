@@ -1,15 +1,15 @@
 ---
 Name: Pull request
 About: Submit a pull request for this project
-Title: ''
-Labels: ''
-Assignees: ''
-
+Title: ""
+Labels: ""
+Assignees: ""
 ---
 
 ### Description
 
 Please provide a clear and concise description of what this pull request does. Include any relevant context, such as:
+
 - Which issue or feature it addresses (e.g., resolves #123 or implements feature request #456).
 - Any relevant background information or rationale for the changes made.
 
@@ -20,17 +20,19 @@ Please provide a clear and concise description of what this pull request does. I
 - [ ] Enhancement
 - [ ] Documentation update
 - [ ] Refactor
-- [ ] Other (please specify): ___________
+- [ ] Other (please specify): \***\*\_\_\_\*\***
 
 ### Related Issue(s)
 
 If your pull request addresses an existing issue or feature request, link to it here:
+
 - Closes #<issue-number>
 - Addresses #<issue-number>
 
 ### How to Test
 
 Please describe how the reviewer can test this pull request. Include any setup steps, configurations, or environment variables that need to be configured.
+
 1. Go to '...'
 2. Click on '...'
 3. Do '...'
