@@ -1,6 +1,8 @@
 # env var
-.env*
+.env
 .dev.vars*
+!.env.example
+!.dev.vars.example
 
 # frontend build
 frontend/dist/

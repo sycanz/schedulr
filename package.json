@@ -10,6 +10,7 @@
         "build:scraper": "rollup -c --bundleConfigAsCjs",
         "watch:scraper": "rollup -c --bundleConfigAsCjs -w",
         "prepare": "husky",
+        "setup": "npm install && cd backend/cloudflare-workers && npm install",
         "lint": "eslint \"frontend/src/**/*.js\"",
         "lint:fix": "eslint \"frontend/src/**/*.js\" --fix",
         "format": "prettier --write \"**/*.{js,ts,json,md,yml,yaml}\"",

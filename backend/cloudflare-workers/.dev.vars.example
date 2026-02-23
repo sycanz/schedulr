@@ -1,0 +1,7 @@
+CLIENT_ID="<your-client-id>"
+CLIENT_SECRET="<your-client-secret>"
+REDIRECT_URI="https://<YOUR-APP-ID>.chromiumapp.org/oauth"
+REDIRECT_URI_BRAVE="https://<YOUR-APP-ID>.chromiumapp.org/oauth"     # add this if you're testing for brave browser
+AUTH_REFRESH_ENDPOINT_DEV="https://localhost:8787/api/auth/refresh"
+SUPABASE_URL="https://<your-project-ref>.supabase.co"
+SUPABASE_KEY="<your-supabase-key>"                                   # publishable or secret key, NOT anon key

@@ -144,6 +144,9 @@ You should be familiar with or have a basic understanding of these:
 │           ├── scraper/        # web scraping functions
 │           └── utils/          # misc reusable functions
 ├── images/                     # images used for schedulr
+├── package.json                # package manager config
+├── package-lock.json           # package lock file
+├── rollup.config.js            # rollup config file
 ├── Makefile                    # shortcut commands for building extension
 ├── .env                        # environment variables for frontend
 └── manifest.json               # extension manifest file
@@ -157,7 +160,17 @@ The sequence diagram below illustrates both the authentication and import to cal
 
 #### Entity Relationship Diagram
 
-ERD image to be added here
+In this schema, we treat each account as separate user despite being logged in from the same IP.
+
+![Schedulr ERD](/images/erd.png)
+
+The relationship between each table are:
+
+1. users (one) - oauth_tokens (one): each user can have only one oauth token
+2. users (one) - sessions (one): each user can have only one session
+
+> [!NOTE]
+> To clarify, each user can only have one oauth_tokens and sessions is because the program upserts (overwrites) previous oauth token and session when user logs in again. You can refer to [backend/db/schema.sql](https://github.com/sycanz/schedulr/blob/main/backend/db/schema.sql) for the table definitions.
 
 #### Secret Management
 
@@ -178,14 +191,10 @@ The build process is handled by GitHub Actions:
 1. **Clone the Repository**
 
     ```bash
-    $ git clone https://github.com/sycanz/schedulr
+    git clone https://github.com/sycanz/schedulr
     ```
 
-2. **Prepare `manifest.json`**
-    - Rename `template_manifest.json` to `manifest.json`
-    - Remove the "key" and "oauth2" fields (for now).
-
-3. **Load the Extension into Chrome**
+2. **Load the Extension into Chrome**
     - Open Chrome browser and go to `chrome://extensions/`
     - Enable Developer mode (toggle switch at the top right)
     - Click on `Load unpacked` and select the cloned repository
@@ -204,37 +213,10 @@ The build process is handled by GitHub Actions:
 
 #### Setup development environment
 
-1. Run `npm install` in the root directory
-2. Create `.env` file (frontend secrets) in the **root** directory and add the following variables:
+1. Run `npm run setup` in the root directory to install all dependencies.
+2. Create `.env` file (frontend secrets) in the **root** directory and add the necessary variables by referring to [.env.example](https://github.com/sycanz/schedulr/blob/main/.env.example).
 
-    ```bash
-    CLIENT_ID="<your-client-id>"
-    CLIENT_SECRET="<your-client-secret>"
-    CFW_AUTH_ENDPOINT_DEV="https://localhost:8787/api/auth/token"
-    CFW_AUTH_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/auth/token"
-    CFW_REFRESH_ENDPOINT_DEV="https://localhost:8787/api/auth/refresh"
-    CFW_REFRESH_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/auth/refresh"
-    CFW_CHECK_RETURN_USER_ENDPOINT_DEV="https://localhost:8787/api/auth/return-user"
-    CFW_CHECK_RETURN_USER_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/auth/return-user"
-    CFW_GET_CALENDAR_ENDPOINT_DEV="https://localhost:8787/api/calendar/get-calendar-list"
-    CFW_GET_CALENDAR_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/calendar/get-calendar-list"
-    CFW_ADD_NEW_EVENT_ENDPOINT_DEV="https://localhost:8787/api/calendar/add-events"
-    CFW_ADD_NEW_EVENT_ENDPOINT_PROD="https://schedulr-prd.<YOUR-CFW-SUBDOMAIN>.workers.dev/api/calendar/add-events"
-    ```
-
-3. Run `npm install` in the **backend/cloudflare-workers/** directory
-4. Create `.dev.vars` file (backend secrets) in **backend/cloudflare-workers/** directory
-5. Add the following variables to `.dev.vars` file:
-
-    ```bash
-    CLIENT_ID="<your-client-id>"
-    CLIENT_SECRET="<your-client-secret>"
-    REDIRECT_URI="https://<YOUR-APP-ID>.chromiumapp.org/oauth"
-    REDIRECT_URI_BRAVE="https://<YOUR-APP-ID>.chromiumapp.org/oauth"     # add this if you're testing for brave browser
-    AUTH_REFRESH_ENDPOINT_DEV="https://localhost:8787/api/auth/refresh"
-    SUPABASE_URL="https://<your-project-ref>.supabase.co"
-    SUPABASE_KEY="<your-supabase-key>"                                   # publishable or secret key, NOT anon key
-    ```
+3. Create `.dev.vars` file (backend secrets) in **backend/cloudflare-workers/** directory and add the necessary variables by referring to [.dev.vars.example](https://github.com/sycanz/schedulr/blob/main/backend/cloudflare-workers/.dev.vars.example).
 
 ### Development Tips
 
