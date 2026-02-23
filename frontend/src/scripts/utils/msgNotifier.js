@@ -3,17 +3,23 @@
  * @param {string} message - The error message to display
  * @param {string} title - Optional title for the notification (defaults to "Schedulr Error")
  * @param {boolean} isPopup - Whether this is called from popup context (defaults to false)
+ * @param {boolean} shouldClosePopup - Whether to close the popup after showing notification (defaults to false)
  */
 export function showErrorNotification(
     message,
     title = "Schedulr Error",
-    isPopup = false
+    isPopup = false,
+    shouldClosePopup = false
 ) {
     console.error(`[${title}] ${message}`);
 
     if (isPopup) {
         // For popup context, use window.alert
         window.alert(`${title}: ${message}`);
+
+        if (shouldClosePopup) {
+            window.close();
+        }
     } else {
         // For content script context, send message to popup or show notification
         try {
@@ -21,6 +27,7 @@ export function showErrorNotification(
             chrome.runtime.sendMessage({
                 action: "showAlert",
                 error: `${title}: ${message}`,
+                closePopup: shouldClosePopup,
             });
         } catch {
             // Fallback to browser notification if popup is not available
@@ -44,23 +51,30 @@ export function showErrorNotification(
  * @param {string} message - The success message to display
  * @param {string} title - Optional title for the notification (defaults to "Schedulr Success")
  * @param {boolean} isPopup - Whether this is called from popup context (defaults to false)
+ * @param {boolean} shouldClosePopup - Whether to close the popup after showing notification (defaults to false)
  */
 export function showSuccessNotification(
     message,
     title = "Schedulr Success",
-    isPopup = false
+    isPopup = false,
+    shouldClosePopup = false
 ) {
     console.log(`[${title}] ${message}`);
 
     if (isPopup) {
         // For popup context, use window.alert
         window.alert(`${title}: ${message}`);
+
+        if (shouldClosePopup) {
+            window.close();
+        }
     } else {
         // For content script context, send message to popup
         try {
             chrome.runtime.sendMessage({
                 action: "showAlert",
                 error: `${title}: ${message}`,
+                closePopup: shouldClosePopup,
             });
         } catch {
             // Fallback to browser notification

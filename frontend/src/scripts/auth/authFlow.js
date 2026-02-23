@@ -1,4 +1,4 @@
-import { showErrorNotification } from "../utils/errorNotifier.js";
+import { showErrorNotification } from "../utils/msgNotifier.js";
 
 export function getStorageData(keys) {
     return new Promise((resolve) => {

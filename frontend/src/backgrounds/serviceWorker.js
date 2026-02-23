@@ -7,7 +7,7 @@ import {
 } from "../../dist/authFlow.bundle.js";
 import { getCalIds } from "../../dist/calListQuery.bundle.js";
 import { getCurrTab } from "../scripts/utils/progFlow.js";
-import { showErrorNotification } from "../scripts/utils/errorNotifier.js";
+import { showErrorNotification } from "../scripts/utils/msgNotifier.js";
 
 // navigate user to 'schedulr' website's usage part when
 // the extension is first installed

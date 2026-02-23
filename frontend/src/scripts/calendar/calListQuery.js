@@ -1,4 +1,4 @@
-import { showErrorNotification } from "../utils/errorNotifier.js";
+import { showErrorNotification } from "../utils/msgNotifier.js";
 
 export async function getCalIds(sessionToken) {
     const response = await fetch(__CFW_GET_CALENDAR_ENDPOINT__, {

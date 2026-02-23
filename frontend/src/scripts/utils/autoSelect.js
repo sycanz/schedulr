@@ -1,4 +1,4 @@
-import { showErrorNotification } from "./errorNotifier.js";
+import { showErrorNotification } from "./msgNotifier.js";
 
 // selects a specific radio button within a group
 export function selectRadioButton(name, value) {
