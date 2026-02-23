@@ -58,7 +58,7 @@ jobs:
           jq '.host_permissions |= map(select(. != "http://localhost:8787/*")) | .key = "${{ secrets.EXTENSION_PUBLIC_KEY }}"' manifest.json > manifest.prod.json
           mv manifest.prod.json manifest.json
 
-      - name: Upload build artifacts
+      - name: Upload extension build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: extension-build
@@ -69,12 +69,24 @@ jobs:
             manifest.json
           retention-days: 1
 
+      - name: Upload worker build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-build
+          path: backend/cloudflare-workers/dist/
+          retention-days: 1
+
   deploy-backend:
     needs: build-project
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download worker build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: worker-build
 
       - name: Create production environment file
         run: |
