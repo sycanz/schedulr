@@ -8,7 +8,9 @@
 
 </div>
 
-https://github.com/user-attachments/assets/b9e1409c-e5e3-4159-a5ff-86cfa49d3a7c
+
+https://github.com/user-attachments/assets/4ee6a69a-cfb0-42d7-abf2-63661013a642
+
 
 ## Table of Content
 
@@ -74,7 +76,7 @@ Note: Some steps after step 4 may vary depending on your target calendar.
 6. Press the **Submit** button to download the .ics file.
 7. Go to your target calendar and import the .ics file.
 
-**\*Tip**: An .ics file lets you import events into other calendar apps like Outlook.\*
+***Tip**: An .ics file lets you import events into other calendar apps like Outlook.*
 
 ## Key binding ⌨️
 
@@ -85,7 +87,7 @@ The shortcut key opens up the popup page
 
 ## Project status ⏳
 
-Schedulr version 3.0.2 is available on [Chrome Web store](https://chromewebstore.google.com/detail/schedulr/ofaflpillnejkhmkefmcpoamjeaghipp) as of now.
+Schedulr version 4.0.2 is available on [Chrome Web store](https://chromewebstore.google.com/detail/schedulr/ofaflpillnejkhmkefmcpoamjeaghipp) as of now.
 
 ## Contributing 🤝🏻
 
@@ -104,7 +106,7 @@ You should be familiar with or have a basic understanding of these:
 - Google Calendar API
 - Cloudflare Workers
 - Github action / Rollup (recommended in case you need to fix build processes)
-- Chrome extension development, manifest v3. Easy tutorial by google [here](https://developer.chrome.com/docs/extensions/mv3/getstarted/)
+- Chrome extension development, manifest v3.
 
 ### Understanding the Project
 
