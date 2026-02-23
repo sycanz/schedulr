@@ -158,6 +158,11 @@ input[type="radio"]:checked+.color-circle {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
+}
+
+.loader-container p {
+    margin-bottom: 0;
 }
 
 .loader {
@@ -216,6 +221,8 @@ input[type="radio"]:checked+.color-circle {
 #accountControls {
     display: none;
     margin-top: 10px;
+    gap: 10px;
+    justify-content: center;
 }
 
 /* End of Account Management Buttons */
@@ -282,3 +289,23 @@ input[name="color"]:checked+.default-color-label {
 }
 
 /* End of loader stuffs */
+
+.user-email {
+    display: flex;
+    font-size: 0.75rem;
+    color: #9399b2;
+    margin-top: -2px;
+    font-weight: normal;
+}
+
+.import-status {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #89b4fa;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.import-status i {
+    margin-right: 8px;
+}

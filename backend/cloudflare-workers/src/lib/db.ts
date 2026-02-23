@@ -51,6 +51,20 @@ export async function getUserOAuthDetails(
         data[0]);
 }
 
+export async function getUserEmail(supabase: SupabaseClient, userId: string) {
+    const { data, error: getUserOAuthError } = await supabase
+        .from("users")
+        .select("email")
+        .eq("id", userId)
+        .single();
+
+    if (getUserOAuthError || !data) {
+        return null;
+    }
+
+    return data.email;
+}
+
 export async function getUserSessionDetails(
     supabase: SupabaseClient,
     userId: string

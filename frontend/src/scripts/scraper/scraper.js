@@ -97,6 +97,13 @@ export async function dataProc(
             "No data was processed. Please make sure you're on the correct page and try again."
         );
     }
+
+    // Notify popup that processing is complete
+    try {
+        chrome.runtime.sendMessage({ action: "importComplete" });
+    } catch (err) {
+        console.log("Popup likely closed, skipping message");
+    }
 }
 
 /* Start of flow types */

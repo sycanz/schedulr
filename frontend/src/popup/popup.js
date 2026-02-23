@@ -43,6 +43,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
         if (message.closePopup) {
             window.close();
         }
+    } else if (message.action === "importComplete") {
+        const importStatus = document.getElementById("importStatus");
+        if (importStatus) {
+            importStatus.style.display = "none";
+        }
     }
 });
 
@@ -206,10 +211,20 @@ function setAttributes(calData) {
     isCalendarFetched = true;
 
     // update elements
+    displayUserEmail();
     document.getElementById("loader").style.display = "none";
     document.getElementById("accountControls").style.display = "flex";
 
     console.log("Calendar options updated");
+}
+
+async function displayUserEmail() {
+    chrome.storage.local.get(["user_email"], (result) => {
+        if (result.user_email) {
+            const userEmailDiv = document.getElementById("userEmail");
+            userEmailDiv.innerText = `Signed in as: ${result.user_email}`;
+        }
+    });
 }
 
 // if user had previously used schedulr,
@@ -344,6 +359,12 @@ async function getFormsValue(selectedOptionValue) {
         chrome.runtime.sendMessage({
             action: "startScraper",
         });
+
+        // Show import status feedback
+        const importStatus = document.getElementById("importStatus");
+        if (importStatus) {
+            importStatus.style.display = "block";
+        }
     } catch (err) {
         console.error("An error occured: ", err);
         showErrorNotification(

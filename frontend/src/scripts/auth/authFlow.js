@@ -53,9 +53,13 @@ export async function checkSessionTokenValidity() {
         await setStorageData({
             session_token: data.sessionToken,
             session_expires_at_iso: data.sessionExpiresAtISO,
+            user_email: data.email,
         });
         return data.sessionToken;
     } else {
+        if (data.email) {
+            await setStorageData({ user_email: data.email });
+        }
         return sessionToken;
     }
 }
@@ -137,12 +141,13 @@ export async function onLaunchWebAuthFlow() {
         return null;
     }
 
-    const { sessionToken, sessionExpiresAtISO } = await response.json();
+    const { sessionToken, sessionExpiresAtISO, email } = await response.json();
 
     if (sessionToken && sessionExpiresAtISO) {
         await setStorageData({
             session_token: sessionToken,
             session_expires_at_iso: sessionExpiresAtISO,
+            user_email: email,
         });
         return sessionToken;
     } else {

@@ -10,6 +10,7 @@ import {
     getUserId,
     getUserIdWithSessionToken,
     getUserOAuthDetails,
+    getUserEmail,
     getUserSessionDetails,
     insertUserDetails,
     insertOAuthDetails,
@@ -74,6 +75,7 @@ app.post("/api/auth/return-user", async (c) => {
     const { expires_at: sessionTokenExpiresAt } = userSession;
 
     let tokenExpired;
+    const email = await getUserEmail(supabase, userId);
     const timeNow = new Date().toISOString();
     if (timeNow > sessionTokenExpiresAt) {
         tokenExpired = true;
@@ -111,11 +113,13 @@ app.post("/api/auth/return-user", async (c) => {
             userAgent
         );
 
-        // return data to update local storage
-        return c.json({ tokenExpired, sessionToken, sessionExpiresAtISO }, 200);
+        return c.json(
+            { tokenExpired, sessionToken, sessionExpiresAtISO, email },
+            200
+        );
     } else if (timeNow < sessionTokenExpiresAt) {
         tokenExpired = false;
-        return c.json({ tokenExpired }, 200);
+        return c.json({ tokenExpired, email }, 200);
     }
 });
 
@@ -179,7 +183,7 @@ app.post("/api/auth/token", async (c) => {
             userAgent
         );
 
-        return c.json({ sessionToken, sessionExpiresAtISO }, 200);
+        return c.json({ sessionToken, sessionExpiresAtISO, email }, 200);
     } catch (error) {
         console.error("Error with authorization_code request: ", error);
         return c.json({ error }, 400);

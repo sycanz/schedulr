@@ -91,13 +91,12 @@
 
             <div id="calendarList"></div>
 
-            <!-- Loader -->
             <div class="loader-container">
                 <div class="loader" id="loader"></div>
             </div>
 
-            <!-- Account Management -->
-            <div id="accountControls" style="display: none; margin-top: 10px; gap: 10px; justify-content: center;">
+            <div id="userEmail" class="user-email"></div>
+            <div id="accountControls">
                 <button id="resyncButton" type="button" class="small-btn">Resync</button>
                 <button id="logoutButton" type="button" class="small-btn">Logout</button>
             </div>
@@ -107,7 +106,7 @@
             <p>Color for events: </p>
             <div class="color-options-container">
                 <div class="default-color-container">
-                    <input type="radio" id="Default" name="color" value="default" checked>
+                    <input type="radio" id="Default" name="color" value="default">
                     <label for="Default" class="default-color-label">Default</label>
                 </div>
 
@@ -145,6 +144,12 @@
         </form>
     </div>
 
+    <div id="importStatus" class="import-status" style="display: none;">
+        <div class="loader-container">
+            <div class="loader" id="loader"></div>
+            <p>Importing to calendar...</p>
+        </div>
+    </div>
     <div class="finalButton">
         <input type="submit" value="Submit">
     </div>
