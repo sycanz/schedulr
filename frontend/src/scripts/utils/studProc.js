@@ -46,13 +46,13 @@ export function procClassTimes(classTimes) {
     function convertTimeFormat(timeStr) {
         const [time, period] = timeStr.split(/(AM|PM)/);
 
-        let [hour, minute] = time.split(':');
+        let [hour, minute] = time.split(":");
 
-        if (period === 'AM' && parseInt(hour) < 10) {
+        if (period === "AM" && parseInt(hour) < 10) {
             hour = `0${hour}`;
-        } else if (period === 'AM' && parseInt(hour) > 9) {
+        } else if (period === "AM" && parseInt(hour) > 9) {
             hour = `${hour}`;
-        } else if (period === 'PM' && parseInt(hour) < 12) {
+        } else if (period === "PM" && parseInt(hour) < 12) {
             hour = parseInt(hour) + 12;
         }
 

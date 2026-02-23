@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "schedulr",
-    "version": "3.9.9",
+    "version": "4.0.2",
     "description": "It scrapes the timetable from CliC and inserts it into google calendar",
     "icons": {
         "16": "images/magnify16.png",
@@ -20,22 +20,13 @@
                 "mac": "Command+Shift+S",
                 "windows": "Alt+Shift+S"
             },
-            "description" : "Open schedulr's popup.html"
+            "description": "Open schedulr's popup.html"
         }
     },
     "background": {
         "service_worker": "frontend/src/backgrounds/serviceWorker.js",
         "type": "module"
     },
-    "permissions": [
-        "activeTab",
-        "scripting",
-        "identity",
-        "storage",
-        "notifications"
-    ],
-    "host_permissions": [
-        "https://*.workers.dev/*",
-        "http://localhost:8787/*"
-    ]
+    "permissions": ["activeTab", "scripting", "identity", "storage", "notifications"],
+    "host_permissions": ["https://*.workers.dev/*", "http://localhost:8787/*"]
 }

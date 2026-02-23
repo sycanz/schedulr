@@ -1,4 +1,4 @@
-import { showErrorNotification } from '../utils/errorNotifier.js';
+import { showErrorNotification } from "../utils/msgNotifier.js";
 
 export function getStorageData(keys) {
     return new Promise((resolve) => {
@@ -16,10 +16,10 @@ export function setStorageData(items) {
     });
 }
 
-async function checkSessionTokenValidity() {
+export async function checkSessionTokenValidity() {
     const { session_token: sessionToken, session_expires_at_iso: sessionExpiresAtISO } = await getStorageData([
-        'session_token',
-        'session_expires_at_iso'
+        "session_token",
+        "session_expires_at_iso",
     ]);
 
     const now = new Date().toISOString();
@@ -28,18 +28,15 @@ async function checkSessionTokenValidity() {
     }
 
     // crosscheck with session token stored in db
-    const response = await fetch(
-        __CFW_CHECK_RETURN_USER_ENDPOINT__,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                sessionToken,
-            }),
+    const response = await fetch(__CFW_CHECK_RETURN_USER_ENDPOINT__, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
         },
-    );
+        body: JSON.stringify({
+            sessionToken,
+        }),
+    });
 
     if (!response.ok) {
         const errorData = await response.json();
@@ -52,20 +49,19 @@ async function checkSessionTokenValidity() {
     if (data.tokenExpired) {
         await setStorageData({
             session_token: data.sessionToken,
-            session_expires_at_iso: data.sessionExpiresAtISO
+            session_expires_at_iso: data.sessionExpiresAtISO,
+            user_email: data.email,
         });
         return data.sessionToken;
     } else {
+        if (data.email) {
+            await setStorageData({ user_email: data.email });
+        }
         return sessionToken;
     }
 }
 
 export async function onLaunchWebAuthFlow() {
-    const validSessionToken = await checkSessionTokenValidity();
-    if (validSessionToken) {
-        return validSessionToken;
-    }
-
     const clientId = __CLIENT_ID__;
     const state = Math.random().toString(36).substring(7);
     const scope = "openid profile email https://www.googleapis.com/auth/calendar";
@@ -90,7 +86,9 @@ export async function onLaunchWebAuthFlow() {
             },
             (redirectUrl) => {
                 if (chrome.runtime.lastError || !redirectUrl) {
-                    const errorMessage = chrome.runtime.lastError ? chrome.runtime.lastError.message : "Authentication was cancelled";
+                    const errorMessage = chrome.runtime.lastError
+                        ? chrome.runtime.lastError.message
+                        : "Authentication was cancelled";
                     reject(new Error(`WebAuthFlow failed: ${errorMessage}`));
                 } else {
                     resolve(redirectUrl);
@@ -113,18 +111,15 @@ export async function onLaunchWebAuthFlow() {
         return null;
     }
 
-    const response = await fetch(
-        __CFW_AUTH_ENDPOINT__,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                code,
-            }),
+    const response = await fetch(__CFW_AUTH_ENDPOINT__, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
         },
-    );
+        body: JSON.stringify({
+            code,
+        }),
+    });
 
     if (!response.ok) {
         const errorData = await response.json();
@@ -133,12 +128,13 @@ export async function onLaunchWebAuthFlow() {
         return null;
     }
 
-    const { sessionToken, sessionExpiresAtISO } = await response.json();
+    const { sessionToken, sessionExpiresAtISO, email } = await response.json();
 
     if (sessionToken && sessionExpiresAtISO) {
         await setStorageData({
             session_token: sessionToken,
             session_expires_at_iso: sessionExpiresAtISO,
+            user_email: email,
         });
         return sessionToken;
     } else {

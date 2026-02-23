@@ -1,14 +1,18 @@
 {
-  "name": "cloudflare-workers",
-  "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
-  },
-  "dependencies": {
-    "hono": "^4.7.11"
-  },
-  "devDependencies": {
-    "wrangler": "^4.4.0"
-  }
+    "name": "schedulr",
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy --minify",
+        "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+        "lint": "eslint src/**/*.ts",
+        "lint:fix": "eslint src/**/*.ts --fix"
+    },
+    "dependencies": {
+        "hono": "^4.11.10"
+    },
+    "devDependencies": {
+        "@eslint/migrate-config": "^2.0.2",
+        "typescript-eslint": "^8.55.0",
+        "wrangler": "^4.59.1"
+    }
 }

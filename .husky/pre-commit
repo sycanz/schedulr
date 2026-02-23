@@ -1,0 +1,6 @@
+echo "Running pre-commit checks..."
+
+echo "Checking code formatting and linting..."
+npx lint-staged
+
+echo "Pre-commit checks passed!"

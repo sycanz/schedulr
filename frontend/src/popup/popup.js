@@ -1,32 +1,32 @@
-import { selectRadioButton } from '../scripts/utils/autoSelect.js'
-import { isNotANewcomer } from '../scripts/utils/firstTimer.js'
-import { showErrorNotification } from '../scripts/utils/errorNotifier.js'
-import { setStorageData } from '../scripts/auth/authFlow.js'
+import { selectRadioButton } from "../scripts/utils/autoSelect.js";
+import { isNotANewcomer } from "../scripts/utils/firstTimer.js";
+import { showErrorNotification } from "../scripts/utils/msgNotifier.js";
+import { setStorageData } from "../scripts/auth/authFlow.js";
 
 // program starts here
 console.log("Starting schedulr");
 
-// initializing common variable
+// common variables
 let selectedOptionValue;
-
+let isCalendarFetched = false;
 
 //////////// start of listeners //////////////
 
 // 1st page: listener for submit button
-document.getElementById('optionForm').addEventListener('submit', (event) => {
+document.getElementById("optionForm").addEventListener("submit", (event) => {
     console.log("Submit button pressed");
     event.preventDefault();
     updatePopup();
 });
 
 // starting from 2nd page: listener for "back" button
-document.getElementById('backButton').addEventListener('click', function() {
+document.getElementById("backButton").addEventListener("click", function () {
     console.log("Back button pressed");
     showPreviousPage();
 });
 
 // starting from 2nd page: listener for "previous settings" button
-document.getElementById('fillPreviousSettings').addEventListener('click', function() {
+document.getElementById("fillPreviousSettings").addEventListener("click", function () {
     console.log("Previous Settings button pressed");
     checkForPreference();
 });
@@ -38,6 +38,14 @@ chrome.runtime.onMessage.addListener(async (message) => {
         setAttributes(calData);
     } else if (message.action === "showAlert") {
         window.alert(message.error);
+        if (message.closePopup) {
+            window.close();
+        }
+    } else if (message.action === "importComplete") {
+        const importStatus = document.getElementById("importStatus");
+        if (importStatus) {
+            importStatus.style.display = "none";
+        }
     }
 });
 
@@ -45,44 +53,64 @@ chrome.runtime.onMessage.addListener(async (message) => {
 function finalButtonClickHandler(event) {
     event.preventDefault();
     console.log("Submit button clicked, getting selected values...");
-    getFormsValue(selectedOptionValue)
+    getFormsValue(selectedOptionValue);
 }
 
-//////////// end of listeners //////////////
+// 2nd page: listener for resync button
+document.getElementById("resyncButton").addEventListener("click", () => {
+    console.log("Resync button pressed");
+    document.getElementById("loader").style.display = "block";
+    document.getElementById("calendarList").innerHTML = "";
+    document.getElementById("accountControls").style.display = "none";
+    chrome.runtime.sendMessage({
+        action: "authoriseUser",
+    });
+});
 
+// 2nd page: listener for logout button
+document.getElementById("logoutButton").addEventListener("click", async () => {
+    console.log("Logout button pressed");
+    if (confirm("Are you sure you want to logout?")) {
+        await chrome.storage.local.remove(["session_token", "session_expires_at_iso", "selectedCalendars"]);
+        isCalendarFetched = false;
+        showPreviousPage();
+        location.reload();
+    }
+});
+
+//////////// end of listeners //////////////
 
 //////////// start of functions //////////////
 
 function showPreviousPage() {
     // query all forms
-    let previousSettingButton = document.getElementsByClassName('previousSettingsButton')[0];
-    let optionForm = document.getElementsByClassName('optionForm')[0];
-    let generalForms = document.getElementsByClassName('generalForms')[0];
-    let calForms = document.getElementsByClassName('calForms')[0];
-    let finalButton = document.getElementsByClassName('finalButton')[0];
+    let previousSettingButton = document.getElementsByClassName("previousSettingsButton")[0];
+    let generalForms = document.getElementsByClassName("generalForms")[0];
+    let calForms = document.getElementsByClassName("calForms")[0];
+    let finalButton = document.getElementsByClassName("finalButton")[0];
 
     // hide the second page forms
-    previousSettingButton.style.display = 'none';
-    generalForms.style.display = 'none';
-    calForms.style.display = 'none';
-    finalButton.style.display = 'none';
+    previousSettingButton.style.display = "none";
+    generalForms.style.display = "none";
+    calForms.style.display = "none";
+    finalButton.style.display = "none";
 
     // Clear the previous form options
     // optionForm.innerHTML = '';
 
     // show the first page again
-    document.getElementsByClassName('firstPage')[0].style.display = 'flex';
+    document.getElementsByClassName("firstPage")[0].style.display = "flex";
 
     // hide the back button itself since we're back on the first page
-    document.getElementById('backButton').style.display = 'none';
+    document.getElementById("backButton").style.display = "none";
 }
 
 async function updatePopup() {
     selectedOptionValue = document.querySelector('input[name="option"]:checked')?.value;
     // console.log(`Received option value: ${selectedOptionValue}`);
 
-    if (!(selectedOptionValue)) {
-        showErrorNotification('Please select an option.', 'Selection Required', true);
+    if (!selectedOptionValue) {
+        showErrorNotification("Please select an option.", "Selection Required", true);
         return;
     }
 
@@ -91,51 +119,56 @@ async function updatePopup() {
     });
 
     // hide the "1st page" after user chooses an option
-    document.getElementsByClassName('firstPage')[0].style.display = 'none';
+    document.getElementsByClassName("firstPage")[0].style.display = "none";
 
     // query all possible forms
-    let previousSettingButton = document.getElementsByClassName('previousSettingsButton')[0];
-    let generalForms = document.getElementsByClassName('generalForms')[0];
-    let backButton = document.getElementById('backButton');
-    let calForms = document.getElementsByClassName('calForms')[0];
-    let finalButton = document.getElementsByClassName('finalButton')[0];
+    let previousSettingButton = document.getElementsByClassName("previousSettingsButton")[0];
+    let generalForms = document.getElementsByClassName("generalForms")[0];
+    let backButton = document.getElementById("backButton");
+    let calForms = document.getElementsByClassName("calForms")[0];
+    let finalButton = document.getElementsByClassName("finalButton")[0];
 
-    generalForms.style.display = 'flex';
-    backButton.style.display = 'flex';
+    generalForms.style.display = "flex";
+    backButton.style.display = "flex";
 
     // check if they're a first timer, if so then show previous settings button
     const returningUser = await isNotANewcomer();
 
     // display appropriate forms according to selected option
-    switch(selectedOptionValue) {
+    switch (selectedOptionValue) {
         case "1":
-            await chrome.runtime.sendMessage({
-                action: "authoriseUser"
-            });
+            if (!isCalendarFetched) {
+                await chrome.runtime.sendMessage({
+                    action: "authoriseUser",
+                });
+            }
 
             if (returningUser) {
-                previousSettingButton.style.display = 'flex';
+                previousSettingButton.style.display = "flex";
             }
-            calForms.style.display = 'flex';
-            finalButton.style.display = 'flex';
+            calForms.style.display = "flex";
+            finalButton.style.display = "flex";
             break;
         case "2":
             if (returningUser) {
-                previousSettingButton.style.display = 'flex';
+                previousSettingButton.style.display = "flex";
             }
-            previousSettingButton.style.display = 'flex';
-            finalButton.style.display = 'flex';
+            previousSettingButton.style.display = "flex";
+            finalButton.style.display = "flex";
             break;
     }
 
     // remove previously attached listener add a new one
-    finalButton.removeEventListener('click', finalButtonClickHandler);
-    finalButton.addEventListener('click', finalButtonClickHandler);
+    finalButton.removeEventListener("click", finalButtonClickHandler);
+    finalButton.addEventListener("click", finalButtonClickHandler);
 }
 
 // update option element after queried user's calendars
 function setAttributes(calData) {
-    const form = document.getElementById("calendarForm");
+    const calendarList = document.getElementById("calendarList");
+
+    // clear previous entries to prevent duplication
+    calendarList.innerHTML = "";
 
     for (let cals in calData) {
         // create input and label tag for every index
@@ -154,48 +187,76 @@ function setAttributes(calData) {
         label.setAttribute("for", `${cals}`);
 
         // append input and label tag, then a line break after
-        form.appendChild(input);
-        form.appendChild(label);
-        form.appendChild(br);
+        calendarList.appendChild(input);
+        calendarList.appendChild(label);
+        calendarList.appendChild(br);
     }
 
-    // hide the loader after option elements updated
-    document.getElementById('loader').style.display = 'none';
-    console.log("Calendar options upated")
+    isCalendarFetched = true;
+
+    // update elements
+    displayUserEmail();
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("accountControls").style.display = "flex";
+
+    console.log("Calendar options updated");
+}
+
+async function displayUserEmail() {
+    chrome.storage.local.get(["user_email"], (result) => {
+        if (result.user_email) {
+            const userEmailDiv = document.getElementById("userEmail");
+            userEmailDiv.innerText = `Signed in as: ${result.user_email}`;
+        }
+    });
 }
 
 // if user had previously used schedulr,
 // it'll automatically select their previous option
 function checkForPreference() {
-    chrome.storage.local.get([
-        "selectedCalendars", "selectedColorValues", "selectedEventFormats",
-        "selectedReminderTimes", "selectedSemesterValues", "selectedOptionValues",
-        "selectedDefects"], (items) => {
-        const { selectedCalendars, selectedColorValues, selectedEventFormats,
-            selectedReminderTimes, selectedSemesterValues, selectedOptionValues,
-            selectedDefects } = items;
+    chrome.storage.local.get(
+        [
+            "selectedCalendars",
+            "selectedColorValues",
+            "selectedEventFormats",
+            "selectedReminderTimes",
+            "selectedSemesterValues",
+            "selectedOptionValues",
+            "selectedDefects",
+        ],
+        (items) => {
+            const {
+                selectedCalendars,
+                selectedColorValues,
+                selectedEventFormats,
+                selectedReminderTimes,
+                selectedSemesterValues,
+                selectedOptionValues,
+                selectedDefects,
+            } = items;
 
-        if (!selectedSemesterValues) {
-            return;
-        }
+            if (!selectedSemesterValues) {
+                return;
+            }
 
-        switch(selectedOptionValues) {
-            case "1":
-                selectRadioButton("semester", selectedSemesterValues);
-                selectRadioButton("format", selectedEventFormats);
-                selectRadioButton("reminder", selectedReminderTimes);
-                selectRadioButton("calendar", selectedCalendars);
-                selectRadioButton("color", selectedColorValues);
-                selectRadioButton("defected", selectedDefects);
-                break;
-            case "2":
-                selectRadioButton("semester", selectedSemesterValues);
-                selectRadioButton("format", selectedEventFormats);
-                selectRadioButton("reminder", selectedReminderTimes);
-                selectRadioButton("defected", selectedDefects);
-                break;
+            switch (selectedOptionValues) {
+                case "1":
+                    selectRadioButton("semester", selectedSemesterValues);
+                    selectRadioButton("format", selectedEventFormats);
+                    selectRadioButton("reminder", selectedReminderTimes);
+                    selectRadioButton("calendar", selectedCalendars);
+                    selectRadioButton("color", selectedColorValues);
+                    selectRadioButton("defected", selectedDefects);
+                    break;
+                case "2":
+                    selectRadioButton("semester", selectedSemesterValues);
+                    selectRadioButton("format", selectedEventFormats);
+                    selectRadioButton("reminder", selectedReminderTimes);
+                    selectRadioButton("defected", selectedDefects);
+                    break;
+            }
         }
-    })
+    );
 }
 
 // checks all neccessary field vary by selected option value
@@ -211,13 +272,17 @@ async function getFormsValue(selectedOptionValue) {
 
         if (selectedOptionValue == 1) {
             // check if all values are selected
-            if (!(selectedSemesterValue &&
-                selectedEventFormat &&
-                selectedReminderTime &&
-                selectedCalendar &&
-                selectedDefect &&
-                selectedColorValue)) {
-                showErrorNotification('Please select all options.', 'Selection Required', true);
+            if (
+                !(
+                    selectedSemesterValue &&
+                    selectedEventFormat &&
+                    selectedReminderTime &&
+                    selectedCalendar &&
+                    selectedDefect &&
+                    selectedColorValue
+                )
+            ) {
+                showErrorNotification("Please select all options.", "Selection Required", true);
                 return;
             }
 
@@ -232,11 +297,8 @@ async function getFormsValue(selectedOptionValue) {
             });
         } else if (selectedOptionValue == 2) {
             // check if all values are selected
-            if (!(selectedSemesterValue &&
-                selectedEventFormat &&
-                selectedReminderTime &&
-                selectedDefect)) {
-                showErrorNotification('Please select all options.', 'Selection Required', true);
+            if (!(selectedSemesterValue && selectedEventFormat && selectedReminderTime && selectedDefect)) {
+                showErrorNotification("Please select all options.", "Selection Required", true);
                 return;
             }
 
@@ -254,9 +316,14 @@ async function getFormsValue(selectedOptionValue) {
         chrome.runtime.sendMessage({
             action: "startScraper",
         });
-    } catch(err) {
-        console.error('An error occured: ', err);
-        showErrorNotification(err.message || 'An unexpected error occurred', 'Form Submission Error', true);
+
+        const importStatus = document.getElementById("importStatus");
+        if (importStatus && selectedOptionValue == 1) {
+            importStatus.style.display = "block";
+        }
+    } catch (err) {
+        console.error("An error occured: ", err);
+        showErrorNotification(err.message || "An unexpected error occurred", "Form Submission Error", true);
     }
 }
 

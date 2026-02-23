@@ -1,37 +1,65 @@
 {
-  "name": "schedulr",
-  "version": "1.0.0",
-  "description": "<div align=\"center\">   <img src=\"./images/magnify128.png\" alt=\"Schedulr Logo\" width=\"120\" />   <h1>Schedulr</h1>   <p>A chrome extension that transfers MMU timetable into Google, Outlook, Apple Calendar (and more)</p>",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
-  "scripts": {
-    "build:scraper": "rollup -c --bundleConfigAsCjs",
-    "watch:scraper": "rollup -c --bundleConfigAsCjs -w"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sycanz/schedulr.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/sycanz/schedulr/issues"
-  },
-  "homepage": "https://github.com/sycanz/schedulr#readme",
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-replace": "^6.0.2",
-    "@rollup/plugin-typescript": "^12.1.4",
-    "dotenv": "^16.5.0",
-    "rollup": "^4.44.0"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.50.4",
-    "tslib": "^2.8.1",
-    "uuid": "^11.1.0"
-  }
+    "name": "schedulr",
+    "version": "1.0.0",
+    "description": "<div align=\"center\">   <img src=\"./images/magnify128.png\" alt=\"Schedulr Logo\" width=\"120\" />   <h1>Schedulr</h1>   <p>A chrome extension that transfers MMU timetable into Google, Outlook, Apple Calendar (and more)</p>",
+    "main": "index.js",
+    "directories": {
+        "doc": "docs"
+    },
+    "scripts": {
+        "build:scraper": "rollup -c --bundleConfigAsCjs",
+        "build:scraper:prod": "BUILD=prd rollup -c --bundleConfigAsCjs",
+        "watch:scraper": "rollup -c --bundleConfigAsCjs -w",
+        "prepare": "husky",
+        "setup": "npm install && cd backend/cloudflare-workers && npm install",
+        "lint": "eslint \"frontend/src/**/*.js\"",
+        "lint:fix": "eslint \"frontend/src/**/*.js\" --fix",
+        "format": "prettier --write \"**/*.{js,ts,json,md,yml,yaml}\"",
+        "format:check": "prettier --check \"**/*.{js,ts,json,md,yml,yaml}\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sycanz/schedulr.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/sycanz/schedulr/issues"
+    },
+    "homepage": "https://github.com/sycanz/schedulr#readme",
+    "devDependencies": {
+        "@eslint/eslintrc": "^3.3.3",
+        "@eslint/js": "^10.0.1",
+        "@eslint/migrate-config": "^2.0.2",
+        "@rollup/plugin-commonjs": "^28.0.6",
+        "@rollup/plugin-node-resolve": "^16.0.1",
+        "@rollup/plugin-replace": "^6.0.2",
+        "@rollup/plugin-typescript": "^12.1.4",
+        "dotenv": "^16.5.0",
+        "eslint": "^10.0.0",
+        "globals": "^17.3.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.2.7",
+        "prettier": "^3.8.1",
+        "rollup": "^4.44.0"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.50.4",
+        "tslib": "^2.8.1",
+        "uuid": "^11.1.0"
+    },
+    "lint-staged": {
+        "frontend/src/**/*.js": [
+            "prettier --write",
+            "eslint --fix"
+        ],
+        "backend/cloudflare-workers/src/**/*.ts": [
+            "prettier --write",
+            "eslint --fix"
+        ],
+        "*.{json,md,yml,yaml}": [
+            "prettier --write"
+        ]
+    }
 }

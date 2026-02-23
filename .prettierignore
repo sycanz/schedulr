@@ -1,0 +1,7 @@
+node_modules/
+frontend/dist/
+backend/cloudflare-workers/dist/
+backend/cloudflare-workers/.wrangler/
+package-lock.json
+*.min.js
+*.bundle.js

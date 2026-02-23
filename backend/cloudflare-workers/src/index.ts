@@ -1,10 +1,19 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { v4 as uuidv4 } from 'uuid';
-import { exchangeCodeForToken, decodeJwtPayload, getNewValidAuthToken } from '../dist/googleAuth.bundle.js';
-import { getUserId, getUserIdWithSessionToken, getUserOAuthDetails, getUserSessionDetails,
-    insertUserDetails, insertOAuthDetails, insertSessionDetails, updateExpiredOAuthDetails } from './lib/db';
-import { getSupabaseClient } from '../../db/supabase.js';
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { v4 as uuidv4 } from "uuid";
+import { exchangeCodeForToken, decodeJwtPayload, getNewValidAuthToken } from "../dist/googleAuth.bundle.js";
+import {
+    getUserId,
+    getUserIdWithSessionToken,
+    getUserOAuthDetails,
+    getUserEmail,
+    getUserSessionDetails,
+    insertUserDetails,
+    insertOAuthDetails,
+    insertSessionDetails,
+    updateExpiredOAuthDetails,
+} from "./lib/db";
+import { getSupabaseClient } from "../../db/supabase.js";
 
 type Env = {
     CLIENT_ID: string;
@@ -12,7 +21,7 @@ type Env = {
     REDIRECT_URI: string;
     CFW_REFRESH_ENDPOINT: string;
     SUPABASE_URL: string;
-    SUPABASE_ANON_KEY: string;
+    SUPABASE_KEY: string;
 };
 
 type OAuthTokenResponse = {
@@ -28,23 +37,26 @@ type JWTTokenContent = {
     sub: string;
     name: string;
     email: string;
-}
+};
 
-const app = new Hono<{ Bindings: Env }>()
+const app = new Hono<{ Bindings: Env }>();
 
-app.use('*', cors({
-  origin: 'https://clic.mmu.edu.my',
-  allowMethods: ['GET', 'POST'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(
+    "*",
+    cors({
+        origin: "https://clic.mmu.edu.my",
+        allowMethods: ["GET", "POST"],
+        allowHeaders: ["Content-Type", "Authorization"],
+    })
+);
 
 app.post("/api/auth/return-user", async (c) => {
     const {
         CFW_REFRESH_ENDPOINT: authRefreshEndpointDev,
         SUPABASE_URL: supabaseUrl,
-        SUPABASE_ANON_KEY: supabaseAnonKey
+        SUPABASE_KEY: supabaseKey,
     } = c.env;
-    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey);
+    const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
     const body = await c.req.json();
 
     const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
@@ -53,9 +65,10 @@ app.post("/api/auth/return-user", async (c) => {
         return c.json({ error: "No session details found for this user!" }, 400);
     }
 
-    let { expires_at: sessionTokenExpiresAt } = userSession;
+    const { expires_at: sessionTokenExpiresAt } = userSession;
 
     let tokenExpired;
+    const email = await getUserEmail(supabase, userId);
     const timeNow = new Date().toISOString();
     if (timeNow > sessionTokenExpiresAt) {
         tokenExpired = true;
@@ -65,7 +78,7 @@ app.post("/api/auth/return-user", async (c) => {
             return c.json({ error: "No OAuth details found!" }, 400);
         }
 
-        let { refresh_token: refreshToken } = userOAuth;
+        const { refresh_token: refreshToken } = userOAuth;
         const refreshed = await getNewValidAuthToken(refreshToken, authRefreshEndpointDev);
         await updateExpiredOAuthDetails(supabase, userId, refreshed.accessToken, refreshed.authExpiresAtISO);
 
@@ -76,11 +89,10 @@ app.post("/api/auth/return-user", async (c) => {
         const userAgent = c.req.header("User-Agent") || "";
         await insertSessionDetails(supabase, userId, sessionToken, sessionExpiresAtISO, userIpAddr, userAgent);
 
-        // return data to update local storage
-        return c.json({ tokenExpired, sessionToken, sessionExpiresAtISO }, 200);
+        return c.json({ tokenExpired, sessionToken, sessionExpiresAtISO, email }, 200);
     } else if (timeNow < sessionTokenExpiresAt) {
         tokenExpired = false;
-        return c.json({ tokenExpired }, 200);
+        return c.json({ tokenExpired, email }, 200);
     }
 });
 
@@ -90,9 +102,9 @@ app.post("/api/auth/token", async (c) => {
         CLIENT_SECRET: clientSecret,
         REDIRECT_URI: redirectUri,
         SUPABASE_URL: supabaseUrl,
-        SUPABASE_ANON_KEY: supabaseAnonKey
+        SUPABASE_KEY: supabaseKey,
     } = c.env;
-    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey)
+    const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
     const body = await c.req.json();
 
     try {
@@ -116,7 +128,7 @@ app.post("/api/auth/token", async (c) => {
         const authExpiresAtISO = new Date((now + expiresIn) * 1000).toISOString();
 
         userId = await getUserId(supabase, sub);
-        await insertOAuthDetails(supabase, userId, accessToken, refreshToken || '', authExpiresAtISO);
+        await insertOAuthDetails(supabase, userId, accessToken, refreshToken || "", authExpiresAtISO);
 
         const sessionToken = uuidv4();
         const sessionExpiresAtISO = new Date((now + 1800) * 1000).toISOString();
@@ -124,10 +136,10 @@ app.post("/api/auth/token", async (c) => {
         const userAgent = c.req.header("User-Agent") || "";
         await insertSessionDetails(supabase, userId, sessionToken, sessionExpiresAtISO, userIpAddr, userAgent);
 
-        return c.json({ sessionToken, sessionExpiresAtISO }, 200);
+        return c.json({ sessionToken, sessionExpiresAtISO, email }, 200);
     } catch (error) {
         console.error("Error with authorization_code request: ", error);
-        return c.json({ error }, 400)
+        return c.json({ error }, 400);
     }
 });
 
@@ -136,13 +148,13 @@ app.post("/api/auth/refresh", async (c) => {
         CLIENT_ID: clientId,
         CLIENT_SECRET: clientSecret,
         SUPABASE_URL: supabaseUrl,
-        SUPABASE_ANON_KEY: supabaseAnonKey
+        SUPABASE_KEY: supabaseKey,
     } = c.env;
-    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey)
+    const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
 
     const body = await c.req.json();
     const now = Math.floor(Date.now() / 1000);
-    
+
     try {
         const response = await fetch("https://oauth2.googleapis.com/token", {
             method: "POST",
@@ -158,20 +170,19 @@ app.post("/api/auth/refresh", async (c) => {
         });
 
         if (response.ok) {
-            const { access_token: accessToken, expires_in: expiresIn } =
-                (await response.json()) as OAuthTokenResponse;
+            const { access_token: accessToken, expires_in: expiresIn } = (await response.json()) as OAuthTokenResponse;
 
             return c.json(
                 {
                     accessToken,
                     expires: now + expiresIn,
                 },
-                200,
+                200
             );
         }
 
         const data = await response.json();
-        console.error("request failed:", data)
+        console.error("request failed:", data);
         return c.json({ data }, 400);
     } catch (error) {
         console.error("Error with refresh token's request: ", error);
@@ -179,20 +190,17 @@ app.post("/api/auth/refresh", async (c) => {
     }
 });
 
-app.post("/api/calendar/add-events", async(c) => {
-    const {
-        SUPABASE_URL: supabaseUrl,
-        SUPABASE_ANON_KEY: supabaseAnonKey
-    } = c.env;
+app.post("/api/calendar/add-events", async (c) => {
+    const { SUPABASE_URL: supabaseUrl, SUPABASE_KEY: supabaseKey } = c.env;
     const body = await c.req.json();
-    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey);
+    const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
 
     const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
     const userSession = await getUserSessionDetails(supabase, userId);
     if (!userSession) {
         return c.json({ error: "No session details found for this user!" }, 400);
     }
-    let { expires_at: sessionTokenExpiresAt } = userSession;
+    const { expires_at: sessionTokenExpiresAt } = userSession;
 
     if (sessionTokenExpiresAt < new Date().toISOString()) {
         return c.json({ error: "Session expired, please reauthenticate!" }, 400);
@@ -202,26 +210,29 @@ app.post("/api/calendar/add-events", async(c) => {
     if (!userOAuth) {
         return c.json({ error: "No OAuth details found!" }, 400);
     }
-    let { access_token: accessToken } = userOAuth;
+    const { access_token: accessToken } = userOAuth;
 
     try {
-        const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${body.selectedCalendar}/events`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body.event)
-        })
+        const response = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${body.selectedCalendar}/events`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(body.event),
+            }
+        );
 
         if (response.ok) {
             const data = await response.json();
-            console.log('Event created:', data);
+            console.log("Event created:", data);
             return c.json({ data }, 200);
         }
 
         const data = await response.json();
-        console.error("request failed:", data)
+        console.error("request failed:", data);
         return c.json({ data }, 400);
     } catch (error) {
         console.error("Error with add-events request: ", error);
@@ -229,20 +240,17 @@ app.post("/api/calendar/add-events", async(c) => {
     }
 });
 
-app.post("/api/calendar/get-calendar-list", async(c) => {
-    const {
-        SUPABASE_URL: supabaseUrl,
-        SUPABASE_ANON_KEY: supabaseAnonKey
-    } = c.env;
+app.post("/api/calendar/get-calendar-list", async (c) => {
+    const { SUPABASE_URL: supabaseUrl, SUPABASE_KEY: supabaseKey } = c.env;
     const body = await c.req.json();
-    const supabase = getSupabaseClient(supabaseUrl, supabaseAnonKey);
+    const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
 
     const userId = await getUserIdWithSessionToken(supabase, body.sessionToken);
     const userOAuth = await getUserOAuthDetails(supabase, userId);
     if (!userOAuth) {
         return c.json({ error: "No OAuth details found!" }, 400);
     }
-    let { access_token: accessToken } = userOAuth;
+    const { access_token: accessToken } = userOAuth;
 
     try {
         const response = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
@@ -251,7 +259,7 @@ app.post("/api/calendar/get-calendar-list", async(c) => {
                 Authorization: `Bearer ${accessToken}`,
                 "Content-Type": "application/json",
             },
-        })
+        });
 
         if (response.ok) {
             const data = await response.json();
@@ -267,4 +275,4 @@ app.post("/api/calendar/get-calendar-list", async(c) => {
     }
 });
 
-export default app
+export default app;
