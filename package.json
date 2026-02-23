@@ -8,6 +8,7 @@
     },
     "scripts": {
         "build:scraper": "rollup -c --bundleConfigAsCjs",
+        "build:scraper:prod": "BUILD=prd rollup -c --bundleConfigAsCjs",
         "watch:scraper": "rollup -c --bundleConfigAsCjs -w",
         "prepare": "husky",
         "setup": "npm install && cd backend/cloudflare-workers && npm install",

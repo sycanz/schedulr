@@ -3,3 +3,4 @@ deploy-dev-wrangler:
 
 deploy-prd-wrangler:
 	cd ./backend/cloudflare-workers && npx wrangler secret bulk .dev.vars.prd --env prd
+	cd ./backend/cloudflare-workers && npx wrangler deploy --env prd
