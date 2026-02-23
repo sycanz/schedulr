@@ -317,9 +317,8 @@ async function getFormsValue(selectedOptionValue) {
             action: "startScraper",
         });
 
-        // Show import status feedback
         const importStatus = document.getElementById("importStatus");
-        if (importStatus) {
+        if (importStatus && selectedOptionValue == 1) {
             importStatus.style.display = "block";
         }
     } catch (err) {
