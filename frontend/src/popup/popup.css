@@ -1,82 +1,108 @@
-body {
-    font-family: Arial, sans-serif;
-    width: 315px;
-    /* width: 100%; */
-    margin: 0;
+/* ── CSS Variables ── */
+:root {
+    --ctp-base: #1e1e2e;
+    --ctp-mantle: #181825;
+    --ctp-crust: #11111b;
+    --ctp-surface0: #313244;
+    --ctp-surface1: #45475a;
+    --ctp-surface2: #585b70;
+    --ctp-overlay0: #6c7086;
+    --ctp-overlay1: #7f849c;
+    --ctp-overlay2: #9399b2;
+    --ctp-subtext0: #a6adc8;
+    --ctp-subtext1: #bac2de;
+    --ctp-text: #cdd6f4;
+    --ctp-blue: #89b4fa;
+    --ctp-sapphire: #74c7ec;
+    --ctp-lavender: #b4befe;
+    --ctp-red: #f38ba8;
+    --ctp-peach: #fab387;
+    --ctp-green: #a6e3a1;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-pill: 50px;
+    --transition: all 0.2s ease;
+}
+
+/* ── Reset & Base ── */
+*,
+*::before,
+*::after {
     box-sizing: border-box;
-    background-color: #1e1e2e;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    width: 380px;
+    margin: 0;
+    background-color: var(--ctp-base);
     overflow-x: hidden;
     overflow-y: auto;
+    color: var(--ctp-text);
+    -webkit-font-smoothing: antialiased;
 }
 
+/* Custom scrollbar */
+body::-webkit-scrollbar {
+    width: 6px;
+}
+
+body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: var(--ctp-surface2);
+    border-radius: 3px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: var(--ctp-overlay0);
+}
+
+/* ── Typography ── */
 h1 {
-    font-size: 25px;
-    font-style: bold;
-    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ctp-text);
     text-align: center;
+    letter-spacing: -0.3px;
 }
 
-.firstPage {
+p,
+label {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ctp-text);
+    line-height: 1.4;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ctp-text);
+    margin-bottom: 12px;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0px 20px 20px 20px;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.2px;
 }
 
-.firstButton {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    padding: 0px 20px;
+.section-icon {
+    color: var(--ctp-blue);
+    font-size: 14px;
 }
 
-.generalForms {
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0px 20px;
-}
-
-.calForms {
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0px 20px 20px 20px;
-}
-
-.finalButton {
-    display: none;
-    justify-content: center;
-    gap: 10px;
-    padding: 0px 20px 20px 20px;
-}
-
+/* ── Header ── */
 .header-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 10px;
-}
-
-.backButton button {
-    display: none;
-    background-color: transparent;
-    border: none;
-    padding-left: 8px;
-    cursor: pointer;
-    align-items: center;
-    gap: 8px;
-}
-
-.backButton button i {
-    color: white;
-    font-size: 15px;
-}
-
-.line {
-    border-bottom: 2px solid #89b4fa;
-    margin-top: 0px;
-    margin-bottom: 20px;
+    padding: 14px 16px 12px;
 }
 
 .middle {
@@ -85,155 +111,420 @@ h1 {
     gap: 10px;
 }
 
+.middle img {
+    border-radius: 6px;
+}
+
+.header-link {
+    display: flex;
+    align-items: center;
+    opacity: 0.85;
+    transition: var(--transition);
+}
+
+.header-link:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.header-link img {
+    border-radius: 6px;
+}
+
+/* ── Back Button ── */
+.backButton button {
+    display: none;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.backButton button:hover {
+    background-color: var(--ctp-surface0);
+}
+
+.backButton button i {
+    color: var(--ctp-text);
+    font-size: 14px;
+}
+
+/* ── Divider ── */
+.line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--ctp-blue), transparent);
+    margin: 0 16px 16px;
+    opacity: 0.6;
+}
+
+/* ── Form Card ── */
+.form-card {
+    background: var(--ctp-surface0);
+    border: 1px solid var(--ctp-surface1);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    transition: var(--transition);
+}
+
+.form-card:hover {
+    border-color: var(--ctp-surface2);
+}
+
 form {
     background: transparent;
 }
 
-.tip {
-    margin-top: 15px;
-}
-
-p,
-label {
-    margin: 0 0 10px;
-    font-size: 14px;
-    color: #fff;
-}
-
-input[type="radio"] {
-    margin-right: 10px;
-}
-
-.button-container {
+/* ── Page 1: First Page ── */
+.firstPage {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px 16px;
+    animation: fadeInUp 0.25s ease;
 }
 
-input[type="submit"] {
-    background-color: #585b70;
-    border: 2px solid #89b4fa;
-    color: white;
-    margin-top: 5px;
-    padding: 10px;
-    border-radius: 16px;
-    cursor: pointer;
+.firstPage .section-title {
+    text-align: center;
+    justify-content: center;
     font-size: 14px;
-    justify-content: center;
+    margin-bottom: 14px;
 }
 
-input[type="submit"]:hover {
-    background-color: #a6adc8;
+/* ── Option Cards (Side by Side) ── */
+.option-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
 }
 
-/* Colour picker stuffs */
-.color-picker {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    width: 150px;
-    margin: 0 auto;
-}
-
-#colorForm input[type="radio"] {
+.option-cards input[type="radio"] {
     display: none;
 }
 
-.color-circle {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+.option-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 12px;
+    background: var(--ctp-surface0);
+    border: 2px solid var(--ctp-surface1);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    border: 2px solid transparent;
+    transition: var(--transition);
+    text-align: center;
+    min-height: 110px;
 }
 
-input[type="radio"]:checked+.color-circle {
-    border: 3px solid #FFFFFF;
+.option-card:hover {
+    border-color: var(--ctp-surface2);
+    background: var(--ctp-surface1);
+    transform: translateY(-1px);
 }
 
-/* End of colour picker stuffs */
+.option-cards input[type="radio"]:checked+.option-card {
+    border-color: var(--ctp-blue);
+    background: rgba(137, 180, 250, 0.08);
+    box-shadow: 0 0 0 1px rgba(137, 180, 250, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.2);
+}
 
-/* Loader stuffs */
+.card-icon {
+    font-size: 24px;
+    color: var(--ctp-blue);
+    transition: var(--transition);
+}
+
+.option-cards input[type="radio"]:checked+.option-card .card-icon {
+    color: var(--ctp-sapphire);
+    transform: scale(1.1);
+}
+
+.card-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ctp-subtext1);
+    line-height: 1.3;
+}
+
+.option-cards input[type="radio"]:checked+.option-card .card-text {
+    color: var(--ctp-text);
+}
+
+/* ── Tip ── */
+.tip {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ctp-overlay1);
+    text-align: center;
+    line-height: 1.5;
+}
+
+.tip strong {
+    color: var(--ctp-blue);
+}
+
+/* ── Buttons (Confirm / Submit) ── */
+.firstButton {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0 0;
+}
+
+input[type="submit"] {
+    background: var(--ctp-blue);
+    border: none;
+    color: var(--ctp-crust);
+    padding: 10px 32px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    transition: var(--transition);
+    letter-spacing: 0.2px;
+}
+
+input[type="submit"]:hover {
+    background: var(--ctp-sapphire);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(137, 180, 250, 0.25);
+}
+
+input[type="submit"]:active {
+    transform: translateY(0);
+}
+
+/* ── General Forms (Page 2) ── */
+.generalForms {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px 10px;
+    animation: fadeInUp 0.25s ease;
+}
+
+/* ── Calendar Forms ── */
+.calForms {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 20px 8px;
+    animation: fadeInUp 0.25s ease;
+}
+
+/* ── Final Button ── */
+.finalButton {
+    display: none;
+    justify-content: center;
+    padding: 12px 20px 20px;
+}
+
+/* ── Chip / Pill Radio Buttons ── */
+.chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip-group input[type="radio"] {
+    display: none;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    background: var(--ctp-base);
+    border: 1px solid var(--ctp-surface1);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ctp-subtext0);
+    transition: var(--transition);
+    user-select: none;
+}
+
+.chip:hover {
+    border-color: var(--ctp-surface2);
+    color: var(--ctp-text);
+    background: var(--ctp-surface1);
+}
+
+.chip-group input[type="radio"]:checked+.chip {
+    background: var(--ctp-blue);
+    color: var(--ctp-crust);
+    border-color: var(--ctp-blue);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(137, 180, 250, 0.2);
+}
+
+/* ── Previous Settings Button ── */
+.previousSettingsButton {
+    display: none;
+    justify-content: center;
+    padding: 0 20px;
+    margin-bottom: 12px;
+}
+
+.previousSettingsButton button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(137, 180, 250, 0.1);
+    color: var(--ctp-blue);
+    padding: 10px 20px;
+    border: 1.5px solid var(--ctp-blue);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    transition: var(--transition);
+}
+
+.previousSettingsButton button:hover {
+    background: rgba(137, 180, 250, 0.18);
+    border-color: var(--ctp-sapphire);
+    color: var(--ctp-sapphire);
+}
+
+.previousSettingsButton button i {
+    font-size: 13px;
+}
+
+/* ── Calendar List Radios (dynamically generated) ── */
+#calendarList {
+    margin-bottom: 8px;
+}
+
+#calendarList input[type="radio"] {
+    display: none;
+}
+
+#calendarList label {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    margin: 0 6px 6px 0;
+    background: var(--ctp-base);
+    border: 1px solid var(--ctp-surface1);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ctp-subtext0);
+    transition: var(--transition);
+}
+
+#calendarList label:hover {
+    border-color: var(--ctp-surface2);
+    color: var(--ctp-text);
+    background: var(--ctp-surface1);
+}
+
+#calendarList input[type="radio"]:checked+label {
+    background: var(--ctp-blue);
+    color: var(--ctp-crust);
+    border-color: var(--ctp-blue);
+    font-weight: 600;
+}
+
+/* ── Loader ── */
 .loader-container {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    padding: 4px 0;
 }
 
 .loader-container p {
     margin-bottom: 0;
+    font-size: 13px;
+    color: var(--ctp-blue);
 }
 
 .loader {
-    border: 4px solid #f3f3f3;
+    border: 3px solid var(--ctp-surface1);
     border-radius: 50%;
-    border-top: 4px solid #3498db;
-    width: 15px;
-    height: 15px;
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
+    border-top: 3px solid var(--ctp-blue);
+    width: 16px;
+    height: 16px;
+    animation: spin 0.8s linear infinite;
 }
 
-/* Previous setting stuffs */
-.previousSettingsButton {
+/* ── Account Controls ── */
+#accountControls {
     display: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ctp-surface1);
+    gap: 8px;
     justify-content: center;
-    margin: 15px 0;
 }
 
-.previousSettingsButton button {
-    background-color: #585b70;
-    color: white;
-    padding: 10px 20px;
-    border: 1px solid #89b4fa;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    width: 80%;
-    max-width: 250px;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.previousSettingsButton button:hover {
-    background-color: #a6adc8;
-}
-
-/* End of previous Settings stuffs */
-
-/* Account Management Buttons */
 .small-btn {
-    background-color: #313244;
-    color: white;
-    padding: 5px 10px;
-    border: 1px solid #89b4fa;
-    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--ctp-surface1);
+    color: var(--ctp-text);
+    padding: 8px 16px;
+    border: 1px solid var(--ctp-surface2);
+    border-radius: var(--radius-pill);
     cursor: pointer;
-    font-size: 12px;
-    transition: background-color 0.2s ease;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    transition: var(--transition);
 }
 
 .small-btn:hover {
-    background-color: #45475a;
+    background-color: var(--ctp-surface2);
+    border-color: var(--ctp-overlay0);
+    transform: translateY(-1px);
 }
 
-#accountControls {
-    display: none;
-    margin-top: 10px;
-    gap: 10px;
+.small-btn i {
+    font-size: 11px;
+}
+
+.danger-btn {
+    background-color: rgba(243, 139, 168, 0.08);
+    border-color: rgba(243, 139, 168, 0.25);
+    color: var(--ctp-red);
+}
+
+.danger-btn:hover {
+    background-color: rgba(243, 139, 168, 0.15);
+    border-color: var(--ctp-red);
+    color: var(--ctp-red);
+}
+
+/* ── User Email ── */
+.user-email {
+    display: flex;
     justify-content: center;
+    font-size: 13px;
+    color: var(--ctp-overlay2);
+    font-weight: 400;
+    font-style: italic;
 }
 
-/* End of Account Management Buttons */
-
-/* Default Color Option Styling */
+/* ── Color Picker ── */
 .color-options-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
-    margin-top: 5px;
+    gap: 12px;
+    margin-top: 4px;
 }
 
 .default-color-container {
@@ -242,42 +533,116 @@ input[type="radio"]:checked+.color-circle {
     justify-content: center;
 }
 
+#colorForm input[type="radio"] {
+    display: none;
+}
+
 .default-color-label {
-    background-color: #313244;
-    color: #89b4fa;
-    padding: 6px 20px;
-    border: 1px solid #89b4fa;
-    border-radius: 20px;
+    background-color: var(--ctp-base);
+    color: var(--ctp-blue);
+    padding: 7px 24px;
+    border: 1px solid var(--ctp-surface1);
+    border-radius: var(--radius-pill);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    transition: var(--transition);
     text-align: center;
     min-width: 80px;
 }
 
 input[name="color"]:checked+.default-color-label {
-    background-color: #89b4fa;
-    color: #1e1e2e;
+    background-color: var(--ctp-blue);
+    color: var(--ctp-crust);
 }
 
 .default-color-label:hover {
-    background-color: #45475a;
+    background-color: var(--ctp-surface1);
 }
 
-/* End of Default Color Option Styling */
-
-/* Safari */
-@-webkit-keyframes spin {
-    0% {
-        -webkit-transform: rotate(0deg);
-    }
-
-    100% {
-        -webkit-transform: rotate(360deg);
-    }
+.color-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 200px;
 }
 
+.color-circle {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--transition);
+}
+
+.color-circle:hover {
+    transform: scale(1.15);
+}
+
+input[type="radio"]:checked+.color-circle {
+    border: 3px solid var(--ctp-text);
+    box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.3);
+}
+
+/* ── Import Status Overlay ── */
+.import-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(17, 17, 27, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1000;
+}
+
+.import-overlay-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 40px;
+    background: var(--ctp-surface0);
+    border: 1px solid var(--ctp-surface1);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    animation: fadeInUp 0.3s ease;
+}
+
+.overlay-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--ctp-surface1);
+    border-top: 3px solid var(--ctp-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.overlay-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ctp-blue);
+    margin: 0;
+}
+
+.overlay-subtext {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--ctp-overlay2);
+    margin: 0;
+}
+
+/* ── Animations ── */
 @keyframes spin {
     0% {
         transform: rotate(0deg);
@@ -288,24 +653,29 @@ input[name="color"]:checked+.default-color-label {
     }
 }
 
-/* End of loader stuffs */
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
 
-.user-email {
-    display: flex;
-    font-size: 0.75rem;
-    color: #9399b2;
-    margin-top: -2px;
-    font-weight: normal;
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
 }
 
-.import-status {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #89b4fa;
-    font-weight: 500;
-    font-size: 0.9rem;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.import-status i {
+/* ── General Radio Override (for dynamically generated radios) ── */
+input[type="radio"] {
     margin-right: 8px;
 }

@@ -5,11 +5,15 @@
     <!-- Meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="popup.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
+    <!-- Header -->
     <div class="header-container">
         <div class="backButton">
             <button id="backButton">
@@ -17,142 +21,203 @@
             </button>
         </div>
         <div class="middle">
-            <img src="../../../images/magnify128.png" width=30px height=auto></img>
+            <img src="../../../images/magnify128.png" width="28" height="28" alt="Schedulr icon">
             <h1>Schedulr</h1>
         </div>
-        <a href="https://hackerspacemmu.rocks/" target="_blank">
-            <img src="../../../images/hackerspace.png" width=40px height=auto></img>
+        <a href="https://hackerspacemmu.rocks/" target="_blank" class="header-link">
+            <img src="../../../images/hackerspace.png" width="36" alt="Hackerspace">
         </a>
     </div>
 
     <div class="line"></div>
 
+    <!-- Apply Previous Settings -->
     <div class="previousSettingsButton">
-        <button id="fillPreviousSettings" type="button">Apply previous settings</button>
+        <button id="fillPreviousSettings" type="button">
+            <i class="fa fa-clock-rotate-left"></i>
+            Apply previous settings
+        </button>
     </div>
 
+    <!-- Page 1: Action Selection -->
     <div class="firstPage">
         <form id="optionForm">
-            <p>What do you want to perform?</p>
-            <input type="radio" id="cal" name="option" value="1">
-            <label for="cal">Transfer to Google Calendar</label><br>
-            <input type="radio" id="ics" name="option" value="2">
-            <label for="ics">Download .ics file</label><br>
+            <p class="section-title">What would you like to do?</p>
+
+            <div class="option-cards">
+                <input type="radio" id="cal" name="option" value="1">
+                <label for="cal" class="option-card">
+                    <i class="fa fa-calendar-plus card-icon"></i>
+                    <span class="card-text">Transfer to Google Calendar</span>
+                </label>
+
+                <input type="radio" id="ics" name="option" value="2">
+                <label for="ics" class="option-card">
+                    <i class="fa fa-file-arrow-down card-icon"></i>
+                    <span class="card-text">Download .ics file</span>
+                </label>
+            </div>
 
             <div class="firstButton">
                 <input type="submit" value="Confirm">
             </div>
+
             <p class="tip"><em><strong>Tip</strong>: An .ics file lets you import events into other calendar apps like
                     Outlook.</em></p>
         </form>
     </div>
 
+    <!-- Page 2: General Settings -->
     <div class="generalForms">
+
+        <!-- Semester Duration -->
         <form id="semesterForm">
-            <p>How many weeks of classes: </p>
-            <input type="radio" id="short" name="semester" value="7">
-            <label for="short">Short semester (7 weeks)</label><br>
-            <input type="radio" id="long" name="semester" value="14">
-            <label for="long">Long semester (14 weeks)</label><br>
+            <div class="form-card">
+                <p class="section-title"><i class="fa fa-graduation-cap section-icon"></i> Semester Duration</p>
+                <div class="chip-group">
+                    <input type="radio" id="short" name="semester" value="7">
+                    <label for="short" class="chip">Short (7 weeks)</label>
+
+                    <input type="radio" id="long" name="semester" value="14">
+                    <label for="long" class="chip">Long (14 weeks)</label>
+                </div>
+            </div>
         </form>
 
+        <!-- Event Format -->
         <form id="eventFormatForm">
-            <p>Pick your event format: </p>
-            <input type="radio" id="first" name="format" value="1">
-            <label for="first">Subject Code - Section (Type)</label><br>
-            <input type="radio" id="second" name="format" value="2">
-            <label for="second">Subject Name - Section (Type)</label><br>
-            <input type="radio" id="third" name="format" value="3">
-            <label for="third">Subject Name - Code - Section (Type)</label><br>
+            <div class="form-card">
+                <p class="section-title"><i class="fa fa-tag section-icon"></i> Event Format</p>
+                <div class="chip-group">
+                    <input type="radio" id="first" name="format" value="1">
+                    <label for="first" class="chip">Code - Section</label>
+
+                    <input type="radio" id="second" name="format" value="2">
+                    <label for="second" class="chip">Name - Section</label>
+
+                    <input type="radio" id="third" name="format" value="3">
+                    <label for="third" class="chip">Name - Code - Section</label>
+                </div>
+            </div>
         </form>
 
+        <!-- Reminder -->
         <form id="reminderForm">
-            <p>Reminder for events: </p>
-            <input type="radio" id="none" name="reminder" value="none">
-            <label for="minutes">No reminder</label><br>
-            <input type="radio" id="minutes" name="reminder" value="30">
-            <label for="minutes">30 minutes before</label><br>
-            <input type="radio" id="hour" name="reminder" value="60">
-            <label for="hour">1 hour before</label><br>
+            <div class="form-card">
+                <p class="section-title"><i class="fa fa-bell section-icon"></i> Reminder</p>
+                <div class="chip-group">
+                    <input type="radio" id="none" name="reminder" value="none">
+                    <label for="none" class="chip">None</label>
+
+                    <input type="radio" id="minutes" name="reminder" value="30">
+                    <label for="minutes" class="chip">30 min</label>
+
+                    <input type="radio" id="hour" name="reminder" value="60">
+                    <label for="hour" class="chip">1 hour</label>
+                </div>
+            </div>
         </form>
 
+        <!-- Defected CLiC -->
         <form id="defectForm">
-            <p>Defected CLiC?:</p>
-            <input type="radio" id="yes" name="defected" value="yes">
-            <label for="minutes">Yes</label><br>
-            <input type="radio" id="no" name="defected" value="no">
-            <label for="minutes">No</label><br>
+            <div class="form-card">
+                <p class="section-title"><i class="fa fa-triangle-exclamation section-icon"></i> Defected CLiC?</p>
+                <div class="chip-group">
+                    <input type="radio" id="yes" name="defected" value="yes">
+                    <label for="yes" class="chip">Yes</label>
+
+                    <input type="radio" id="no" name="defected" value="no">
+                    <label for="no" class="chip">No</label>
+                </div>
+            </div>
         </form>
+
     </div>
 
-    <div class="calForms">>
+    <!-- Calendar-specific Forms -->
+    <div class="calForms">
         <form id="calendarForm">
-            <p>Calendar to insert event to:</p>
+            <div class="form-card">
+                <p class="section-title"><i class="fa fa-calendar section-icon"></i> Calendar</p>
 
-            <div id="calendarList"></div>
+                <div id="calendarList"></div>
 
-            <div class="loader-container">
-                <div class="loader" id="loader"></div>
-            </div>
+                <div class="loader-container">
+                    <div class="loader" id="loader"></div>
+                </div>
 
-            <div id="userEmail" class="user-email"></div>
-            <div id="accountControls">
-                <button id="resyncButton" type="button" class="small-btn">Resync</button>
-                <button id="logoutButton" type="button" class="small-btn">Logout</button>
+                <div id="userEmail" class="user-email"></div>
+                <div id="accountControls">
+                    <button id="resyncButton" type="button" class="small-btn">
+                        <i class="fa fa-rotate"></i> Resync
+                    </button>
+                    <button id="logoutButton" type="button" class="small-btn danger-btn">
+                        <i class="fa fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
             </div>
         </form>
 
         <form id="colorForm">
-            <p>Color for events: </p>
-            <div class="color-options-container">
-                <div class="default-color-container">
-                    <input type="radio" id="Default" name="color" value="default">
-                    <label for="Default" class="default-color-label">Default</label>
+            <div class="form-card">
+                <p class="section-title"><i class="fa fa-palette section-icon"></i> Event Color</p>
+                <div class="color-options-container">
+                    <div class="default-color-container">
+                        <input type="radio" id="Default" name="color" value="default">
+                        <label for="Default" class="default-color-label">Default</label>
+                    </div>
+
+                    <div class="color-picker">
+                        <input type="radio" id="Lavender" name="color" value="1">
+                        <label for="Lavender" class="color-circle" style="background-color: #a4bdfc;"></label>
+
+                        <input type="radio" id="Sage" name="color" value="2">
+                        <label for="Sage" class="color-circle" style="background-color: #7ae7bf;"></label>
+
+                        <input type="radio" id="Grape" name="color" value="3">
+                        <label for="Grape" class="color-circle" style="background-color: #dbadff;"></label>
+
+                        <input type="radio" id="Flamingo" name="color" value="4">
+                        <label for="Flamingo" class="color-circle" style="background-color: #ff887c;"></label>
+
+                        <input type="radio" id="Banana" name="color" value="5">
+                        <label for="Banana" class="color-circle" style="background-color: #fbd75b;"></label>
+
+                        <input type="radio" id="Tangerine" name="color" value="6">
+                        <label for="Tangerine" class="color-circle" style="background-color: #ffb878;"></label>
+
+                        <input type="radio" id="Peacock" name="color" value="7">
+                        <label for="Peacock" class="color-circle" style="background-color: #46d6db;"></label>
+
+                        <input type="radio" id="Blueberry" name="color" value="9">
+                        <label for="Blueberry" class="color-circle" style="background-color: #5484ed;"></label>
+
+                        <input type="radio" id="Basil" name="color" value="10">
+                        <label for="Basil" class="color-circle" style="background-color: #51b749;"></label>
+
+                        <input type="radio" id="Tomato" name="color" value="11">
+                        <label for="Tomato" class="color-circle" style="background-color: #dc2127;"></label>
+                    </div>
                 </div>
-
-                <div class="color-picker">
-                    <input type="radio" id="Lavender" name="color" value="1">
-                    <label for="Lavender" class="color-circle" style="background-color: #a4bdfc;"></label>
-
-                    <input type="radio" id="Sage" name="color" value="2">
-                    <label for="Sage" class="color-circle" style="background-color: #7ae7bf;"></label>
-
-                    <input type="radio" id="Grape" name="color" value="3">
-                    <label for="Grape" class="color-circle" style="background-color: #dbadff;"></label>
-
-                    <input type="radio" id="Flamingo" name="color" value="4">
-                    <label for="Flamingo" class="color-circle" style="background-color: #ff887c;"></label>
-
-                    <input type="radio" id="Banana" name="color" value="5">
-                    <label for="Banana" class="color-circle" style="background-color: #fbd75b;"></label>
-
-                    <input type="radio" id="Tangerine" name="color" value="6">
-                    <label for="Tangerine" class="color-circle" style="background-color: #ffb878;"></label>
-
-                    <input type="radio" id="Peacock" name="color" value="7">
-                    <label for="Peacock" class="color-circle" style="background-color: #46d6db;"></label>
-
-                    <input type="radio" id="Blueberry" name="color" value="9">
-                    <label for="Blueberry" class="color-circle" style="background-color: #5484ed;"></label>
-
-                    <input type="radio" id="Basil" name="color" value="10">
-                    <label for="Basil" class="color-circle" style="background-color: #51b749;"></label>
-
-                    <input type="radio" id="Tomato" name="color" value="11">
-                    <label for="Tomato" class="color-circle" style="background-color: #dc2127;"></label>
-                </div>
+            </div>
         </form>
     </div>
 
-    <div id="importStatus" class="import-status" style="display: none;">
-        <div class="loader-container">
-            <div class="loader" id="loader"></div>
-            <p>Importing to calendar...</p>
+    <!-- Import Status Overlay -->
+    <div id="importStatus" class="import-overlay" style="display: none;">
+        <div class="import-overlay-content">
+            <div class="overlay-spinner" id="loader"></div>
+            <p class="overlay-text">Importing to calendar...</p>
+            <p class="overlay-subtext">Please don't close this window</p>
         </div>
     </div>
+
+    <!-- Submit Button -->
     <div class="finalButton">
         <input type="submit" value="Submit">
     </div>
+
+    <!-- Scripts -->
     <script type="module" src="popup.js"></script>
     <script type="module" src="../scripts/edit-cal-choice.js"></script>
     <script type="module" src="../scripts/btn-behaviour.js"></script>
