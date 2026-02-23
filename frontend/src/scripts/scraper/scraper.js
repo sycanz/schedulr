@@ -9,7 +9,7 @@ import { icalBlob } from "./createIcs.js";
 import {
     showErrorNotification,
     showSuccessNotification,
-} from "../utils/errorNotifier.js";
+} from "../utils/msgNotifier.js";
 import { getStorageData } from "../auth/authFlow.js";
 import {
     addZeroToDate,
@@ -73,15 +73,24 @@ export async function dataProc(
     // Show alert only if an operation was successful
     if (googleCalendarSuccess && icsDownloadSuccess) {
         showSuccessNotification(
-            "Timetable transferred to Google Calendar and .ics file downloaded!"
+            "Timetable transferred to Google Calendar and .ics file downloaded!",
+            "Schedulr Success",
+            false,
+            true
         );
     } else if (googleCalendarSuccess) {
         showSuccessNotification(
-            "Timetable successfully transferred to Google Calendar!"
+            "Timetable successfully transferred to Google Calendar!",
+            "Schedulr Success",
+            false,
+            true
         );
     } else if (icsDownloadSuccess) {
         showSuccessNotification(
-            ".ics file downloaded! Now you can import it into a calendar of your choice."
+            ".ics file downloaded! Now you can import it into a calendar of your choice.",
+            "Schedulr Success",
+            false,
+            true
         );
     } else {
         showErrorNotification(
@@ -254,6 +263,7 @@ function lectFlow(iframeElement) {
 
                     const day = days[colIndex - 1];
                     const startDate = formatDate(dates[colIndex], year);
+                    const endDate = formatDate(dates[colIndex], year);
 
                     /*
                 Let user choose thier own event format:
@@ -270,7 +280,7 @@ function lectFlow(iframeElement) {
                     }
 
                     console.log(
-                        `Summary: ${summary}, Location: ${result.classLocation}, Day: ${day}, startDateTime: ${startDate}T${result.startTime}, endDateTime: ${startDate}T${result.endTime}`
+                        `Summary: ${summary}, Location: ${result.classLocation}, Day: ${day}, startDateTime: ${startDate}T${result.startTime}, endDateTime: ${endDate}T${result.endTime}`
                     );
 
                     // If class is 2 hours, mark slot below as "True"
@@ -291,7 +301,7 @@ function lectFlow(iframeElement) {
                         result.classLocation,
                         startDate,
                         result.startTime,
-                        startDate,
+                        endDate,
                         result.endTime
                     );
                     // Append to array after defining events
@@ -335,8 +345,8 @@ async function groupData(
 ) {
     let { classCode, classNameOnly } = procClassName(className);
     let { classType, classSect } = procClassDetails(classDetails);
-    let { startTime, endTime } = procClassTimes(classTimes);
     let { startDate } = procClassDates(classDates);
+    let { startTime, endTime } = procClassTimes(classTimes);
     let { classDayText } = procClassDay(classDay);
 
     const { selectedDefects: selectedDefect } = await getStorageData([

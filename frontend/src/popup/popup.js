@@ -1,6 +1,6 @@
 import { selectRadioButton } from "../scripts/utils/autoSelect.js";
 import { isNotANewcomer } from "../scripts/utils/firstTimer.js";
-import { showErrorNotification } from "../scripts/utils/errorNotifier.js";
+import { showErrorNotification } from "../scripts/utils/msgNotifier.js";
 import { setStorageData } from "../scripts/auth/authFlow.js";
 
 // program starts here
@@ -40,6 +40,9 @@ chrome.runtime.onMessage.addListener(async (message) => {
         setAttributes(calData);
     } else if (message.action === "showAlert") {
         window.alert(message.error);
+        if (message.closePopup) {
+            window.close();
+        }
     }
 });
 
@@ -65,10 +68,14 @@ document.getElementById("resyncButton").addEventListener("click", () => {
 document.getElementById("logoutButton").addEventListener("click", async () => {
     console.log("Logout button pressed");
     if (confirm("Are you sure you want to logout?")) {
-        await chrome.storage.local.clear();
+        await chrome.storage.local.remove([
+            "session_token",
+            "session_expires_at_iso",
+            "selectedCalendars",
+        ]);
         isCalendarFetched = false;
         showPreviousPage();
-        location.reload(); // Refresh to clear state
+        location.reload();
     }
 });
 
