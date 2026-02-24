@@ -2,6 +2,7 @@
     "name": "schedulr",
     "scripts": {
         "dev": "wrangler dev",
+        "prd": "wrangler dev --env prd",
         "deploy": "wrangler deploy --minify",
         "cf-typegen": "wrangler types --env-interface CloudflareBindings",
         "lint": "eslint src/**/*.ts",
