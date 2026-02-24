@@ -1,3 +1,5 @@
+import { getStorageData } from "../auth/authFlow.js";
+
 export function procClassName(className) {
     // console.log(className.trim());
     let splitClassName = className.trim().split(/\s+/);
@@ -69,4 +71,34 @@ export function procClassTimes(classTimes) {
 export function procClassDay(classDay) {
     let classDayText = classDay.split(":")[1].trim();
     return { classDayText };
+}
+
+export async function procDateDefects(startDate, classDayText) {
+    const { selectedDefects: selectedDefect } = await getStorageData(["selectedDefects"]);
+    let parsedStartDate = startDate.split("-");
+    if (selectedDefect == "yes") {
+        let updatedDate;
+        switch (classDayText) {
+            case "Monday":
+                updatedDate = parsedStartDate[2];
+                break;
+            case "Tuesday":
+                updatedDate = (parseInt(parsedStartDate[2]) + 1).toString();
+                break;
+            case "Wednesday":
+                updatedDate = (parseInt(parsedStartDate[2]) + 2).toString();
+                break;
+            case "Thursday":
+                updatedDate = (parseInt(parsedStartDate[2]) + 3).toString();
+                break;
+            case "Friday":
+                updatedDate = (parseInt(parsedStartDate[2]) + 4).toString();
+                break;
+            default:
+                updatedDate = parsedStartDate[2];
+        }
+
+        startDate = `${parsedStartDate[0]}-${parsedStartDate[1]}-${updatedDate}`;
+    }
+    return startDate;
 }
