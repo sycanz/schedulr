@@ -8,24 +8,22 @@ dotenv.config();
 
 const isProduction = process.env.BUILD === "prd";
 
+const getReplacementValue = (prodVar, devVar) => {
+    const val = isProduction ? process.env[prodVar] : process.env[devVar];
+    if (isProduction && !val) {
+        throw new Error(`CRITICAL: Missing mandatory production environment variable: ${prodVar}`);
+    }
+    return JSON.stringify(val || "");
+};
+
 const replacePlugin = replace({
     preventAssignment: true,
-    __CLIENT_ID__: JSON.stringify(isProduction ? process.env.CLIENT_ID_PROD : process.env.CLIENT_ID),
-    __CFW_AUTH_ENDPOINT__: JSON.stringify(
-        isProduction ? process.env.CFW_AUTH_ENDPOINT_PROD : process.env.CFW_AUTH_ENDPOINT_DEV
-    ),
-    __CFW_REFRESH_ENDPOINT__: JSON.stringify(
-        isProduction ? process.env.CFW_REFRESH_ENDPOINT_PROD : process.env.CFW_REFRESH_ENDPOINT_DEV
-    ),
-    __CFW_CHECK_RETURN_USER_ENDPOINT__: JSON.stringify(
-        isProduction ? process.env.CFW_CHECK_RETURN_USER_ENDPOINT_PROD : process.env.CFW_CHECK_RETURN_USER_ENDPOINT_DEV
-    ),
-    __CFW_GET_CALENDAR_ENDPOINT__: JSON.stringify(
-        isProduction ? process.env.CFW_GET_CALENDAR_ENDPOINT_PROD : process.env.CFW_GET_CALENDAR_ENDPOINT_DEV
-    ),
-    __CFW_ADD_NEW_EVENT_ENDPOINT__: JSON.stringify(
-        isProduction ? process.env.CFW_ADD_NEW_EVENT_ENDPOINT_PROD : process.env.CFW_ADD_NEW_EVENT_ENDPOINT_DEV
-    ),
+    __CLIENT_ID__: getReplacementValue("CLIENT_ID_PROD", "CLIENT_ID"),
+    __CFW_AUTH_ENDPOINT__: getReplacementValue("CFW_AUTH_ENDPOINT_PROD", "CFW_AUTH_ENDPOINT_DEV"),
+    __CFW_REFRESH_ENDPOINT__: getReplacementValue("CFW_REFRESH_ENDPOINT_PROD", "CFW_REFRESH_ENDPOINT_DEV"),
+    __CFW_CHECK_RETURN_USER_ENDPOINT__: getReplacementValue("CFW_CHECK_RETURN_USER_ENDPOINT_PROD", "CFW_CHECK_RETURN_USER_ENDPOINT_DEV"),
+    __CFW_GET_CALENDAR_ENDPOINT__: getReplacementValue("CFW_GET_CALENDAR_ENDPOINT_PROD", "CFW_GET_CALENDAR_ENDPOINT_DEV"),
+    __CFW_ADD_NEW_EVENT_ENDPOINT__: getReplacementValue("CFW_ADD_NEW_EVENT_ENDPOINT_PROD", "CFW_ADD_NEW_EVENT_ENDPOINT_DEV"),
 });
 
 const resolvePlugins = [

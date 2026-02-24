@@ -92,13 +92,14 @@ jobs:
       - name: Create production environment file
         run: |
           cd backend/cloudflare-workers
-          # Create .dev.vars.prd file with production secrets
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID_PROD }}" > .dev.vars.prd
-          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET_PROD }}" >> .dev.vars.prd
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .dev.vars.prd
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .dev.vars.prd
-          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .dev.vars.prd
-          echo "CFW_REFRESH_ENDPOINT=${{ secrets.CFW_REFRESH_ENDPOINT_PROD }}" >> .dev.vars.prd
+          cat <<EOF > .dev.vars.prd
+          CLIENT_ID=${{ secrets.CLIENT_ID_PROD }}
+          CLIENT_SECRET=${{ secrets.CLIENT_SECRET_PROD }}
+          REDIRECT_URI=${{ secrets.REDIRECT_URI }}
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+          CFW_REFRESH_ENDPOINT=${{ secrets.CFW_REFRESH_ENDPOINT_PROD }}
+          EOF
 
       - name: Deploy to Cloudflare Workers using Makefile
         run: make deploy-prd-wrangler
