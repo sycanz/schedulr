@@ -96,7 +96,7 @@ export async function insertOAuthDetails(
             access_token: accessToken,
             refresh_token: refreshToken,
             access_token_expires_at: expiresAtISO,
-            scope: "openid profile email calendar",
+            scope: "openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
         },
         {
             onConflict: "user_id",
