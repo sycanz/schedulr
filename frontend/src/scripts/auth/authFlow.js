@@ -65,7 +65,7 @@ export async function onLaunchWebAuthFlow() {
     const clientId = __CLIENT_ID__;
     const state = Math.random().toString(36).substring(7);
     const scope =
-        "openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events";
+        "openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar";
     const redirectUri = chrome.identity.getRedirectURL("oauth");
 
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
