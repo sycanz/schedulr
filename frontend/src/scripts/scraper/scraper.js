@@ -1,12 +1,19 @@
-import { procClassName, procClassDetails, procClassDates, procClassTimes, procClassDay } from "../utils/studProc.js";
+import {
+    procClassName,
+    procClassDetails,
+    procClassDates,
+    procClassTimes,
+    procClassDay,
+    procDateDefects,
+} from "../utils/studProc.js";
 import { icalBlob } from "./createIcs.js";
 import { showErrorNotification, showSuccessNotification } from "../utils/msgNotifier.js";
-import { getStorageData } from "../auth/authFlow.js";
 import { addZeroToDate, createArray, procData, formatDate, rowSpan, handleMultiHourClass } from "../utils/lectProc.js";
 
 // object for easy access to common vars
 let config = {};
 let classEvents = [];
+let classWeekEvents = [];
 let googleCalendarSuccess = false;
 let icsDownloadSuccess = false;
 
@@ -120,14 +127,39 @@ async function studentFlow() {
                 let classTimesText = classTimes[i].textContent.trim();
                 let classLocText = classLoc[i].textContent.trim();
 
-                await groupData(
-                    classNameText,
-                    classDetailsText,
-                    classDatesText,
-                    classDaysText,
-                    classTimesText,
-                    classLocText
-                );
+                let { startDate } = procClassDates(classDatesText);
+                let { classDayText } = procClassDay(classDaysText);
+                startDate = await procDateDefects(startDate, classDayText);
+
+                await groupData(classNameText, classDetailsText, startDate, classTimesText, classLocText);
+
+                // add week number
+                if (classWeekEvents.length === 0) {
+                    const parsedStartDate = startDate.split("-");
+                    const date = new Date(parsedStartDate[0], parsedStartDate[1] - 1, parsedStartDate[2]);
+                    const numWeeks = parseInt(config.selectedSemesterValue);
+
+                    const formatYMD = (d) => {
+                        const m = String(d.getMonth() + 1).padStart(2, "0");
+                        const day = String(d.getDate()).padStart(2, "0");
+                        return `${d.getFullYear()}-${m}-${day}`;
+                    };
+
+                    for (let w = 1; w <= numWeeks; w++) {
+                        const mondayOfWeekDate = new Date(date);
+                        mondayOfWeekDate.setDate(date.getDate() - date.getDay() + 1 + (w - 1) * 7);
+
+                        const fridayOfWeekDate = new Date(mondayOfWeekDate);
+                        fridayOfWeekDate.setDate(mondayOfWeekDate.getDate() + 4);
+
+                        const eventWeek = craftCalWeekEvent(
+                            formatYMD(mondayOfWeekDate),
+                            formatYMD(fridayOfWeekDate),
+                            w
+                        );
+                        classWeekEvents.push(eventWeek);
+                    }
+                }
             }
         }
     }
@@ -285,39 +317,10 @@ function lectFlow(iframeElement) {
 /* End of flow types */
 
 // =============== Helper functions ===============
-async function groupData(className, classDetails, classDates, classDay, classTimes, classLoc) {
+async function groupData(className, classDetails, startDate, classTimes, classLoc) {
     let { classCode, classNameOnly } = procClassName(className);
     let { classType, classSect } = procClassDetails(classDetails);
-    let { startDate } = procClassDates(classDates);
     let { startTime, endTime } = procClassTimes(classTimes);
-    let { classDayText } = procClassDay(classDay);
-
-    const { selectedDefects: selectedDefect } = await getStorageData(["selectedDefects"]);
-    let parsedStartDate = startDate.split("-");
-    if (selectedDefect == "yes") {
-        let updatedDate;
-        switch (classDayText) {
-            case "Monday":
-                updatedDate = parsedStartDate[2];
-                break;
-            case "Tuesday":
-                updatedDate = (parseInt(parsedStartDate[2]) + 1).toString();
-                break;
-            case "Wednesday":
-                updatedDate = (parseInt(parsedStartDate[2]) + 2).toString();
-                break;
-            case "Thursday":
-                updatedDate = (parseInt(parsedStartDate[2]) + 3).toString();
-                break;
-            case "Friday":
-                updatedDate = (parseInt(parsedStartDate[2]) + 4).toString();
-                break;
-            default:
-                updatedDate = parsedStartDate[2];
-        }
-
-        startDate = `${parsedStartDate[0]}-${parsedStartDate[1]}-${updatedDate}`;
-    }
 
     // console.log(classCode, ",", classNameOnly, ",", classType, ",", classSect, ",", startDate, "-", endDate, ",", startTime, ",", endTime, ",", classLoc);
 
@@ -373,6 +376,30 @@ function craftCalEvent(summary, classLocation, startDate, formattedStartTime, en
     return event;
 }
 
+function craftCalWeekEvent(startDate, endDate, weekNumber) {
+    let event = {
+        summary: `Week ${weekNumber}`,
+        start: {
+            date: startDate,
+            timeZone: "Asia/Kuala_Lumpur",
+        },
+        end: {
+            date: endDate,
+            timeZone: "Asia/Kuala_Lumpur",
+        },
+        reminders: {
+            useDefault: false,
+            overrides: [],
+        },
+    };
+
+    if (config.selectedOptionValue != 2 && config.selectedColorValue !== "default") {
+        event.colorId = config.selectedColorValue;
+    }
+
+    return event;
+}
+
 async function syncGoogleCalendar() {
     if (classEvents.length === 0) {
         showErrorNotification("No events to sync. Please make sure timetable data was loaded correctly.");
@@ -403,6 +430,31 @@ async function syncGoogleCalendar() {
         } else {
             const errorData = await response.json();
             console.error("Error adding event:", errorData);
+            errorCount++;
+        }
+    }
+
+    // create calendar week numbers
+    for (const newWeekEvent of classWeekEvents) {
+        const response = await fetch(__CFW_ADD_NEW_EVENT_ENDPOINT__, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                event: newWeekEvent,
+                selectedCalendar: config.selectedCalendar,
+                sessionToken: config.sessionToken,
+            }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Week Event added successfully:", data);
+            successCount++;
+        } else {
+            const errorData = await response.json();
+            console.error("Error adding week event:", errorData);
             errorCount++;
         }
     }
