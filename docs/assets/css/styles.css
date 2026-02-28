@@ -1083,3 +1083,88 @@ kbd {
     padding: 30px 4%;
   }
 }
+
+/* ============================================================
+   TNG QR Modal
+   ============================================================ */
+.qr-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-modal.open {
+  display: flex;
+}
+
+.qr-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.qr-modal-content {
+  position: relative;
+  z-index: 1;
+  background: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface1);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  animation: fadeUp 0.25s ease;
+}
+
+.qr-modal-content h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ctp-text);
+  margin-bottom: 10px;
+}
+
+.qr-modal-content p {
+  font-size: 14px;
+  color: var(--ctp-subtext0);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.qr-modal-content img {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ctp-surface1);
+  margin: 0 auto;
+}
+
+.qr-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: var(--ctp-surface0);
+  border: none;
+  color: var(--ctp-subtext1);
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), color var(--transition);
+}
+
+.qr-modal-close:hover {
+  background: var(--ctp-surface1);
+  color: var(--ctp-text);
+}

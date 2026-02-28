@@ -32,6 +32,31 @@
         });
     });
 
+    // TNG QR Modal
+    const qrModal = document.getElementById('qrModal');
+    const qrModalBackdrop = document.getElementById('qrModalBackdrop');
+    const qrModalClose = document.getElementById('qrModalClose');
+
+    function openQrModal(e) {
+        if (e) e.preventDefault();
+        if (qrModal) qrModal.classList.add('open');
+    }
+
+    function closeQrModal() {
+        if (qrModal) qrModal.classList.remove('open');
+    }
+
+    // Wire up all support triggers on the page (nav + footer)
+    document.querySelectorAll('[id^="support"]').forEach(function (el) {
+        el.addEventListener('click', openQrModal);
+    });
+
+    if (qrModalBackdrop) qrModalBackdrop.addEventListener('click', closeQrModal);
+    if (qrModalClose) qrModalClose.addEventListener('click', closeQrModal);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeQrModal();
+    });
+
     // FAQ accordion
     document.querySelectorAll('.faq-question').forEach(function (btn) {
         btn.addEventListener('click', function () {

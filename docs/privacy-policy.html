@@ -43,8 +43,8 @@
                 </a>
             </li>
             <li>
-                <a class="rightside" href="https://ko-fi.com/sycanz" target="_blank" rel="noopener">
-                    <i class="fa fa-mug-hot"></i> Buy me a coffee
+                <a class="rightside" href="#" id="supportNavBtn">
+                    <i class="fa fa-heart"></i> Support
                 </a>
             </li>
         </ul>
@@ -54,88 +54,181 @@
     <div class="body">
         <div class="privacy-policy">
             <h2>Privacy Policy for Schedulr Chrome Extension</h2>
-            <p><strong>Effective Date:</strong> 14 August 2024</p>
+            <p><strong>Effective Date:</strong> 1 March 2026</p>
 
-            <p>Thank you for using "Schedulr," a Chrome extension that helps you scrape your timetable from the CliC
-                platform and insert it
-                into Google Calendar. I value your privacy and am committed to protecting your personal information.
-                This Privacy Policy outlines
-                how I collect, use, and safeguard your data when you use my extension.</p>
+            <p>Thank you for using "Schedulr," a Chrome extension that helps you import your timetable from the MMU
+                CliC platform into your calendar. I value your privacy and am committed to being transparent about how
+                your data is handled. This Privacy Policy explains what information is collected, why it is needed,
+                and how it is stored and protected.</p>
 
             <div class="privacy-section">
                 <h3>1. Information I Collect</h3>
-                <p><strong>Google Account Information:</strong> The extension requires access to your Google Calendar
-                    account to insert your
-                    timetable. This is managed through OAuth2 authentication, and only the necessary scopes to manage
-                    calendar events
-                    are requested.</p>
-                <p><strong>Timetable Data:</strong> The extension scrapes your timetable data from the CliC platform to
-                    populate events in
-                    your Google Calendar.</p>
+
+                <p><strong>Google Account Information (via OAuth 2.0):</strong> When you authenticate with Google,
+                    the Extension initiates a standard OAuth 2.0 authorization code flow using
+                    <code>chrome.identity.launchWebAuthFlow</code>. The authorization code is sent securely to my
+                    backend (Cloudflare Workers), which exchanges it with Google for the following tokens:
+                </p>
+                <ul style="padding-left: 22px; margin-bottom: 14px;">
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">Access token</strong>: used to make Google Calendar API calls on your
+                        behalf.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">Refresh token</strong>: used to obtain a new access token when the
+                        current one expires, so you don't need to re-authenticate every session.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">ID token</strong>: decoded server-side to extract your Google
+                        account's display name, email address, and unique account identifier (<code>sub</code>). This is
+                        used to identify your account in the system.</li>
+                </ul>
+
+                <p><strong>Data stored in the backend database (Supabase):</strong> The following information is
+                    stored securely on my backend to enable the OAuth session management:</p>
+                <ul style="padding-left: 22px; margin-bottom: 14px;">
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">users table:</strong> Your Google email address, display name, and
+                        Google account <code>sub</code> (a unique, opaque identifier assigned by Google).</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">oauth_tokens table:</strong> Your access token, refresh token, token
+                        expiry timestamp, and the list of OAuth scopes granted.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">sessions table:</strong> A randomly generated session token (UUID),
+                        session expiry time (30 minutes), your IP address at the time of login, and your browser's
+                        User-Agent string. These are used solely to validate active sessions and prevent session
+                        hijacking.</li>
+                </ul>
+
+                <p><strong>Data stored locally in your browser:</strong> The Extension stores the following in
+                    <code>chrome.storage.local</code> (on your device only):
+                </p>
+                <ul style="padding-left: 22px; margin-bottom: 14px;">
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;">Your session
+                        token and its expiry time.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;">Your Google
+                        email address (for display purposes in the extension UI).</li>
+                </ul>
+
+                <p><strong>Timetable Data:</strong> The Extension reads your timetable from the CliC page you have
+                    open and uses it to construct calendar events. This data is processed locally in your browser and
+                    sent directly to the Google Calendar API — it is never stored on my servers.</p>
             </div>
 
             <div class="privacy-section">
                 <h3>2. How I Use Your Information</h3>
-                <p><strong>Google Calendar Integration:</strong> The sole purpose of this extension is to add your
-                    scraped timetable events
-                    into your Google Calendar. No data is stored or transmitted to any external servers, and all data
-                    handling is done locally
-                    within your browser.</p>
-                <p><strong>User Authentication:</strong> OAuth2 is used to authenticate your Google account, allowing
-                    the extension to
-                    manage your Google Calendar events.</p>
+                <p><strong>Authentication &amp; Session Management:</strong> Your Google account details and tokens
+                    are stored on the backend solely to manage your authenticated session. When you open the Extension,
+                    it validates your session token against the database. If your session has expired (after 30
+                    minutes),
+                    the backend uses your refresh token to obtain a new access token automatically — so you stay logged
+                    in without going through the Google consent screen again.</p>
+
+                <p><strong>Google Calendar Integration:</strong> Your access token is used server-side to make
+                    authorised requests to the Google Calendar API — specifically, to add your timetable events to
+                    your chosen calendar or to retrieve your calendar list.</p>
+
+                <p><strong>Security:</strong> Your IP address and User-Agent are recorded at login time to help
+                    detect and prevent session hijacking. They are never used for tracking, profiling, or advertising.
+                </p>
+
+                <p><strong>Timetable Processing:</strong> Timetable data scraped from CliC is processed locally in
+                    your browser or sent directly to Google Calendar. It is never stored on or transmitted to my
+                    servers.</p>
             </div>
 
             <div class="privacy-section">
                 <h3>3. Data Sharing and Disclosure</h3>
-                <p>I do not share, sell, or otherwise disclose your personal information to third parties.
-                    The data processed by the extension is only used for integrating your timetable into Google
-                    Calendar.</p>
+                <p>I do <strong>not</strong> sell, rent, or share your personal data with any third parties for
+                    commercial or marketing purposes. Your data is used exclusively within Schedulr to provide the
+                    timetable import service. The only external service that receives your data is:</p>
+                <ul style="padding-left: 22px; margin-bottom: 14px;">
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">Google</strong>: your access token is used to call the Google
+                        Calendar API on your behalf, in accordance with <a href="https://policies.google.com/privacy"
+                            target="_blank" rel="noopener">Google's Privacy Policy</a>.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">Supabase</strong>: used as the backend database provider to store the
+                        account, token, and session data described in Section 1. Supabase processes data in accordance
+                        with its own <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Privacy
+                            Policy</a>.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;"><strong
+                            style="color:#cdd6f4">Cloudflare</strong>: the backend API runs on Cloudflare Workers.
+                        Request metadata (such as IP address) may be processed by Cloudflare as part of network routing,
+                        in accordance with <a href="https://www.cloudflare.com/privacypolicy/" target="_blank"
+                            rel="noopener">Cloudflare's Privacy Policy</a>.</li>
+                </ul>
             </div>
 
             <div class="privacy-section">
                 <h3>4. Data Retention and Deletion</h3>
-                <p>The Schedulr Chrome extension does not collect, store, or transmit any personal data to external
-                    servers.
-                    The extension only accesses your Google Calendar to add new events (your classes) directly into your
-                    calendar.
-                    No data is retained by the extension after these events are added.</p>
-
-                <p>Since the extension does not store any data, there is no data to delete.
-                    If you wish to stop the extension from accessing your Google Calendar, you can simply remove the
-                    extension from your browser.
-                    Additionally, you can revoke the extension's access at any time through your Google Account settings
-                    by navigating to
-                    <strong>"Security &gt; Third-party apps with account access &gt; Manage third-party access"</strong>
-                    and removing Schedulr from the list.
+                <p>Your account information (name, email, <code>sub</code>), OAuth tokens, and session data are
+                    retained in the database for as long as you use the Extension. Sessions automatically expire after
+                    <strong>30 minutes</strong> of inactivity; at that point, a new session is issued the next time
+                    you open the Extension (using your stored refresh token).
                 </p>
+
+                <p><strong>To delete your data:</strong> If you wish to have all your data removed from the
+                    backend database, please contact me at
+                    <a href="mailto:aidenchan0397@gmail.com">aidenchan0397@gmail.com</a> with your Google email
+                    address and I will delete your records promptly.
+                </p>
+
+                <p>Additionally, you can revoke the Extension's access to your Google account at any time via
+                    your Google Account settings: <strong>Security &gt; Third-party apps with account access &gt;
+                        Manage third-party access</strong>, then remove Schedulr. This will invalidate your access and
+                    refresh tokens.</p>
+
+                <p>Removing the Extension from your browser will also clear any locally stored data
+                    (<code>chrome.storage.local</code>), but will not automatically remove your records from the
+                    backend database — please contact me if you'd like that done as well.</p>
             </div>
 
             <div class="privacy-section">
                 <h3>5. Security</h3>
-                <p>I take reasonable measures to protect your data while using my extension.
-                    However, please note that no method of transmission over the internet or method of electronic
-                    storage is 100% secure,
-                    and I cannot guarantee absolute security.</p>
+                <p>I take reasonable steps to protect your data:</p>
+                <ul style="padding-left: 22px; margin-bottom: 14px;">
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;">All
+                        communication between the Extension and the backend uses HTTPS.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;">OAuth tokens and
+                        session data are stored in a secured Supabase database with access restricted to the backend API
+                        only.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;">Session tokens
+                        are randomly generated UUIDs and expire after 30 minutes to limit exposure in the event of a
+                        compromise.</li>
+                    <li style="font-size: 15px; color: #a6adc8; line-height: 1.75; margin-bottom: 8px;">The backend uses
+                        state verification during the OAuth flow to prevent CSRF attacks.</li>
+                </ul>
+                <p>However, no system is 100% secure, and I cannot guarantee absolute security over the internet.</p>
             </div>
 
             <div class="privacy-section">
                 <h3>6. Your Consent</h3>
-                <p>By using the "Schedulr" extension, you consent to this Privacy Policy.</p>
+                <p>By installing and using the Schedulr extension, you consent to this Privacy Policy and the
+                    handling of your data as described above.</p>
             </div>
 
             <div class="privacy-section">
                 <h3>7. Changes to This Privacy Policy</h3>
-                <p>I may update this Privacy Policy from time to time and will notify you of any changes by posting the
-                    new Privacy Policy on this page.
-                    You are advised to review this Privacy Policy periodically for any changes.</p>
+                <p>I may update this Privacy Policy from time to time and will update the effective date accordingly.
+                    You are advised to review this page periodically for any changes. Continued use of the Extension
+                    after changes are posted constitutes acceptance of the revised Policy.</p>
             </div>
 
             <div class="privacy-section">
                 <h3>8. Contact Me</h3>
-                <p>If you have any questions or concerns about this Privacy Policy or my practices,
-                    you can reach out to me at <a href="mailto:aidenchan0397@gmail.com">aidenchan0397@gmail.com</a>.</p>
+                <p>If you have any questions, concerns, or data deletion requests regarding this Privacy Policy,
+                    please contact me at <a href="mailto:aidenchan0397@gmail.com">aidenchan0397@gmail.com</a>.</p>
             </div>
+        </div>
+    </div>
+
+    <!-- TNG QR Modal -->
+    <div class="qr-modal" id="qrModal" role="dialog" aria-modal="true" aria-label="Support via TNG">
+        <div class="qr-modal-backdrop" id="qrModalBackdrop"></div>
+        <div class="qr-modal-content">
+            <button class="qr-modal-close" id="qrModalClose" aria-label="Close">&times;</button>
+            <h3>Support MMU Schedulr</h3>
+            <p>Scan the TNG eWallet QR code below to send a donation — every cup of coffee helps! ☕</p>
+            <img src="assets/image/qr.jpeg" alt="TNG eWallet QR Code">
         </div>
     </div>
 
@@ -149,8 +242,9 @@
             <a href="index.html">Home</a>
             <a href="developers.html">Developers</a>
             <a href="privacy-policy.html">Privacy Policy</a>
+            <a href="terms-of-service.html">Terms of Service</a>
             <a href="https://github.com/sycanz/schedulr" target="_blank" rel="noopener">GitHub</a>
-            <a href="https://ko-fi.com/sycanz" target="_blank" rel="noopener">Buy me a coffee</a>
+            <a href="#" id="supportFooterBtn">Support ☕</a>
         </div>
         <div class="footer-socials">
             <a href="https://github.com/sycanz" target="_blank" rel="noopener" aria-label="GitHub">

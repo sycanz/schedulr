@@ -8,9 +8,7 @@
 
 </div>
 
-
 https://github.com/user-attachments/assets/4ee6a69a-cfb0-42d7-abf2-63661013a642
-
 
 ## Table of Content
 
@@ -76,7 +74,7 @@ Note: Some steps after step 4 may vary depending on your target calendar.
 6. Press the **Submit** button to download the .ics file.
 7. Go to your target calendar and import the .ics file.
 
-***Tip**: An .ics file lets you import events into other calendar apps like Outlook.*
+**\*Tip**: An .ics file lets you import events into other calendar apps like Outlook.\*
 
 ## Key binding ⌨️
 
@@ -270,9 +268,13 @@ Please read the [Privacy Policy](https://www.mmuschedulr.com/privacy-policy.html
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](https://github.com/sycanz/schedulr/blob/main/LICENSE)
 
-## Buy me a coffee ☕
+## Support ☕
 
-I seem to have developed a bit of an addiction to espresso shots, so if you're feeling generous, feel free to [buy me a coffee](https://ko-fi.com/sycanz)!
+If you've found this useful and want to support the project, you can send a TNG donation via the QR code below!
+
+<div align="center">
+  <img src="./images/qr.jpeg" alt="TNG eWallet QR Code" width="400" />
+</div>
 
 ## Credit 🎉
 
@@ -292,9 +294,9 @@ This project was developed at [Hackerspace MMU](https://hackerspacemmu.rocks/). 
 
 **A:** Ensure you have expanded all subjects in the "By Class" page.
 
-**Q: Do I need to grant permission every time I open the extension? And should I grant permission for both scopes in the authentication window?**
+**Q: Do I need to grant permission every time I open the extension?**
 
-**A:** You only need to grant permission once and you're good to go. And yes you absolutely should grant permission for both scopes, otherwise the extension will not work properly.
+**A:** No. Once you've granted permission, your session will remain active for **30 minutes** without needing to re-authenticate. This is by design to prevent session hijacking.
 
 **Q: Should I be worried about my privacy when using this extension?**
 
@@ -306,7 +308,7 @@ This project was developed at [Hackerspace MMU](https://hackerspacemmu.rocks/). 
 
 **Q: Are there any plans to support other browsers?**
 
-**A:** Maybe in the future, but for now, the focus is on Chrome.
+**A:** Definitely Firefox is on the roadmap, but the current focus is on Chrome and Chromium-based browsers.
 
 **Q: Can I rely on this extension for my timetable?**
 
