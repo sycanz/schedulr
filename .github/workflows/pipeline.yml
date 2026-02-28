@@ -4,6 +4,17 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     branches: [main, stg]
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - ".github/**"
+      - "LICENSE"
+      - "CONTRIBUTING.md"
+      - "CHANGELOG.md"
+      - "CODE_OF_CONDUCT.md"
+      - "SECURITY.md"
+      - "TROUBLESHOOTING.md"
+      - "QUICKSTART.md"
 
 jobs:
   secret-detection:
