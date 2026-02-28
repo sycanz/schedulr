@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="MMU Schedulr Developer Documentation — prerequisites, architecture, getting started guide, and build process for contributors.">
+    <title>Developers — MMU Schedulr</title>
+    <link rel="canonical" href="https://www.mmuschedulr.com/developers.html">
+    <link rel="icon" type="image/png" href="assets/image/magnify128.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a class="leftside" href="index.html">
+            <img src="assets/image/magnify128.png" alt="MMU Schedulr Logo">
+            MMU Schedulr
+        </a>
+        <div class="menu-icon" id="menuIcon" aria-label="Toggle navigation" role="button" tabindex="0">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul id="navLinks">
+            <li>
+                <a class="rightside" href="developers.html">
+                    <i class="fa fa-code"></i> Developers
+                </a>
+            </li>
+            <li>
+                <a class="rightside" href="privacy-policy.html">
+                    <i class="fa fa-shield-halved"></i> Privacy Policy
+                </a>
+            </li>
+            <li>
+                <a class="rightside" href="https://ko-fi.com/sycanz" target="_blank" rel="noopener">
+                    <i class="fa fa-mug-hot"></i> Buy me a coffee
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Developer Docs -->
+    <main class="dev-docs">
+        <h1>Developer Documentation 📚</h1>
+        <p>Everything you need to understand, set up, and contribute to Schedulr.</p>
+
+        <!-- Prerequisites -->
+        <h1>Prerequisites</h1>
+        <p>You should be familiar with or have a basic understanding of:</p>
+        <div class="badge-row">
+            <span class="badge"><i class="fab fa-js"></i> HTML / CSS / JavaScript</span>
+            <span class="badge"><i class="fa fa-spider"></i> Web Scraping</span>
+            <span class="badge"><i class="fab fa-google"></i> Google Calendar API</span>
+            <span class="badge"><i class="fa fa-cloud"></i> Cloudflare Workers</span>
+            <span class="badge"><i class="fab fa-github"></i> GitHub Actions</span>
+            <span class="badge"><i class="fa fa-puzzle-piece"></i> Chrome Extension (MV3)</span>
+        </div>
+
+        <!-- Architecture -->
+        <h1>System Architecture</h1>
+        <p>The diagram below shows the high-level system architecture of Schedulr:</p>
+        <img src="assets/image/sys-arch.png" alt="Schedulr System Architecture Diagram">
+
+        <!-- Project Structure -->
+        <h1>Project Structure</h1>
+        <pre><code>schedulr/
+├── backend/                    # Backend code
+│   ├── cloudflare-workers/     # Cloudflare Worker API
+│   │   ├── dist/               # Built output files
+│   │   ├── src/
+│   │   │   ├── index.ts        # Main Worker entrypoint
+│   │   │   └── lib/            # Reusable helper functions
+│   │   ├── .dev.vars           # Dev environment secrets
+│   │   ├── .dev.vars.prd       # Production environment secrets
+│   │   └── wrangler.jsonc      # Wrangler config
+│   └── db/                     # Database schema & migrations
+├── docs/                       # This website
+├── frontend/                   # Chrome extension client code
+│   ├── dist/                   # Built extension files
+│   └── src/
+│       ├── backgrounds/        # Service worker scripts
+│       ├── popup/              # Extension popup UI
+│       └── scripts/
+│           ├── auth/           # OAuth authentication flow
+│           ├── calendar/       # Google Calendar integration
+│           ├── scraper/        # CliC timetable scraper
+│           └── utils/          # Shared utilities
+├── images/                     # Project images & diagrams
+├── rollup.config.js            # Bundler config
+├── Makefile                    # Build shortcut commands
+├── manifest.json               # Extension manifest (MV3)
+└── package.json                # Root package config</code></pre>
+
+        <!-- Program Flow -->
+        <h1>Program Flow</h1>
+        <p>The sequence diagram below illustrates both the authentication and calendar import processes:</p>
+        <img src="assets/image/prog-flow.png" alt="Schedulr Program Flow Sequence Diagram">
+
+        <!-- ERD -->
+        <h1>Entity Relationship Diagram</h1>
+        <p>In this schema, each account is treated as a separate user even when logged in from the same IP.</p>
+        <img src="assets/image/erd.png" alt="Schedulr Entity Relationship Diagram">
+        <p>Table relationships:</p>
+        <ul>
+            <li><strong>users → oauth_tokens</strong> (one-to-one): each user holds one OAuth token</li>
+            <li><strong>users → sessions</strong> (one-to-one): each user holds one active session</li>
+        </ul>
+        <div class="note-box">
+            <p><strong>Note:</strong> Each user can only have one <code>oauth_tokens</code> and <code>sessions</code>
+                record because the program <em>upserts</em> (overwrites) the previous token and session on each login.
+                See <a href="https://github.com/sycanz/schedulr/blob/main/backend/db/schema.sql" target="_blank"
+                    rel="noopener">backend/db/schema.sql</a> for table definitions.</p>
+        </div>
+
+        <!-- Secret Management -->
+        <h1>Secret Management</h1>
+        <p>Project secrets are stored as <strong>GitHub Secrets</strong> and injected as environment variables during
+            the build process via GitHub Actions. Never commit secrets to the repository.</p>
+
+        <!-- Build Process -->
+        <h1>Build Process</h1>
+        <p>Building and deploying is handled by GitHub Actions:</p>
+        <img src="assets/image/github_actions.png" alt="Schedulr GitHub Actions Build Pipeline">
+
+        <!-- Getting Started -->
+        <h1>Getting Started</h1>
+        <p><strong>Note:</strong> This guide is based on Google Chrome. Some steps (especially
+            <code>manifest.json</code> format) may not apply directly to other browsers — refer to their documentation
+            as needed.
+        </p>
+
+        <h2>1. Clone the repository</h2>
+        <pre><code>git clone https://github.com/sycanz/schedulr
+cd schedulr</code></pre>
+
+        <h2>2. Load the extension into Chrome</h2>
+        <ol>
+            <li>Open Chrome and navigate to <code>chrome://extensions/</code></li>
+            <li>Enable <strong>Developer mode</strong> (toggle in the top right)</li>
+            <li>Click <strong>Load unpacked</strong> and select the cloned repository</li>
+            <li>Note the <strong>Extension ID</strong> (Item ID) — you'll need it for the Google OAuth redirect URI</li>
+        </ol>
+
+        <h2>3. Set up Google Calendar API</h2>
+        <ol>
+            <li>Create a new project in the <a href="https://console.cloud.google.com/" target="_blank"
+                    rel="noopener">Google Cloud Console</a></li>
+            <li>Enable the <strong>Google Calendar API</strong></li>
+            <li>Create OAuth 2.0 credentials (<strong>Web application</strong> type) and add the authorised redirect
+                URI:
+                <pre><code>https://&lt;YOUR-EXTENSION-ID&gt;.chromiumapp.org/oauth</code></pre>
+            </li>
+            <li>Copy the <strong>Client ID</strong> and <strong>Client Secret</strong></li>
+        </ol>
+
+        <h2>4. Set up the development environment</h2>
+        <ol>
+            <li>Install all dependencies from the root directory:
+                <pre><code>npm run setup</code></pre>
+            </li>
+            <li>Create a <code>.env</code> file in the <strong>root</strong> directory (frontend secrets):
+                <pre><code># Refer to .env.example for required variables
+cp .env.example .env</code></pre>
+            </li>
+            <li>Create a <code>.dev.vars</code> file in <strong>backend/cloudflare-workers/</strong> (backend secrets):
+                <pre><code>cp backend/cloudflare-workers/.dev.vars.example backend/cloudflare-workers/.dev.vars</code></pre>
+            </li>
+        </ol>
+
+        <!-- Development Tips -->
+        <h1>Development Tips</h1>
+
+        <h2>Backend (Cloudflare Workers)</h2>
+        <p>There are two ways to develop and test the Cloudflare Worker:</p>
+
+        <h3>Local development <em>(recommended for dev)</em></h3>
+        <ol>
+            <li>In <strong>terminal 1</strong> (project root): <code>npm run watch:scraper</code> — watches for file
+                changes</li>
+            <li>In <strong>terminal 2</strong> (backend/cloudflare-workers/): <code>npm run dev</code> — starts the
+                Worker locally</li>
+        </ol>
+        <div class="note-box">
+            <p><strong>Note:</strong> Set the CFW endpoint to <code>http://localhost:8787</code> in your
+                <code>.env</code> when using local dev.
+            </p>
+        </div>
+
+        <h3>Push to dev / production environment</h3>
+        <ol>
+            <li>Authenticate: <code>npx wrangler login</code></li>
+            <li>Deploy with Makefile shortcuts:
+                <pre><code>make deploy-dev   # deploy to dev environment
+make deploy-prd   # deploy to production</code></pre>
+            </li>
+        </ol>
+        <div class="note-box">
+            <p><strong>Note:</strong> You need to re-run the deploy command after each change to update the remote
+                Worker.</p>
+        </div>
+
+        <!-- Git Hooks -->
+        <h1>Git Hooks (pre-commit)</h1>
+        <p>Husky is configured to automatically run on every commit:</p>
+        <ul>
+            <li>Formats code with <strong>Prettier</strong></li>
+            <li>Lints code with <strong>ESLint</strong></li>
+        </ul>
+
+        <h2>Manual execution</h2>
+        <ul>
+            <li><code>npm run lint</code> — run ESLint</li>
+            <li><code>npm run lint:fix</code> — run ESLint and auto-fix</li>
+            <li><code>npm run prettier</code> — run Prettier</li>
+            <li><code>npm run prettier:fix</code> — run Prettier and auto-fix</li>
+        </ul>
+
+        <!-- Tech Stack -->
+        <h1>Tech Stack 🚀</h1>
+        <div class="badge-row">
+            <span class="badge"><i class="fab fa-js"></i> JavaScript (ES6+)</span>
+            <span class="badge"><i class="fab fa-google"></i> Google Calendar API</span>
+            <span class="badge"><i class="fa fa-lock"></i> OAuth 2.0</span>
+            <span class="badge"><i class="fab fa-html5"></i> HTML / CSS</span>
+            <span class="badge"><i class="fa fa-cloud"></i> Cloudflare Workers</span>
+            <span class="badge"><i class="fa fa-database"></i> Supabase</span>
+            <span class="badge"><i class="fab fa-npm"></i> Rollup</span>
+        </div>
+
+        <!-- Contributing -->
+        <h1>Contributing 🤝</h1>
+        <p>
+            Schedulr is open-source and welcomes contributions! Check out the
+            <a href="https://github.com/sycanz/schedulr/blob/main/.github/CONTRIBUTING.md" target="_blank"
+                rel="noopener">contribution guidelines</a>
+            to get started. Bug fixes, feature requests, documentation improvements, and code contributions are all
+            welcome.
+        </p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-logo">
+            <img src="assets/image/magnify128.png" alt="Logo">
+            MMU Schedulr
+        </div>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="developers.html">Developers</a>
+            <a href="privacy-policy.html">Privacy Policy</a>
+            <a href="https://github.com/sycanz/schedulr" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://ko-fi.com/sycanz" target="_blank" rel="noopener">Buy me a coffee</a>
+        </div>
+        <div class="footer-socials">
+            <a href="https://github.com/sycanz" target="_blank" rel="noopener" aria-label="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/aiden-c-a504a7246/" target="_blank" rel="noopener"
+                aria-label="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="mailto:aidenchan0397@gmail.com" aria-label="Email">
+                <i class="fas fa-envelope"></i>
+            </a>
+        </div>
+        <p class="footer-copy">© 2024 MMU Schedulr · Built with ❤️ at Hackerspace MMU · GNU GPL v3.0</p>
+    </footer>
+
+    <script src="scripts/menu.js"></script>
+</body>
+
+</html>
