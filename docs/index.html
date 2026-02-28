@@ -45,8 +45,8 @@
                 </a>
             </li>
             <li>
-                <a class="rightside" href="https://ko-fi.com/sycanz" target="_blank" rel="noopener">
-                    <i class="fa fa-mug-hot"></i> Buy me a coffee
+                <a class="rightside" href="#" id="supportNavBtn">
+                    <i class="fa fa-heart"></i> Support
                 </a>
             </li>
         </ul>
@@ -323,8 +323,10 @@
                     <span class="faq-icon">+</span>
                 </button>
                 <div class="faq-answer">
-                    <p>No, you only need to grant permission once. Make sure to grant permission for <strong>both
-                            scopes</strong> — otherwise the extension won't work properly.</p>
+                    <p>Once you've granted permission, your session will be active (doesn't re-authenticate) for
+                        <strong>30
+                            minutes</strong>. It's designed this way to prevent session hijacking.
+                    </p>
                 </div>
             </div>
 
@@ -334,9 +336,7 @@
                     <span class="faq-icon">+</span>
                 </button>
                 <div class="faq-answer">
-                    <p>No. The extension only reads your timetable from CliC and transfers it to your calendar. No
-                        personal data is stored on external servers. See the <a href="privacy-policy.html"
-                            id="links">Privacy Policy</a> for full details.</p>
+                    <p>See the <a href="privacy-policy.html" id="links">Privacy Policy</a> for full details.</p>
                 </div>
             </div>
 
@@ -357,7 +357,7 @@
                     <span class="faq-icon">+</span>
                 </button>
                 <div class="faq-answer">
-                    <p>Maybe in the future, but the current focus is on Chrome and Chromium-based browsers.</p>
+                    <p>Definitely for Firefox, but the current focus is on Chrome and Chromium-based browsers.</p>
                 </div>
             </div>
 
@@ -386,8 +386,9 @@
             <a href="index.html">Home</a>
             <a href="developers.html">Developers</a>
             <a href="privacy-policy.html">Privacy Policy</a>
+            <a href="terms-of-service.html">Terms of Service</a>
             <a href="https://github.com/sycanz/schedulr" target="_blank" rel="noopener">GitHub</a>
-            <a href="https://ko-fi.com/sycanz" target="_blank" rel="noopener">Buy me a coffee</a>
+            <a href="#" id="supportFooterBtn">Support ☕</a>
         </div>
         <div class="footer-socials">
             <a href="https://github.com/sycanz" target="_blank" rel="noopener" aria-label="GitHub">
@@ -403,6 +404,17 @@
         </div>
         <p class="footer-copy">© 2024 MMU Schedulr · Built with ❤️ at Hackerspace MMU · GNU GPL v3.0</p>
     </footer>
+
+    <!-- TNG QR Modal -->
+    <div class="qr-modal" id="qrModal" role="dialog" aria-modal="true" aria-label="Support via TNG">
+        <div class="qr-modal-backdrop" id="qrModalBackdrop"></div>
+        <div class="qr-modal-content">
+            <button class="qr-modal-close" id="qrModalClose" aria-label="Close">&times;</button>
+            <h3>Support MMU Schedulr</h3>
+            <p>Scan the TNG eWallet QR code below to send a donation — every contribution helps! ☕</p>
+            <img src="assets/image/qr.jpeg" alt="TNG eWallet QR Code">
+        </div>
+    </div>
 
     <script src="scripts/menu.js"></script>
 </body>
