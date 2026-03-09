@@ -75,7 +75,7 @@ export async function onLaunchWebAuthFlow() {
     authUrl.searchParams.append("scope", scope);
     authUrl.searchParams.append("access_type", "offline");
     authUrl.searchParams.append("state", state);
-    authUrl.searchParams.append("include_granted_scopes", "true");
+    authUrl.searchParams.append("include_granted_scopes", "false");
     authUrl.searchParams.append("prompt", "consent");
 
     // retrieve authentication code
