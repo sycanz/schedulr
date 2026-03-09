@@ -141,9 +141,9 @@ jobs:
         uses: mobilefirstllc/cws-publish@latest
         with:
           action: "upload" # 'publish' for auto-publish
-          client_id: ${{ secrets.CLIENT_ID_PROD }}
-          client_secret: ${{ secrets.CLIENT_SECRET_PROD }}
-          refresh_token: ${{ secrets.REFRESH_TOKEN }}
+          client_id: ${{ secrets.CLIENT_ID_PROD_UPLOAD_CWS }}
+          client_secret: ${{ secrets.CLIENT_SECRET_PROD_UPLOAD_CWS }}
+          refresh_token: ${{ secrets.REFRESH_TOKEN_UPLOAD_CWS }}
           extension_id: ${{ secrets.EXTENSION_ID }}
           zip_file: "extension.zip"
 
