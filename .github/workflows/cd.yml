@@ -1,0 +1,136 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main, stg]
+    types: [completed]
+
+jobs:
+  deploy-backend-stg:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'stg'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download worker build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: worker-build
+          path: backend/cloudflare-workers/dist/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create staging environment file
+        run: |
+          cd backend/cloudflare-workers
+          cat <<EOF > .dev.vars.stg
+          CLIENT_ID=${{ secrets.CLIENT_ID_STG }}
+          CLIENT_SECRET=${{ secrets.CLIENT_SECRET_STG }}
+          REDIRECT_URI=${{ secrets.REDIRECT_URI_STG }}
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+          CFW_REFRESH_ENDPOINT=${{ secrets.CFW_REFRESH_ENDPOINT_STG }}
+          EOF
+
+      - name: Deploy to Cloudflare Workers (schedulr-stg)
+        run: make deploy-stg-wrangler
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-backend-prd:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download worker build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: worker-build
+          path: backend/cloudflare-workers/dist/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create production environment file
+        run: |
+          cd backend/cloudflare-workers
+          cat <<EOF > .dev.vars.prd
+          CLIENT_ID=${{ secrets.CLIENT_ID_PROD }}
+          CLIENT_SECRET=${{ secrets.CLIENT_SECRET_PROD }}
+          REDIRECT_URI=${{ secrets.REDIRECT_URI }}
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+          CFW_REFRESH_ENDPOINT=${{ secrets.CFW_REFRESH_ENDPOINT_PROD }}
+          EOF
+
+      - name: Deploy to Cloudflare Workers (schedulr-prd)
+        run: make deploy-prd-wrangler
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  package-extensions-prd:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download extension build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-build
+          path: .
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install zip
+        run: sudo apt-get install -y zip
+
+      - name: Zip Chrome extension
+        run: zip -r extension-chrome.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
+
+      - name: Zip Firefox extension
+        run: |
+          cp manifest.firefox.json manifest.json
+          zip -r extension-firefox.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
+
+      - name: Upload Chrome zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-chrome-zip
+          path: extension-chrome.zip
+          retention-days: 1
+
+      - name: Upload Firefox zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-firefox-zip
+          path: extension-firefox.zip
+          retention-days: 7
+
+  deploy-extension-chrome:
+    needs: [deploy-backend-prd, package-extensions-prd]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Chrome zip
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-chrome-zip
+
+      - name: Upload to Chrome Web Store
+        uses: mobilefirstllc/cws-publish@latest
+        with:
+          action: "upload" # change to 'publish' to auto-publish
+          client_id: ${{ secrets.CLIENT_ID_PROD_UPLOAD_CWS }}
+          client_secret: ${{ secrets.CLIENT_SECRET_PROD_UPLOAD_CWS }}
+          refresh_token: ${{ secrets.REFRESH_TOKEN_UPLOAD_CWS }}
+          extension_id: ${{ secrets.EXTENSION_ID }}
+          zip_file: "extension-chrome.zip"

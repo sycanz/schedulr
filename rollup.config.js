@@ -7,23 +7,30 @@ import typescript from "@rollup/plugin-typescript";
 dotenv.config();
 
 const isProduction = process.env.BUILD === "prd";
+const isStaging = process.env.BUILD === "stg";
 
-const getReplacementValue = (prodVar, devVar) => {
-    const val = isProduction ? process.env[prodVar] : process.env[devVar];
-    if (isProduction && !val) {
-        throw new Error(`CRITICAL: Missing mandatory production environment variable: ${prodVar}`);
+const getReplacementValue = (prodVar, stgVar, devVar) => {
+    if (isProduction) {
+        const val = process.env[prodVar];
+        if (!val) throw new Error(`CRITICAL: Missing mandatory production environment variable: ${prodVar}`);
+        return JSON.stringify(val);
     }
-    return JSON.stringify(val || "");
+    if (isStaging) {
+        const val = process.env[stgVar];
+        if (!val) throw new Error(`CRITICAL: Missing mandatory staging environment variable: ${stgVar}`);
+        return JSON.stringify(val);
+    }
+    return JSON.stringify(process.env[devVar] || "");
 };
 
 const replacePlugin = replace({
     preventAssignment: true,
-    __CLIENT_ID__: getReplacementValue("CLIENT_ID_PROD", "CLIENT_ID"),
-    __CFW_AUTH_ENDPOINT__: getReplacementValue("CFW_AUTH_ENDPOINT_PROD", "CFW_AUTH_ENDPOINT_DEV"),
-    __CFW_REFRESH_ENDPOINT__: getReplacementValue("CFW_REFRESH_ENDPOINT_PROD", "CFW_REFRESH_ENDPOINT_DEV"),
-    __CFW_CHECK_RETURN_USER_ENDPOINT__: getReplacementValue("CFW_CHECK_RETURN_USER_ENDPOINT_PROD", "CFW_CHECK_RETURN_USER_ENDPOINT_DEV"),
-    __CFW_GET_CALENDAR_ENDPOINT__: getReplacementValue("CFW_GET_CALENDAR_ENDPOINT_PROD", "CFW_GET_CALENDAR_ENDPOINT_DEV"),
-    __CFW_ADD_NEW_EVENT_ENDPOINT__: getReplacementValue("CFW_ADD_NEW_EVENT_ENDPOINT_PROD", "CFW_ADD_NEW_EVENT_ENDPOINT_DEV"),
+    __CLIENT_ID__: getReplacementValue("CLIENT_ID_PROD", "CLIENT_ID_STG", "CLIENT_ID"),
+    __CFW_AUTH_ENDPOINT__: getReplacementValue("CFW_AUTH_ENDPOINT_PROD", "CFW_AUTH_ENDPOINT_STG", "CFW_AUTH_ENDPOINT_DEV"),
+    __CFW_REFRESH_ENDPOINT__: getReplacementValue("CFW_REFRESH_ENDPOINT_PROD", "CFW_REFRESH_ENDPOINT_STG", "CFW_REFRESH_ENDPOINT_DEV"),
+    __CFW_CHECK_RETURN_USER_ENDPOINT__: getReplacementValue("CFW_CHECK_RETURN_USER_ENDPOINT_PROD", "CFW_CHECK_RETURN_USER_ENDPOINT_STG", "CFW_CHECK_RETURN_USER_ENDPOINT_DEV"),
+    __CFW_GET_CALENDAR_ENDPOINT__: getReplacementValue("CFW_GET_CALENDAR_ENDPOINT_PROD", "CFW_GET_CALENDAR_ENDPOINT_STG", "CFW_GET_CALENDAR_ENDPOINT_DEV"),
+    __CFW_ADD_NEW_EVENT_ENDPOINT__: getReplacementValue("CFW_ADD_NEW_EVENT_ENDPOINT_PROD", "CFW_ADD_NEW_EVENT_ENDPOINT_STG", "CFW_ADD_NEW_EVENT_ENDPOINT_DEV"),
 });
 
 const resolvePlugins = [

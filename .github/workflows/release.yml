@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 4.0.6). Must match manifest.json version."
+        required: true
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify version matches manifest
+        run: |
+          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
+          INPUT_VERSION="${{ github.event.inputs.version }}"
+          if [ "$MANIFEST_VERSION" != "$INPUT_VERSION" ]; then
+            echo "❌ Version mismatch: manifest.json has $MANIFEST_VERSION but input was $INPUT_VERSION"
+            exit 1
+          fi
+          echo "✅ Version $INPUT_VERSION confirmed in manifest.json"
+
+      - name: Download latest Chrome zip from CD
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-chrome-zip
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download latest Firefox zip from CD
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-firefox-zip
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ github.event.inputs.version }}"
+          name: "Release v${{ github.event.inputs.version }}"
+          generate_release_notes: true
+          files: |
+            extension-chrome.zip
+            extension-firefox.zip
