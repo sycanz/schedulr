@@ -30,7 +30,7 @@
         }
     },
     "background": {
-        "service_worker": "frontend/src/backgrounds/serviceWorker.js",
+        "scripts": "frontend/src/backgrounds/serviceWorker.js",
         "type": "module"
     },
     "permissions": ["activeTab", "scripting", "identity", "storage", "notifications"],
