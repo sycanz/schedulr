@@ -66,9 +66,23 @@ export async function onLaunchWebAuthFlow() {
     const state = Math.random().toString(36).substring(7);
     const scope =
         "openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar";
-    const redirectUri = chrome.identity.getRedirectURL("oauth");
+    const userAgent = navigator.userAgent;
+    const isFirefox = userAgent.includes("Firefox");
 
+    // The authUrl MUST be the Google OAuth endpoint for both browsers
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+
+    // The redirectUri is what changes based on the browser
+    let redirectUri;
+    if (isFirefox) {
+        const baseRedirectUrl = browser.identity.getRedirectURL();
+        const redirectSubdomain = baseRedirectUrl.slice(0, baseRedirectUrl.indexOf(".")).replace("https://", "");
+        redirectUri = "http://127.0.0.1/mozoauth2/" + redirectSubdomain;
+    } else {
+        redirectUri = chrome.identity.getRedirectURL("oauth");
+    }
+
+    // console.log("Auth Flow Info:", { isFirefox, redirectUri });
     authUrl.searchParams.append("client_id", clientId);
     authUrl.searchParams.append("redirect_uri", redirectUri);
     authUrl.searchParams.append("response_type", "code");
@@ -119,6 +133,7 @@ export async function onLaunchWebAuthFlow() {
         },
         body: JSON.stringify({
             code,
+            redirectUri,
         }),
     });
 
