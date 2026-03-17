@@ -95,7 +95,8 @@ jobs:
       - name: Create firefox production manifest
         run: |
           jq '
-            .host_permissions |= map(select(. != "http://localhost:8787/*"))
+            .host_permissions |= map(select(. != "http://localhost:8787/*")) |
+            .background = { "scripts": [.background.service_worker], "type": .background.type }
           ' manifest.firefox.json > manifest.firefox.prod.json
           mv manifest.firefox.prod.json manifest.firefox.json
 
