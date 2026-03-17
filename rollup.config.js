@@ -6,16 +6,14 @@ import typescript from "@rollup/plugin-typescript";
 
 dotenv.config();
 
-const isProduction = process.env.BUILD === "prd";
-const isStaging = process.env.BUILD === "stg";
+const buildEnv = process.env.BUILD;
 
 const getReplacementValue = (prodVar, stgVar, devVar) => {
-    if (isProduction) {
+    if (buildEnv === "prd") {
         const val = process.env[prodVar];
         if (!val) throw new Error(`CRITICAL: Missing mandatory production environment variable: ${prodVar}`);
         return JSON.stringify(val);
-    }
-    if (isStaging) {
+    } else if (buildEnv === "stg") {
         const val = process.env[stgVar];
         if (!val) throw new Error(`CRITICAL: Missing mandatory staging environment variable: ${stgVar}`);
         return JSON.stringify(val);
