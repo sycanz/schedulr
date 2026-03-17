@@ -8,3 +8,6 @@ deploy-stg-wrangler:
 deploy-prd-wrangler:
 	cd ./backend/cloudflare-workers && npx wrangler secret bulk .dev.vars.prd --env prd
 	cd ./backend/cloudflare-workers && npx wrangler deploy --env prd
+
+package-firefox:
+	bash scripts/package-firefox.sh

@@ -18,7 +18,6 @@ import { getSupabaseClient } from "../../db/supabase.js";
 type Env = {
     CLIENT_ID: string;
     CLIENT_SECRET: string;
-    REDIRECT_URI: string;
     CFW_REFRESH_ENDPOINT: string;
     SUPABASE_URL: string;
     SUPABASE_KEY: string;
@@ -44,8 +43,18 @@ const app = new Hono<{ Bindings: Env }>();
 app.use(
     "*",
     cors({
-        origin: "https://clic.mmu.edu.my",
-        allowMethods: ["GET", "POST"],
+        origin: (origin) => {
+            const allowed = ["https://clic.mmu.edu.my"];
+            if (
+                allowed.includes(origin) ||
+                origin.startsWith("chrome-extension://") ||
+                origin.startsWith("moz-extension://")
+            ) {
+                return origin;
+            }
+            return null;
+        },
+        allowMethods: ["GET", "POST", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization"],
     })
 );
@@ -100,12 +109,12 @@ app.post("/api/auth/token", async (c) => {
     const {
         CLIENT_ID: clientId,
         CLIENT_SECRET: clientSecret,
-        REDIRECT_URI: redirectUri,
         SUPABASE_URL: supabaseUrl,
         SUPABASE_KEY: supabaseKey,
     } = c.env;
     const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
     const body = await c.req.json();
+    const redirectUri = body.redirectUri;
 
     try {
         const data = await exchangeCodeForToken(body.code, clientId, clientSecret, redirectUri);
