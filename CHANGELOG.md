@@ -1,3 +1,26 @@
+## 4.1.0 (18-03-2026)
+
+### ✨ Firefox Support
+
+- Schedulr now supports Firefox browser.
+- Implemented separate manifest files and build logic for Chrome and Firefox.
+
+### 🏗️ CI/CD Enhancements
+
+- Fully automated deployment to Cloudflare Workers for `stg` and `prd` environments.
+- Automatic creation of Chrome (`.zip`) and Firefox (`.zip`) distribution files as GitHub artifacts.
+- Refactored CI/CD to handle branch-specific deployments correctly.
+
+### 🔧 Branch Reorganization
+
+- Reset `main` to a stable infrastructure-focused state.
+- Established `stg` as the primary integration branch for features before production merging.
+
+### 📝 Documentation
+
+- Updated Development Guide: Comprehensive documentation for setting up dev environments.
+- New Testing Procedures: Detailed guide on how to test zip artifacts in both Chrome and Firefox.
+
 ## 4.0.2 (23-2-2026)
 
 ### ✨ UI/UX Refurbishment

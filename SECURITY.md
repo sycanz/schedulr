@@ -10,7 +10,8 @@ Currently, there are no official releases of this project. Security updates and 
 | [v3.0.0](https://github.com/sycanz/schedulr/releases/tag/v3.0.0) | :x:       |
 | [v3.0.1](https://github.com/sycanz/schedulr/releases/tag/v3.0.1) | :x:       |
 | [v3.0.2](https://github.com/sycanz/schedulr/releases/tag/v3.0.2) | :x:       |
-| [v3.0.3](https://github.com/sycanz/schedulr/releases/tag/v3.0.3) | ✅        |
+| [v3.0.3](https://github.com/sycanz/schedulr/releases/tag/v3.0.3) | :x:       |
+| [v4.1.0](https://github.com/sycanz/schedulr/releases/tag/v4.1.0) | ✅        |
 
 ## Reporting a Vulnerability
 
