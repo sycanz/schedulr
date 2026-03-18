@@ -87,12 +87,12 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Create chrome production manifest
+      - name: Create chrome manifest
         run: |
           jq '.host_permissions |= map(select(. != "http://localhost:8787/*")) | .key = "${{ secrets.EXTENSION_PUBLIC_KEY }}"' manifest.json > manifest.prod.json
           mv manifest.prod.json manifest.json
 
-      - name: Create firefox production manifest
+      - name: Create firefox manifest
         run: |
           jq '
             .host_permissions |= map(select(. != "http://localhost:8787/*"))
