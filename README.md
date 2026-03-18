@@ -13,14 +13,15 @@ https://github.com/user-attachments/assets/4ee6a69a-cfb0-42d7-abf2-63661013a642
 ## Table of Content
 
 - [Requirements](https://github.com/sycanz/schedulr?tab=readme-ov-file#requirements-)
+- [Where to get help or support?](https://github.com/sycanz/schedulr?tab=readme-ov-file#where-can-i-get-any-help-or-support)
 - [Installation](https://github.com/sycanz/schedulr?tab=readme-ov-file#installation-)
 - [Usage](https://github.com/sycanz/schedulr?tab=readme-ov-file#usage-%EF%B8%8F)
     - [Import timetable into Google Calendar](https://github.com/sycanz/schedulr?tab=readme-ov-file#to-import-calendar-into-google-calendar)
     - [Import timetable into other calendars](https://github.com/sycanz/schedulr?tab=readme-ov-file#to-import-calendar-into-other-calendars-like-outlook-apple-calendar)
-- [Key Binding](https://github.com/sycanz/schedulr?tab=readme-ov-file#key-binding-%EF%B8%8F)
 - [Project status](https://github.com/sycanz/schedulr?tab=readme-ov-file#project-status-)
 - [Contributing](https://github.com/sycanz/schedulr?tab=readme-ov-file#contributing-)
 - [Development Guide](https://github.com/sycanz/schedulr?tab=readme-ov-file#development-guide-)
+    - [Testing on Staging](https://github.com/sycanz/schedulr?tab=readme-ov-file#testing-on-staging-for-developers)
 - [Tech Stack](https://github.com/sycanz/schedulr?tab=readme-ov-file#tech-stack-)
 - [Changelog](https://github.com/sycanz/schedulr?tab=readme-ov-file#changelog-)
 - [Privacy policy](https://github.com/sycanz/schedulr?tab=readme-ov-file#privacy-policy-)
@@ -32,8 +33,12 @@ https://github.com/user-attachments/assets/4ee6a69a-cfb0-42d7-abf2-63661013a642
 
 ## Requirements 👀
 
-- MMU student with **"Active"** current student status **ONLY**.
-- Chromium-based browser **ONLY**.
+- MMU students with **"Active"** current student status **ONLY**, MMU Lecturers.
+- Chromium-based browser or Firefox **ONLY**. (Safari might not work as intended)
+
+## Where can I get any help or support?
+
+Check if the encountered issues are mentioned in this documentation. If not, you can communicate with me through [email](mailto:aidenchan0397@gmail.com), [issue tracker](https://github.com/sycanz/schedulr/issues), or [discord](https://discordapp.com/users/340443368326692876).
 
 ## Installation 📦
 
@@ -76,16 +81,9 @@ Note: Some steps after step 4 may vary depending on your target calendar.
 
 **\*Tip**: An .ics file lets you import events into other calendar apps like Outlook.\*
 
-## Key binding ⌨️
-
-The shortcut key opens up the popup page
-
-- **Linux and Windows** - `Alt+Shift+S`
-- **macOS** - `Command+Shift+S`
-
 ## Project status ⏳
 
-Schedulr version 4.0.2 is available on [Chrome Web store](https://chromewebstore.google.com/detail/schedulr/ofaflpillnejkhmkefmcpoamjeaghipp) as of now.
+Schedulr version 4.1.0 is available on [Chrome Web store](https://chromewebstore.google.com/detail/schedulr/ofaflpillnejkhmkefmcpoamjeaghipp) as of now.
 
 ## Contributing 🤝🏻
 
@@ -111,10 +109,6 @@ You should be familiar with or have a basic understanding of these:
 #### System Architecture
 
 ![Schedulr System Architecture](/images/sys-arch.png)
-
-#### Project Structure
-
-### Understanding the Project
 
 #### Project Structure
 
@@ -202,13 +196,25 @@ The build process is handled by GitHub Actions:
 
     **IMPORTANT**: Take note of the Client ID (Item ID) of the extension, you'll need it for setting up the Google Calendar API.
 
+#### Testing on Staging (for Developers)
+
+To test the latest changes before they are merged into production:
+
+1. Once you have changes, create a PR to the `stg` branch.
+2. Wait for the CI and CD pipelines to complete on GitHub Actions.
+3. Download `schedulr-chrome-stg-zip` for Chrome or `schedulr-firefox-stg-zip` for Firefox from the **Artifacts** section at the bottom.
+4. Load in Browser:
+    - **Chrome**: Unzip and use `Load unpacked` in `chrome://extensions/`.
+    - **Firefox**: Go to `about:debugging#/runtime/this-firefox`, click `Load Temporary Add-on...`, and select zipped Firefox build.
+5. Test the extension functionality. The staging environment uses separate Cloudflare Worker endpoints and secrets to ensure isolation.
+6. After validation is successful, the code owner (sycanz/Aiden) will handle the final merge to the `main` branch for production deployment.
+
 #### Setting up Google Calendar API
 
 1. Create a new project in the Google Cloud Console.
 2. Enable the Google Calendar API.
 3. Generate an OAuth 2.0 credentials (OAuth Client ID) with the application type **Web application**, add the following authorised redirect URIs:
     - `https://<YOUR-APP-ID>.chromiumapp.org/oauth`
-    - `https://<YOUR-APP-ID>.chromiumapp.org/oauth` (for brave browser)
 4. Retrieve the **Client ID** and **Client Secret**.
 
 #### Setup development environment
@@ -225,16 +231,15 @@ The build process is handled by GitHub Actions:
 There's 2 ways to develop and test cloudflare worker:
 
 1. Local development (recommended for development)
-    - Open terminal 1 in project root dir, run `npm run watch:scraper` (helps read new changes to cfw files)
+    - Open terminal 1 in project root dir, run `npm run watch:scraper` (helps read new changes to cfw files) or just run `npm run build:scraper` to build the scraper
     - Open terminal 2 in `backend/cloudflare-workers/`, run `npm run dev` (runs cfw locally)
 
     **NOTE**: This method requires you to edit the cfw endpoint to `http://localhost:8787` instead of the url provided in template above.
 
-2. Push to dev/prd environment (recommended for stg/prd)
-    - Run `npx wrangler login` to authenticate local dev environment with cloudflare account
-    - Use makefile command `make deploy-dev` or `make deploy-prd`
-
-    **NOTE**: This method requires you to run the `make deploy-dev` command after each changes to update your worker
+2. Push to dev/stg environment (recommended for staging/production testing)
+    - **Custom Environment**: If you want your own cloudflare-hosted dev environment, add a new entry to the `env` object in [backend/cloudflare-workers/wrangler.jsonc](file:///home/sycanz/projects/schedulr/backend/cloudflare-workers/wrangler.jsonc).
+    - **Automated Staging**: Alternatively, just use `localhost:8787` for local polish and then create a PR to the `stg` branch. When merged, the CI/CD pipeline will automatically inject the staging/production keys and deploy to the respective Cloudflare Workers. You can then test the extension by uploading to your browser as described in the [Testing on Staging](#testing-on-staging-for-developers) section.
+    - **Manual Deploy**: Use makefile command `make deploy-dev` or `make deploy-stg` (requires `npx wrangler login`).
 
 ### Git Hooks (pre-commit)
 
@@ -253,8 +258,12 @@ During commit, Husky is setup to automatically:
 ## Tech Stack 🚀
 
 1. Javascript
-2. Google calendar API
-3. HTML, CSS
+2. Google Calendar API (GCP)
+3. Cloudflare Workers (Backend API)
+4. Supabase (Database & Auth)
+5. Rollup (Module Bundling)
+6. GitHub Actions (CI/CD)
+7. HTML, CSS
 
 ## Changelog 📁
 
@@ -284,7 +293,7 @@ This project was developed at [Hackerspace MMU](https://hackerspacemmu.rocks/). 
 
 **Q: What browser does Schedulr currently support?**
 
-**A:** Google Chrome as of now.
+**A:** Google Chrome, Chromium-based browsers (Brave, Edge, etc.), and Firefox. (Safari is not fully supported yet)
 
 **Q: Do I have to pay for this extension?**
 
@@ -308,7 +317,7 @@ This project was developed at [Hackerspace MMU](https://hackerspacemmu.rocks/). 
 
 **Q: Are there any plans to support other browsers?**
 
-**A:** Definitely Firefox is on the roadmap, but the current focus is on Chrome and Chromium-based browsers.
+**A:** Firefox is now officially supported! We are working on refining the experience. Safari is on the roadmap but not currently a priority.
 
 **Q: Can I rely on this extension for my timetable?**
 

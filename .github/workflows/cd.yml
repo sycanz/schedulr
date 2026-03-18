@@ -81,92 +81,20 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-  package-extension-stg:
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'stg'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download extension build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: extension-build
-          path: .
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install zip
-        run: sudo apt-get install -y zip
-
-      - name: Zip Chrome extension
-        run: zip -r schedulr-chrome-stg.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
-
-      - name: Zip Firefox extension
-        run: |
-          cp manifest.firefox.json manifest.json
-          zip -r schedulr-firefox-stg.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
-
-      - name: Upload Chrome zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: schedulr-chrome-stg-zip
-          path: schedulr-chrome-stg.zip
-          retention-days: 2
-
-      - name: Upload Firefox zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: schedulr-firefox-stg-zip
-          path: schedulr-firefox-stg.zip
-          retention-days: 2
-
-  package-extension-prd:
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download extension build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: extension-build
-          path: .
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install zip
-        run: sudo apt-get install -y zip
-
-      - name: Zip Chrome extension
-        run: zip -r schedulr-chrome-prd.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
-
-      - name: Zip Firefox extension
-        run: |
-          cp manifest.firefox.json manifest.json
-          zip -r schedulr-firefox-prd.zip frontend/ images/ manifest.json -x ".git/*" ".github/*" "*.bak" "node_modules/*" "backend/*"
-
-      - name: Upload Chrome zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: schedulr-chrome-prd-zip
-          path: schedulr-chrome-prd.zip
-          retention-days: 2
-
-      - name: Upload Firefox zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: schedulr-firefox-prd-zip
-          path: schedulr-firefox-prd.zip
-          retention-days: 2
-
   deploy-extension-chrome:
-    needs: [deploy-backend-prd, package-extension-prd]
+    needs: [deploy-backend-prd]
     runs-on: ubuntu-latest
     steps:
-      - name: Download Chrome zip
+      - name: Download Chrome artifact
         uses: actions/download-artifact@v4
         with:
-          name: schedulr-chrome-prd-zip
+          name: schedulr-chrome-prd
+
+      - name: Install zip
+        run: sudo apt-get install -y zip
+
+      - name: Zip extension for upload
+        run: zip -r extension-chrome.zip .
 
       - name: Upload to Chrome Web Store
         uses: mobilefirstllc/cws-publish@latest

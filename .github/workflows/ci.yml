@@ -87,29 +87,47 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Create chrome manifest
+      - name: Create extension manifest (chrome)
         run: |
           jq '.host_permissions |= map(select(. != "http://localhost:8787/*")) | .key = "${{ secrets.EXTENSION_PUBLIC_KEY }}"' manifest.json > manifest.prod.json
           mv manifest.prod.json manifest.json
 
-      - name: Create firefox manifest
+      - name: Set environment suffix
         run: |
-          jq '
-            .host_permissions |= map(select(. != "http://localhost:8787/*"))
-          ' manifest.firefox.json > manifest.firefox.prod.json
-          mv manifest.firefox.prod.json manifest.firefox.json
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]]; then
+            echo "ENV_SUFFIX=prd" >> $GITHUB_ENV
+          else
+            echo "ENV_SUFFIX=stg" >> $GITHUB_ENV
+          fi
 
-      - name: Upload extension build artifacts
+      - name: Upload Chrome extension artifact
         uses: actions/upload-artifact@v4
         with:
-          name: extension-build
+          name: schedulr-chrome-${{ env.ENV_SUFFIX }}
           path: |
             frontend/dist/
             frontend/src/
             images/
             manifest.json
-            manifest.firefox.json
-          retention-days: 1
+          retention-days: 2
+
+      - name: Create extension manifest (firefox)
+        run: |
+          jq '
+            .host_permissions |= map(select(. != "http://localhost:8787/*"))
+          ' manifest.firefox.json > manifest.firefox.prod.json
+          mv manifest.firefox.prod.json manifest.json
+
+      - name: Upload Firefox extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: schedulr-firefox-${{ env.ENV_SUFFIX }}
+          path: |
+            frontend/dist/
+            frontend/src/
+            images/
+            manifest.json
+          retention-days: 2
 
       - name: Upload worker build artifacts
         uses: actions/upload-artifact@v4
