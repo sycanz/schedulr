@@ -2,7 +2,6 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
     branches: [main, stg]
     paths-ignore:
       - "docs/**"
@@ -13,21 +12,6 @@ on:
       - "CHANGELOG.md"
       - "CODE_OF_CONDUCT.md"
       - "SECURITY.md"
-      - "TROUBLESHOOTING.md"
-      - "QUICKSTART.md"
-  push:
-    branches: [main, stg]
-    paths-ignore:
-      - "docs/**"
-      - "README.md"
-      - ".github/**"
-      - "LICENSE"
-      - "CONTRIBUTING.md"
-      - "CHANGELOG.md"
-      - "CODE_OF_CONDUCT.md"
-      - "SECURITY.md"
-      - "TROUBLESHOOTING.md"
-      - "QUICKSTART.md"
 
 jobs:
   secret-detection:
@@ -56,14 +40,21 @@ jobs:
           node-version: "18"
           cache: "npm"
 
-      - name: Install frontend dependencies
-        run: npm install
+      - name: Install dependencies
+        run: |
+          npm install
+          cd backend/cloudflare-workers && npm install
 
-      - name: Install backend dependencies
-        run: cd backend/cloudflare-workers && npm install
+      - name: Set environment suffix
+        run: |
+          if [[ "${{ github.base_ref }}" == "main" ]]; then
+            echo "ENV_SUFFIX=prd" >> $GITHUB_ENV
+          else
+            echo "ENV_SUFFIX=stg" >> $GITHUB_ENV
+          fi
 
       - name: Build frontend (stg)
-        if: ${{ github.ref == 'refs/heads/stg' || github.base_ref == 'stg' }}
+        if: env.ENV_SUFFIX == 'stg'
         run: npm run build:scraper:stg
         env:
           CLIENT_ID_STG: ${{ secrets.CLIENT_ID_STG }}
@@ -74,7 +65,7 @@ jobs:
           CFW_ADD_NEW_EVENT_ENDPOINT_STG: ${{ secrets.CFW_ADD_NEW_EVENT_ENDPOINT_STG }}
 
       - name: Build frontend (prd)
-        if: ${{ github.ref == 'refs/heads/main' || github.base_ref == 'main' }}
+        if: env.ENV_SUFFIX == 'prd'
         run: npm run build:scraper:prd
         env:
           CLIENT_ID_PROD: ${{ secrets.CLIENT_ID_PROD }}
@@ -91,14 +82,6 @@ jobs:
         run: |
           jq '.host_permissions |= map(select(. != "http://localhost:8787/*")) | .key = "${{ secrets.EXTENSION_PUBLIC_KEY }}"' manifest.json > manifest.prod.json
           mv manifest.prod.json manifest.json
-
-      - name: Set environment suffix
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.base_ref }}" == "main" ]]; then
-            echo "ENV_SUFFIX=prd" >> $GITHUB_ENV
-          else
-            echo "ENV_SUFFIX=stg" >> $GITHUB_ENV
-          fi
 
       - name: Upload Chrome extension artifact
         uses: actions/upload-artifact@v4

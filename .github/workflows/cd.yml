@@ -1,30 +1,27 @@
 name: CD
 
 on:
-  workflow_run:
-    workflows: ["CI"]
+  pull_request:
+    types: [closed]
     branches: [main, stg]
-    types: [completed]
 
 jobs:
   deploy-backend-stg:
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'stg'
+    if: github.event.pull_request.base.ref == 'stg'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Download worker build artifacts
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: ci.yml
+          pr: ${{ github.event.pull_request.number }}
           name: worker-build
           path: backend/cloudflare-workers/dist/
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create staging environment file
         run: |
@@ -45,23 +42,21 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-backend-prd:
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main'
+    if: github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Download worker build artifacts
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: ci.yml
+          pr: ${{ github.event.pull_request.number }}
           name: worker-build
           path: backend/cloudflare-workers/dist/
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create production environment file
         run: |
@@ -83,11 +78,14 @@ jobs:
 
   deploy-extension-chrome:
     needs: [deploy-backend-prd]
+    if: github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
     steps:
       - name: Download Chrome artifact
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: ci.yml
+          pr: ${{ github.event.pull_request.number }}
           name: schedulr-chrome-prd
 
       - name: Install zip
