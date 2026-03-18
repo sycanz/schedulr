@@ -2,20 +2,20 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "schedulr",
   "main": "dist/worker.js",
-  "compatibility_date": "2026-02-16",
+  "compatibility_date": "2026-02-12",
   "observability": {
     "logs": {
       "enabled": true
     }
   },
   "env": {
-    "dev": {
+    "stg": {
       "name": "schedulr-stg",
-      "compatibility_date": "2026-02-16"
+      "compatibility_date": "2026-02-12"
     },
     "prd": {
       "name": "schedulr-prd",
-      "compatibility_date": "2026-02-16"
+      "compatibility_date": "2026-02-12"
     }
   }
 }
