@@ -16,12 +16,12 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Download worker build artifacts
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: ci.yml
+          pr: ${{ github.event.pull_request.number }}
           name: worker-build
           path: backend/cloudflare-workers/dist/
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create staging environment file
         run: |
@@ -51,12 +51,12 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Download worker build artifacts
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: ci.yml
+          pr: ${{ github.event.pull_request.number }}
           name: worker-build
           path: backend/cloudflare-workers/dist/
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create production environment file
         run: |
@@ -82,11 +82,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Chrome artifact
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: ci.yml
+          pr: ${{ github.event.pull_request.number }}
           name: schedulr-chrome-prd
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install zip
         run: sudo apt-get install -y zip
