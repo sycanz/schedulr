@@ -78,4 +78,13 @@
             }
         });
     });
+    // Browser detection for extension button
+    const getExtensionBtn = document.getElementById('get-extension-btn');
+    if (getExtensionBtn) {
+        const isFirefox = navigator.userAgent.includes("Firefox");
+        if (isFirefox) {
+            getExtensionBtn.href = "https://addons.mozilla.org/en-US/firefox/addon/schedulr/";
+            getExtensionBtn.innerHTML = '<i class="fab fa-firefox-browser"></i> Get the extension';
+        }
+    }
 })();
