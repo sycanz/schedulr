@@ -285,6 +285,16 @@ If you've found this useful and want to support the project, you can send a TNG 
   <img src="./images/qr.jpeg" alt="TNG eWallet QR Code" width="400" />
 </div>
 
+## What is Defected CLiC?
+
+CLiC (MMU's student portal) sometimes shows incorrect start dates for classes. Even if the actual class day is a Tuesday, CLiC might show the preceding Monday as the start date.
+
+![Defected CLiC example](./images/defected-clic.png)
+
+As shown in the image above, the start date is listed as **30/03/2026** (Monday), but the day on the right clearly states **Tuesday** (which would be 31/03/2026).
+
+If you notice this discrepancy in your timetable, select **"Yes"** for **"Defected CLiC?"** in the extension. This ensures that Schedulr correctly calculates the first class date based on the day of the week rather than the potentially incorrect start date provided by CLiC.
+
 ## Credit 🎉
 
 This project was developed at [Hackerspace MMU](https://hackerspacemmu.rocks/). Also shoutout to a couple of friends who helped me out on this project.

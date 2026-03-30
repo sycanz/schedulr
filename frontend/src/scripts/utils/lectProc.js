@@ -1,3 +1,5 @@
+import { craftCalEvent } from "./eventUtils.js";
+
 // Remove unnecessary prefix
 export function truncLocation(location) {
     const prefix = "Common Lecture Complex &amp; ";
@@ -191,4 +193,121 @@ export function addZeroToDate(date) {
     const realDate = `${formattedDate} ${parseMonth}`;
 
     return realDate;
+}
+
+export async function lectFlow(iframeElement, config, classEvents) {
+    console.log("Running lecturer process");
+    // Access the iframe's content document
+    const iframeDocument = iframeElement.contentWindow.document.body;
+
+    // Select elements in iframe
+    const dayHeader = iframeDocument.querySelectorAll("th.PSLEVEL3GRIDODDROW");
+    const rows = iframeDocument.querySelectorAll("table.PSLEVEL3GRIDODDROW  tr");
+    const year = iframeDocument.querySelector(
+        "div#win0divDERIVED_CLASS_S_DESCR100_2 td.PSGROUPBOXLABEL.PSLEFTCORNER"
+    ).textContent;
+    const subjTitleVal = iframeDocument.querySelector(
+        'input[name="DERIVED_CLASS_S_SSR_DISP_TITLE$chk"][id="DERIVED_CLASS_S_SSR_DISP_TITLE$chk"]'
+    ).value;
+    const classInstructorVal = iframeDocument.querySelector(
+        'input[name="DERIVED_CLASS_S_SSR_DISP_ROLE$chk"][id="DERIVED_CLASS_S_SSR_DISP_ROLE$chk"]'
+    ).value;
+
+    if (!dayHeader || dayHeader.length === 0) {
+        console.error("No day elements found");
+        throw new Error("No day elements found. Please make sure you're on the lecturer timetable page.");
+    }
+
+    if (subjTitleVal === "N" && (config.selectedEventFormat === "2" || config.selectedEventFormat === "3")) {
+        console.error('Please check "Show Class Title" box below the calendar under Display Options!');
+        throw new Error('Please check "Show Class Title" box below the calendar under Display Options!');
+    }
+
+    // Get the dates
+    const days = [];
+    const dates = [];
+    dayHeader.forEach((element, index) => {
+        if (index === 0) {
+            dates.push("null");
+        } else {
+            const dayText = element.textContent.split("\n");
+            const day = dayText[0].trim();
+            let date = dayText[1];
+            date = addZeroToDate(date);
+            days.push(day);
+            dates.push(date);
+        }
+    });
+
+    // Create array to store all events.
+    let skip = createArray(12, 8, 0);
+
+    // For every tr
+    rows.forEach((row, rowIndex) => {
+        const cells = row.querySelectorAll("td.PSLEVEL3GRIDODDROW");
+
+        // track current col skips
+        let curColSkips = 0;
+
+        // For every cell
+        cells.forEach((cell, susColIndex) => {
+            if (susColIndex > 0) {
+                // Other than the first one
+                let colIndex = susColIndex + curColSkips;
+
+                if (skip[rowIndex][susColIndex] > 0) {
+                    curColSkips += 1;
+                    colIndex += skip[rowIndex][susColIndex];
+                }
+
+                try {
+                    const spanElement = cell.querySelector("span");
+                    if (!spanElement) return;
+
+                    // Get innerHTML and process data
+                    const classContent = spanElement.innerHTML.split("<br>");
+                    let result = procData(classContent, subjTitleVal, classInstructorVal);
+
+                    const day = days[colIndex - 1];
+                    const startDate = formatDate(dates[colIndex], year);
+                    const endDate = formatDate(dates[colIndex], year);
+
+                    let summary = `${result.subjCode} - ${result.classSect} (${result.classType})`;
+
+                    if (config.selectedEventFormat === "2") {
+                        summary = `${result.subjTitle} - ${result.classSect} (${result.classType})`;
+                    } else if (config.selectedEventFormat === "3") {
+                        summary = `${result.subjTitle} - ${result.subjCode} - ${result.classSect} (${result.classType})`;
+                    }
+
+                    console.log(
+                        `Summary: ${summary}, Location: ${result.classLocation}, Day: ${day}, startDateTime: ${startDate}T${result.startTime}, endDateTime: ${endDate}T${result.endTime}`
+                    );
+
+                    // If class is 2 hours, mark slot below as "True"
+                    let totalHourSpan = rowSpan(result.startTime, result.endTime);
+
+                    // If the class's total span is more than an hour
+                    if (totalHourSpan > 1) {
+                        handleMultiHourClass(totalHourSpan, rowIndex, skip, colIndex);
+                    }
+
+                    const event = craftCalEvent(
+                        config,
+                        summary,
+                        result.classLocation,
+                        startDate,
+                        result.startTime,
+                        endDate,
+                        result.endTime
+                    );
+
+                    classEvents.push(event);
+                } catch (error) {
+                    console.error("Error processing class data:", error);
+                    throw error;
+                }
+            }
+        });
+    });
 }

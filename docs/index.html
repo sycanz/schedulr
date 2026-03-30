@@ -73,7 +73,7 @@
                 </div>
 
                 <a href="https://chromewebstore.google.com/detail/schedulr/ofaflpillnejkhmkefmcpoamjeaghipp"
-                    class="extension-button" target="_blank" rel="noopener">
+                    class="extension-button" id="get-extension-btn" target="_blank" rel="noopener">
                     <i class="fab fa-chrome"></i> Get the extension
                 </a>
             </div>
@@ -142,7 +142,7 @@
             <h1>Requirements 👀</h1>
             <p>
                 — MMU Student with <strong>"Active"</strong> current student status <strong>ONLY</strong><br>
-                — Chromium-based browser <strong>ONLY</strong> (Google Chrome, Brave, Edge, etc.)
+                — Chromium-based browser or Firefox <strong>ONLY</strong>
             </p>
 
             <h1>Installation 📦</h1>
@@ -200,9 +200,23 @@
 
             <h1>Project Status ⏳</h1>
             <p>
-                Schedulr version <strong>4.0.2</strong> is available on
+                Schedulr version <strong>4.1.0</strong> is available on
                 <a href="https://chromewebstore.google.com/detail/schedulr/ofaflpillnejkhmkefmcpoamjeaghipp"
-                    id="links">Chrome Web Store</a> as of now.
+                    id="links">Chrome Web Store</a> and <a href="https://addons.mozilla.org/en-US/firefox/addon/schedulr/" id="links">Firefox Add-ons</a> as of now.
+            </p>
+
+            <h1 id="defected-clic">Defected CLiC? ⚠️</h1>
+            <p>
+                CLiC (MMU's student portal) sometimes shows incorrect start dates for classes. Even if the actual class
+                day is a Tuesday, CLiC might show the preceding Monday as the start date.
+            </p>
+            <img src="assets/image/defected-clic.png" alt="Defected CLiC example"
+                style="width: 100%; max-width: 500px; border-radius: 8px; margin: 10px 0; border: 1px solid var(--ctp-surface1);">
+            <p>
+                If you notice this discrepancy in your timetable, select <strong>"Yes"</strong> for <strong>"Defected
+                    CLiC?"</strong> in the extension settings. This ensures that Schedulr correctly calculates the first
+                class date based on the day of the week rather than the potentially incorrect start date provided by
+                CLiC.
             </p>
 
             <h1>Contributing 🤝</h1>
@@ -292,7 +306,7 @@
                     <span class="faq-icon">+</span>
                 </button>
                 <div class="faq-answer">
-                    <p>Google Chrome (and other Chromium-based browsers like Brave, Edge) as of now.</p>
+                    <p>Google Chrome, Chromium-based browsers (Brave, Edge, etc.), and Firefox.</p>
                 </div>
             </div>
 
@@ -357,7 +371,7 @@
                     <span class="faq-icon">+</span>
                 </button>
                 <div class="faq-answer">
-                    <p>Definitely for Firefox, but the current focus is on Chrome and Chromium-based browsers.</p>
+                    <p>Firefox is now officially supported! Safari is on the roadmap but not currently a priority.</p>
                 </div>
             </div>
 

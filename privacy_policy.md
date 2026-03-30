@@ -1,35 +1,67 @@
-# Privacy Policy for schedulr Chrome Extension
+# Privacy Policy for Schedulr Extension
 
-Effective Date: 14 August 2024
+**Effective Date:** 1 March 2026
 
-Thank you for using "schedulr," a Chrome extension that helps you scrape your timetable from the CliC platform and insert it into Google Calendar. I value your privacy and are committed to protecting your personal information. This Privacy Policy outlines how I collect, use, and safeguard your data when you use my extension.
+Thank you for using "Schedulr," an extension that helps you import your timetable from the MMU CliC platform into your calendar. I value your privacy and am committed to being transparent about how your data is handled. This Privacy Policy explains what information is collected, why it is needed, and how it is stored and protected.
 
 ## 1. Information I Collect
 
-- Google Account Information: To insert your timetable into Google Calendar, the extension require access to your Google Calendar account. This is done through OAuth2 authentication, and it only requests the necessary scopes to manage calendar events.
-- Timetable Data: The extension scrapes your timetable data from the CliC platform to populate events in your Google Calendar.
+### Google Account Information (via OAuth 2.0)
+
+When you authenticate with Google, the Extension initiates a standard OAuth 2.0 authorization code flow. The authorization code is sent securely to my backend (Cloudflare Workers), which exchanges it with Google for the following tokens:
+
+- **Access token**: used to make Google Calendar API calls on your behalf.
+- **Refresh token**: used to obtain a new access token when the current one expires, so you don't need to re-authenticate every session.
+- **ID token**: decoded server-side to extract your Google account's display name, email address, and unique account identifier (`sub`). This is used to identify your account in the system.
+
+### Data stored in the backend database (Supabase)
+
+The following information is stored securely on my backend to enable the OAuth session management:
+
+- **users table**: Your Google email address, display name, and Google account `sub` (a unique, opaque identifier assigned by Google).
+- **oauth_tokens table**: Your access token, refresh token, token expiry timestamp, and the list of OAuth scopes granted.
+- **sessions table**: A randomly generated session token (UUID), session expiry time (30 minutes), your IP address at the time of login, and your browser's User-Agent string. These are used solely to validate active sessions and prevent session hijacking.
+
+### Data stored locally in your browser
+
+The Extension stores the following locally on your device only:
+
+- Your session token and its expiry time.
+- Your Google email address (for display purposes in the extension UI).
+
+### Timetable Data
+
+The Extension reads your timetable from the CliC page you have open and uses it to construct calendar events. This data is processed locally in your browser and sent directly to the Google Calendar API — it is never stored on my servers.
 
 ## 2. How I Use Your Information
 
-- Google Calendar Integration: The primary purpose of this extension is to add your scraped timetable events into your Google Calendar. I do not store or transmit your data to any external servers. All data handling is done locally within your browser.
-- User Authentication: We use Google's OAuth2 service to authenticate your Google account. This allows me to manage your Google Calendar events.
+- **Authentication & Session Management**: Your Google account details and tokens are stored on the backend solely to manage your authenticated session. Sessions expire after 30 minutes of inactivity.
+- **Google Calendar Integration**: Your access token is used server-side to make authorised requests to the Google Calendar API.
+- **Security**: Your IP address and User-Agent are recorded at login time to help detect and prevent session hijacking.
+- **Timetable Processing**: Timetable data is processed locally or sent directly to Google Calendar. It is never stored on my servers.
 
 ## 3. Data Sharing and Disclosure
 
-I do not share, sell, or otherwise disclose your personal information to third parties. The data processed by the extension is only used for the purposes of integrating your timetable into Google Calendar.
+I do **not** sell, rent, or share your personal data with any third parties for commercial or marketing purposes. Your data is used exclusively within Schedulr to provide the timetable import service. The only external services that receive your data are Google (for Calendar API calls), Supabase (database provider), and Cloudflare (backend API hosting).
 
-## 4. Security
+## 4. Data Retention and Deletion
 
-I take reasonable measures to protect your data while using my extension. However, please note that no method of transmission over the internet or method of electronic storage is 100% secure, and I cannot guarantee absolute security.
+Your account information and OAuth tokens are retained for as long as you use the Extension. Sessions automatically expire after 30 minutes of inactivity.
 
-## 5. Your Consent
+**To delete your data**: If you wish to have all your data removed from the backend database, please contact me at [aidenchan0397@gmail.com](mailto:aidenchan0397@gmail.com) with your Google email address and I will delete your records promptly.
 
-By using the "schedulr" extension, you consent to this Privacy Policy.
+## 5. Security
 
-## 6. Changes to This Privacy Policy
+I take reasonable steps to protect your data, including the use of HTTPS for all communications and secured storage for tokens and session data. However, no system is 100% secure.
 
-I may update this Privacy Policy from time to time and will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
+## 6. Your Consent
 
-## 7. Contact Me
+By installing and using the Schedulr extension, you consent to this Privacy Policy and the handling of your data as described above.
 
-If you have any questions or concerns about this Privacy Policy or my practices, you can find me at [aidenchan0397@gmail.com](aidenchan0397@gmail.com).
+## 7. Changes to This Privacy Policy
+
+I may update this Privacy Policy from time to time and will update the effective date accordingly.
+
+## 8. Contact Me
+
+If you have any questions, concerns, or data deletion requests regarding this Privacy Policy, please contact me at [aidenchan0397@gmail.com](mailto:aidenchan0397@gmail.com).
