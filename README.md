@@ -180,7 +180,7 @@ The build process is handled by GitHub Actions:
 
 **Note**: This guide is based on Google Chrome's workflow, so some of the steps _(especially `manifest.json` format)_ may not directly apply to other browsers. Please refer to the respective browser's documentation for more information.
 
-#### Uploading the extension to your browser
+#### 1. Uploading the extension to your browser
 
 1. **Clone the Repository**
 
@@ -188,58 +188,65 @@ The build process is handled by GitHub Actions:
     git clone https://github.com/sycanz/schedulr
     ```
 
-2. **Load the Extension into Chrome**
-    - Open Chrome browser and go to `chrome://extensions/`
-    - Enable Developer mode (toggle switch at the top right)
-    - Click on `Load unpacked` and select the cloned repository
-    - The extension should now be loaded in your browser
+2. **Load the Extension into based on your preference**
 
-    **IMPORTANT**: Take note of the Client ID (Item ID) of the extension, you'll need it for setting up the Google Calendar API.
+    **Chrome**
+    1. Navigate to `chrome://extensions/`
+    2. Enable Developer mode (toggle switch at the top right)
+    3. Click on `Load unpacked` and select the cloned repository
+    4. The extension should now be loaded in your browser
+
+    **Firefox**
+    1. Run `make package-firefox` in project root directory, this will generate firefox compatible file
+    2. Navigate to `about:debugging#/runtime/this-firefox`
+    3. Click on "Add Temporary Add-on" and upload zip file
+    4. Upload Zip File (make sure it's the firefox version with the `make package-firefox` command)
+    5. The extension should now be loaded in your browser
+
+**IMPORTANT**: For Chrome devs, take note of the **extension ID**, you'll need it for setting up the Google Calendar API.
+
+#### 2. Setting up Google Calendar API
+
+1. Create a new project in the [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable the Google Calendar API by navigating to **(APIs and services > Library > Google Calendar API > Enable)**
+3. Create a new OAuth Client ID:
+    - On the left bar, navigate to **APIs and services > Credentials > Create credentials > OAuth Client ID**
+    - Select `Web Application`
+    - For chrome extensions, your authorised redirect URIs will be `https://<YOUR-APP-ID>.chromiumapp.org/oauth`
+    - For firefox extensions, add `http://127.0.0.1/mozoauth2/c413aa589786fe732e3d3587a8002ba3e5f48350`
+4. Navigate to **Audience** on the left bar and add your email under `Test users` so you can access the GCP project, make sure you sign in with the same account when testing the extension.
+5. Take note of the **Client ID** and **Client Secret** after creating OAuth ID.
+
+#### 3. Provisioning Database
+
+1. Create a new [supabase](https://supabase.com/) project with Singapore region
+2. Copy entire content in [schema.sql](https://github.com/sycanz/schedulr/blob/main/backend/db/schema.sql) and paste it in Supabase's SQL editor to create tables (RLS recommended)
+3. Retrieve your `project url` and `publishable key`
+
+#### 4. Setup development environment
+
+1. Create `.env` file (frontend secrets) in the **root** directory and add the necessary variables by referring to [.env.example](https://github.com/sycanz/schedulr/blob/main/.env.example)
+2. Create `.dev.vars` file (backend secrets) in **backend/cloudflare-workers/** directory and add the necessary variables by referring to [.dev.vars.example](https://github.com/sycanz/schedulr/blob/main/backend/cloudflare-workers/.dev.vars.example)
+3. Run `npm run setup` in the root directory to install all dependencies
+4. Run `npm run build:scraper` or `npm run watch:scraper` in project root directory to bundle project
+5. Start backend server with `npm run dev` in `schedulr/backend/cloudflare-workers`
+6. Start contributing!
+
+**NOTE**: In case of any error, check the server log or inspect the dev console when using extension for logs.
+
+### Development Tips
 
 #### Testing on Staging (for Developers)
 
 To test the latest changes before they are merged into production:
 
-1. Once you have changes, create a PR to the `stg` branch.
-2. Wait for the CI and CD pipelines to complete on GitHub Actions.
-3. Download `schedulr-chrome-stg-zip` for Chrome or `schedulr-firefox-stg-zip` for Firefox from the **Artifacts** section at the bottom.
-4. Load in Browser:
-    - **Chrome**: Unzip and use `Load unpacked` in `chrome://extensions/`.
-    - **Firefox**: Go to `about:debugging#/runtime/this-firefox`, click `Load Temporary Add-on...`, and select zipped Firefox build.
-5. Test the extension functionality. The staging environment uses separate Cloudflare Worker endpoints and secrets to ensure isolation.
-6. After validation is successful, the code owner (sycanz/Aiden) will handle the final merge to the `main` branch for production deployment.
+1. Once you have changes, create a PR with `stg` as the base branch and CI pipeline will run.
+2. After CI runs successfully, code owner (sycanz) will merge the PR which executes CD pipeline
+3. After CD runs successfully, download `schedulr-chrome-stg-zip` for Chrome or `schedulr-firefox-stg-zip` for Firefox from the **Artifacts** section at the bottom.
+4. Load files on browser and test the extension.
+5. After validation is successful, the code owner will handle the final merge to `main` branch for production deployment.
 
-#### Setting up Google Calendar API
-
-1. Create a new project in the Google Cloud Console.
-2. Enable the Google Calendar API.
-3. Generate an OAuth 2.0 credentials (OAuth Client ID) with the application type **Web application**, add the following authorised redirect URIs:
-    - `https://<YOUR-APP-ID>.chromiumapp.org/oauth`
-4. Retrieve the **Client ID** and **Client Secret**.
-
-#### Setup development environment
-
-1. Run `npm run setup` in the root directory to install all dependencies.
-2. Create `.env` file (frontend secrets) in the **root** directory and add the necessary variables by referring to [.env.example](https://github.com/sycanz/schedulr/blob/main/.env.example).
-
-3. Create `.dev.vars` file (backend secrets) in **backend/cloudflare-workers/** directory and add the necessary variables by referring to [.dev.vars.example](https://github.com/sycanz/schedulr/blob/main/backend/cloudflare-workers/.dev.vars.example).
-
-### Development Tips
-
-#### Backend development (Cloudflare Workers)
-
-There's 2 ways to develop and test cloudflare worker:
-
-1. Local development (recommended for development)
-    - Open terminal 1 in project root dir, run `npm run watch:scraper` (helps read new changes to cfw files) or just run `npm run build:scraper` to build the scraper
-    - Open terminal 2 in `backend/cloudflare-workers/`, run `npm run dev` (runs cfw locally)
-
-    **NOTE**: This method requires you to edit the cfw endpoint to `http://localhost:8787` instead of the url provided in template above.
-
-2. Push to dev/stg environment (recommended for staging/production testing)
-    - **Custom Environment**: If you want your own cloudflare-hosted dev environment, add a new entry to the `env` object in [backend/cloudflare-workers/wrangler.jsonc](file:///home/sycanz/projects/schedulr/backend/cloudflare-workers/wrangler.jsonc).
-    - **Automated Staging**: Alternatively, just use `localhost:8787` for local polish and then create a PR to the `stg` branch. When merged, the CI/CD pipeline will automatically inject the staging/production keys and deploy to the respective Cloudflare Workers. You can then test the extension by uploading to your browser as described in the [Testing on Staging](#testing-on-staging-for-developers) section.
-    - **Manual Deploy**: Use makefile command `make deploy-dev` or `make deploy-stg` (requires `npx wrangler login`).
+**NOTE**: Secrets for `stg/prd` are dynamically loaded through pipeline.
 
 ### Git Hooks (pre-commit)
 
