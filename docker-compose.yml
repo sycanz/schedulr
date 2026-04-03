@@ -1,0 +1,24 @@
+services:
+  frontend:
+    build: .
+    tty: true
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run watch:scraper
+    env_file:
+      - .env
+
+  backend:
+    build: .
+    tty: true
+    volumes:
+      - .:/app
+      - /app/backend/cloudflare-workers/node_modules
+      - /app/node_modules
+    working_dir: /app/backend/cloudflare-workers
+    command: npm run dev
+    ports:
+      - "8787:8787"
+    env_file:
+      - backend/cloudflare-workers/.dev.vars

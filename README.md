@@ -227,12 +227,10 @@ The build process is handled by GitHub Actions:
 
 1. Create `.env` file (frontend secrets) in the **root** directory and add the necessary variables by referring to [.env.example](https://github.com/sycanz/schedulr/blob/main/.env.example)
 2. Create `.dev.vars` file (backend secrets) in **backend/cloudflare-workers/** directory and add the necessary variables by referring to [.dev.vars.example](https://github.com/sycanz/schedulr/blob/main/backend/cloudflare-workers/.dev.vars.example)
-3. Run `npm run setup` in the root directory to install all dependencies
-4. Run `npm run build:scraper` or `npm run watch:scraper` in project root directory to bundle project
-5. Start backend server with `npm run dev` in `schedulr/backend/cloudflare-workers`
-6. Start contributing!
+3. Run docker compose with `docker compose up`, this runs rollup and start cfw server
+4. Start contributing!
 
-**NOTE**: In case of any error, check the server log or inspect the dev console when using extension for logs.
+**NOTE**: In case of any error, check devtools console or compose logs.
 
 ### Development Tips
 

@@ -12,6 +12,10 @@ npm-debug.log
 
 .DS_Store
 
+# Docker
+.docker
+docker-compose.override.yml
+
 *.bak
 
 schedulr-firefox.zip
