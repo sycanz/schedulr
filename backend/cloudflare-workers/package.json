@@ -2,6 +2,7 @@
     "name": "schedulr",
     "scripts": {
         "dev": "wrangler dev --port 8787",
+        "stg": "wrangler dev --env stg --port 8787",
         "prd": "wrangler dev --env prd",
         "deploy": "wrangler deploy --minify",
         "cf-typegen": "wrangler types --env-interface CloudflareBindings",
