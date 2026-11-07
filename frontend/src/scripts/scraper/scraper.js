@@ -16,7 +16,6 @@ export async function dataProc(
     selectedColorValue,
     selectedCalendar,
     selectedEventFormat,
-    selectedDefect,
     selectedOptionValue
 ) {
     console.log("Execute script dataProc called");
@@ -27,7 +26,6 @@ export async function dataProc(
     config.selectedColorValue = selectedColorValue;
     config.selectedCalendar = selectedCalendar;
     config.selectedEventFormat = selectedEventFormat;
-    config.selectedDefect = selectedDefect;
     config.selectedOptionValue = selectedOptionValue;
 
     // =============== Web scrape workflow ===============

@@ -96,7 +96,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
             "selectedReminderTimes",
             "selectedSemesterValues",
             "selectedEventFormats",
-            "selectedDefects",
             "selectedOptionValues",
         ]);
 
@@ -107,7 +106,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
             selectedReminderTimes: selectedReminderTime,
             selectedSemesterValues: selectedSemesterValue,
             selectedEventFormats: selectedEventFormat,
-            selectedDefects: selectedDefect,
             selectedOptionValues: selectedOptionValue,
         } = items;
 
@@ -135,7 +133,6 @@ chrome.runtime.onMessage.addListener(async (message) => {
                             selectedColorValue,
                             selectedCalendar,
                             selectedEventFormat,
-                            selectedDefect,
                             selectedOptionValue,
                         ],
                         func: (...args) => scraperBundle.dataProc(...args),
