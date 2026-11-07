@@ -240,11 +240,12 @@ The build process is handled by GitHub Actions:
 
 To test the latest changes before they are merged into production:
 
-1. Once you have changes, create a PR with `stg` as the base branch and CI pipeline will run.
-2. After CI runs successfully, code owner (sycanz) will merge the PR which executes CD pipeline
-3. After CD runs successfully, download `schedulr-chrome-stg-zip` for Chrome or `schedulr-firefox-stg-zip` for Firefox from the **Artifacts** section at the bottom.
-4. Load files on browser and test the extension.
-5. After validation is successful, the code owner will handle the final merge to `main` branch for production deployment.
+1. Bump `version` in both `manifest.json` and `manifest.firefox.json` (patch for fixes, minor for features). The Chrome Web Store rejects uploads that don't increase the version.
+2. Once you have changes, create a PR with `stg` as the base branch and CI pipeline will run.
+3. After CI runs successfully, code owner (sycanz) will merge the PR which executes CD pipeline
+4. After CD runs successfully, download `schedulr-chrome-stg-zip` for Chrome or `schedulr-firefox-stg-zip` for Firefox from the **Artifacts** section at the bottom.
+5. Load files on browser and test the extension.
+6. After validation is successful, the code owner will handle the final merge to `main` branch for production deployment.
 
 **NOTE**: Secrets for `stg/prd` are dynamically loaded through pipeline.
 
