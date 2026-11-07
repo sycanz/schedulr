@@ -222,7 +222,6 @@ function checkForPreference() {
             "selectedReminderTimes",
             "selectedSemesterValues",
             "selectedOptionValues",
-            "selectedDefects",
         ],
         (items) => {
             const {
@@ -232,7 +231,6 @@ function checkForPreference() {
                 selectedReminderTimes,
                 selectedSemesterValues,
                 selectedOptionValues,
-                selectedDefects,
             } = items;
 
             if (!selectedSemesterValues) {
@@ -246,13 +244,11 @@ function checkForPreference() {
                     selectRadioButton("reminder", selectedReminderTimes);
                     selectRadioButton("calendar", selectedCalendars);
                     selectRadioButton("color", selectedColorValues);
-                    selectRadioButton("defected", selectedDefects);
                     break;
                 case "2":
                     selectRadioButton("semester", selectedSemesterValues);
                     selectRadioButton("format", selectedEventFormats);
                     selectRadioButton("reminder", selectedReminderTimes);
-                    selectRadioButton("defected", selectedDefects);
                     break;
             }
         }
@@ -267,7 +263,6 @@ async function getFormsValue(selectedOptionValue) {
         const selectedEventFormat = document.querySelector('input[name="format"]:checked')?.value;
         const selectedReminderTime = document.querySelector('input[name="reminder"]:checked')?.value;
         const selectedCalendar = document.querySelector('input[name="calendar"]:checked')?.value;
-        const selectedDefect = document.querySelector('input[name="defected"]:checked')?.value;
         const selectedColorValue = document.querySelector('input[name="color"]:checked')?.value;
 
         if (selectedOptionValue == 1) {
@@ -278,7 +273,6 @@ async function getFormsValue(selectedOptionValue) {
                     selectedEventFormat &&
                     selectedReminderTime &&
                     selectedCalendar &&
-                    selectedDefect &&
                     selectedColorValue
                 )
             ) {
@@ -291,13 +285,12 @@ async function getFormsValue(selectedOptionValue) {
                 selectedEventFormats: selectedEventFormat,
                 selectedReminderTimes: selectedReminderTime,
                 selectedCalendars: selectedCalendar,
-                selectedDefects: selectedDefect,
                 selectedColorValues: selectedColorValue,
                 selectedOptionValues: selectedOptionValue,
             });
         } else if (selectedOptionValue == 2) {
             // check if all values are selected
-            if (!(selectedSemesterValue && selectedEventFormat && selectedReminderTime && selectedDefect)) {
+            if (!(selectedSemesterValue && selectedEventFormat && selectedReminderTime)) {
                 showErrorNotification("Please select all options.", "Selection Required", true);
                 return;
             }
@@ -307,7 +300,6 @@ async function getFormsValue(selectedOptionValue) {
                 selectedEventFormats: selectedEventFormat,
                 selectedReminderTimes: selectedReminderTime,
                 selectedCalendars: null,
-                selectedDefects: selectedDefect,
                 selectedColorValues: null,
                 selectedOptionValues: selectedOptionValue,
             });
