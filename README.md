@@ -300,7 +300,7 @@ CLiC (MMU's student portal) sometimes shows incorrect start dates for classes. E
 
 As shown in the image above, the start date is listed as **30/03/2026** (Monday), but the day on the right clearly states **Tuesday** (which would be 31/03/2026).
 
-If you notice this discrepancy in your timetable, select **"Yes"** for **"Defected CLiC?"** in the extension. This ensures that Schedulr correctly calculates the first class date based on the day of the week rather than the potentially incorrect start date provided by CLiC.
+For student timetable imports, Schedulr checks each class independently. If CLiC shows a Monday start date while the listed class day is Tuesday through Friday, Schedulr moves the first class date to that weekday. Dates whose weekday already matches the listed class day are left unchanged. Other date/day mismatches are logged and left unchanged.
 
 ## Credit 🎉
 

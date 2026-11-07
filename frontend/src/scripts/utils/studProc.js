@@ -73,6 +73,58 @@ export function procClassDay(classDay) {
     return { classDayText };
 }
 
+function correctKnownDefectedCliCDate(startDate, classDayText) {
+    const classDayNumbers = {
+        Monday: 1,
+        Tuesday: 2,
+        Wednesday: 3,
+        Thursday: 4,
+        Friday: 5,
+    };
+    const classDayNumber = classDayNumbers[classDayText];
+    if (classDayNumber === undefined) {
+        return startDate;
+    }
+
+    const [year, month, day] = startDate.split("-").map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    const isValidDate =
+        Number.isInteger(year) &&
+        Number.isInteger(month) &&
+        Number.isInteger(day) &&
+        date.getUTCFullYear() === year &&
+        date.getUTCMonth() === month - 1 &&
+        date.getUTCDate() === day;
+
+    if (!isValidDate) {
+        console.warn("[CLiC date check] Could not parse start date:", startDate);
+        return startDate;
+    }
+
+    const sourceWeekday = date.getUTCDay();
+    if (sourceWeekday === classDayNumber) {
+        return startDate;
+    }
+
+    // Known CLiC defect: the date is Monday while the class day is Tuesday-Friday.
+    if (sourceWeekday !== 1 || classDayNumber < 2 || classDayNumber > 5) {
+        console.warn("[CLiC date check] Unexpected date/day mismatch; leaving date unchanged:", {
+            startDate,
+            classDayText,
+        });
+        return startDate;
+    }
+
+    date.setUTCDate(date.getUTCDate() + classDayNumber - 1);
+    const correctedDate = date.toISOString().slice(0, 10);
+    console.info("[CLiC date correction] Adjusted class start date:", {
+        classDayText,
+        originalStartDate: startDate,
+        correctedStartDate: correctedDate,
+    });
+    return correctedDate;
+}
+
 export async function studentFlow(config, classEvents) {
     console.log("Running student process");
     let classSec = document.querySelectorAll("[id*='divSSR_SBJCT_LVL1_row']");
@@ -126,32 +178,7 @@ async function groupData(config, classEvents, className, classDetails, classDate
     let { startTime, endTime } = procClassTimes(classTimes);
     let { classDayText } = procClassDay(classDay);
 
-    const selectedDefect = config.selectedDefect;
-    let parsedStartDate = startDate.split("-");
-    if (selectedDefect == "yes") {
-        let updatedDate;
-        switch (classDayText) {
-            case "Monday":
-                updatedDate = parsedStartDate[2];
-                break;
-            case "Tuesday":
-                updatedDate = (parseInt(parsedStartDate[2]) + 1).toString();
-                break;
-            case "Wednesday":
-                updatedDate = (parseInt(parsedStartDate[2]) + 2).toString();
-                break;
-            case "Thursday":
-                updatedDate = (parseInt(parsedStartDate[2]) + 3).toString();
-                break;
-            case "Friday":
-                updatedDate = (parseInt(parsedStartDate[2]) + 4).toString();
-                break;
-            default:
-                updatedDate = parsedStartDate[2];
-        }
-
-        startDate = `${parsedStartDate[0]}-${parsedStartDate[1]}-${updatedDate}`;
-    }
+    startDate = correctKnownDefectedCliCDate(startDate, classDayText);
 
     let summary = `${classCode} - ${classSect} (${classType})`;
 
