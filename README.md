@@ -126,7 +126,6 @@ You should be familiar with or have a basic understanding of these:
 │   │   ├── .dev.vars.prd       # environment variables for cfw (production)
 │   │   └── wrangler.jsonc      # wrangler config
 │   └── db/                     # database code
-├── docs/                       # product website code
 ├── frontend/                   # extension's client side functions
 │   ├── dist/                   # stores extension post built (distribution) file
 │   └── src                     # all extension code
@@ -138,6 +137,7 @@ You should be familiar with or have a basic understanding of these:
 │           ├── scraper/        # web scraping functions
 │           └── utils/          # misc reusable functions
 ├── images/                     # images used for schedulr
+├── media/                      # old demo videos (not packaged)
 ├── package.json                # package manager config
 ├── package-lock.json           # package lock file
 ├── rollup.config.js            # rollup config file
@@ -279,7 +279,7 @@ Detailed changes for each release are documented in the [release notes](https://
 
 ## Privacy policy 📜
 
-Please read the [Privacy Policy](https://www.mmuschedulr.com/privacy-policy.html) for this extension before proceeding.
+Please read the [Privacy Policy](https://aidenchan.xyz/projects/schedulr/privacy-policy) for this extension before proceeding.
 
 ## License ⚖️
 
