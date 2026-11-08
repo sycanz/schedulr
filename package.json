@@ -3,9 +3,6 @@
     "version": "1.0.0",
     "description": "<div align=\"center\">   <img src=\"./images/magnify128.png\" alt=\"Schedulr Logo\" width=\"120\" />   <h1>Schedulr</h1>   <p>A chrome extension that transfers MMU timetable into Google, Outlook, Apple Calendar (and more)</p>",
     "main": "index.js",
-    "directories": {
-        "doc": "docs"
-    },
     "scripts": {
         "build:scraper": "rollup -c --bundleConfigAsCjs",
         "build:scraper:prd": "BUILD=prd rollup -c --bundleConfigAsCjs",

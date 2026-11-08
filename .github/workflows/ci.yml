@@ -4,7 +4,6 @@ on:
   pull_request:
     branches: [main, stg]
     paths-ignore:
-      - "docs/**"
       - "README.md"
       - ".github/**"
       - "LICENSE"

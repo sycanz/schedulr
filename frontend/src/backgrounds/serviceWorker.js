@@ -11,7 +11,7 @@ import { showErrorNotification } from "../scripts/utils/msgNotifier.js";
 chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason == "install") {
         chrome.tabs.create({
-            url: "https://www.mmuschedulr.com/#usage",
+            url: "https://aidenchan.xyz/projects/schedulr#usage",
         });
     }
 });
